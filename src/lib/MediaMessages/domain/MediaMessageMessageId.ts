@@ -7,9 +7,9 @@ export class MediaMessageMessageId {
   }
 
   private ensureIsValid() {
-    if (this.value.length > 5) {
+    if (this.value.length < 5) {
       throw new Error(
-        'MediaMessageMessageId must be at most 5 characters long',
+        'MediaMessageMessageId must be at least 5 characters long',
       );
     }
   }

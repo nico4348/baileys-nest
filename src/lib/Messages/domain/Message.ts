@@ -1,3 +1,4 @@
+import { MessageCreatedAt } from './MessageCreatedAt';
 import { MessageId } from './MessageId';
 import { MessageInOut } from './MessageInOut';
 import { MessageMessageType } from './MessageMessageType';
@@ -12,7 +13,7 @@ export class Message {
   to: MessageTo;
   message_type: MessageMessageType;
   in_out: MessageInOut;
-  created_at: Date;
+  created_at: MessageCreatedAt;
 
   constructor(
     id: MessageId,
@@ -21,7 +22,7 @@ export class Message {
     to: MessageTo,
     message_type: MessageMessageType,
     in_out: MessageInOut,
-    created_at: Date,
+    created_at: MessageCreatedAt,
   ) {
     this.id = id;
     this.session_id = session_id;

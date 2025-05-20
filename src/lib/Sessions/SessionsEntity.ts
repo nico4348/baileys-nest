@@ -1,5 +1,5 @@
 import { Entity, PrimaryColumn, Column, OneToMany } from 'typeorm';
-import { SessionLog } from '../SessionLogs/SessionLogs';
+import { SessionLogs } from '../SessionLogs/SessionLogs';
 import { Message } from '../Messages/MessagesEntity';
 import { EventLog } from '../EventLogs/EventLogsEntity';
 
@@ -23,8 +23,8 @@ export class Session {
   @Column({ type: 'timestamp' })
   updated_at: Date;
 
-  @OneToMany(() => SessionLog, (sessionLog) => sessionLog.session)
-  sessionLogs: SessionLog[];
+  @OneToMany(() => SessionLogs, (sessionLog) => sessionLog.session)
+  sessionLogs: SessionLogs[];
 
   @OneToMany(() => Message, (message) => message.session)
   messages: Message[];

@@ -1,14 +1,14 @@
 export class SessionStatus {
-  value: Date;
+  value: boolean;
 
-  constructor(value: Date) {
+  constructor(value: boolean) {
     this.value = value;
     this.ensureIsValid();
   }
 
   private ensureIsValid() {
-    if (this.value > new Date()) {
-      throw new Error('SessionStatus must be in the past');
+    if (typeof this.value !== 'boolean') {
+      throw new Error('SessionStatus must be a boolean');
     }
   }
 }

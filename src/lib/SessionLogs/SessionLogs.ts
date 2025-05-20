@@ -2,7 +2,7 @@ import { Entity, PrimaryColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { Session } from '../Sessions/SessionsEntity'; // Assuming this is the correct path
 
 @Entity('session_logs')
-export class SessionLog {
+export class SessionLogs {
   @PrimaryColumn({ type: 'uuid' })
   id: string;
 

@@ -5,19 +5,19 @@ import { EventLogCreatedAt } from './EventLogCreatedAt';
 
 export class EventLog {
   id: EventLogId;
-  sessionId: EventLogSessionId;
-  eventId: EventLogEventId;
-  createdAt: EventLogCreatedAt;
+  session_id: EventLogSessionId;
+  event_id: EventLogEventId;
+  created_at: EventLogCreatedAt;
 
   constructor(
     id: EventLogId,
-    sessionId: EventLogSessionId,
-    eventId: EventLogEventId,
-    createdAt: EventLogCreatedAt,
+    session_id: EventLogSessionId,
+    event_id: EventLogEventId,
+    created_at: EventLogCreatedAt,
   ) {
     this.id = id;
-    this.sessionId = sessionId;
-    this.eventId = eventId;
-    this.createdAt = createdAt;
+    this.session_id = session_id;
+    this.event_id = event_id;
+    this.created_at = created_at;
   }
 }

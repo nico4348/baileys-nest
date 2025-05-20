@@ -3,7 +3,7 @@ import { MessageStatusMessageId } from './MessageStatusMessageId';
 import { MessageStatusStatusId } from './MessageStatusStatusId';
 import { MessageStatusUpdatedAt } from './MessageStatusUpdatedAt';
 
-export class Message {
+export class MessageStatus {
   id: MessageStatusId;
   message_id: MessageStatusMessageId;
   status_id: MessageStatusStatusId;

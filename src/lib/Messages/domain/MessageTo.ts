@@ -1,14 +1,14 @@
 export class MessageTo {
-  value: Date;
+  value: string;
 
-  constructor(value: Date) {
+  constructor(value: string) {
     this.value = value;
     this.ensureIsValid();
   }
 
   private ensureIsValid() {
-    if (this.value > new Date()) {
-      throw new Error('MessageTo must be in the past');
+    if (!/^\d+$/.test(this.value)) {
+      throw new Error('MessageTo must contain only numeric characters');
     }
   }
 }

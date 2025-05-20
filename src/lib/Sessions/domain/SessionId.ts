@@ -8,7 +8,7 @@ export class SessionId {
 
   private ensureIsValid() {
     if (this.value.length < 5) {
-      throw new Error('EventId must be at least 5 characters long');
+      throw new Error('SessionId must be at least 5 characters long');
     }
   }
 }
