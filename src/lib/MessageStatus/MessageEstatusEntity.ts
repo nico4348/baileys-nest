@@ -1,6 +1,6 @@
 import { Entity, PrimaryColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
-import { Message } from '../Messages/MessagesEntity'; // Assuming this is the correct path
-import { Status } from '../Status/StatusEntity'; // Assuming this is the correct path
+import { Message } from '../Messages/MessagesEntity';
+import { Status } from '../Status/StatusEntity';
 
 @Entity('message_status')
 export class MessageStatus {

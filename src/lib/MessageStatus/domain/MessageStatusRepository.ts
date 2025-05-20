@@ -7,5 +7,4 @@ export interface MessageStatusRepository {
   getById(id: MessageStatusId): Promise<MessageStatus | null>;
   update(message: MessageStatus): Promise<MessageStatus>;
   delete(id: MessageStatusId): Promise<void>;
-  deleteAll(): Promise<void>;
 }

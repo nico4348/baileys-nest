@@ -1,5 +1,5 @@
 import { Entity, PrimaryColumn, Column, OneToMany } from 'typeorm';
-import { SessionLogs } from '../SessionLogs/SessionLogs';
+import { SessionLogs } from '../SessionLogs/SessionLogsEntity';
 import { Message } from '../Messages/MessagesEntity';
 import { EventLog } from '../EventLogs/EventLogsEntity';
 
@@ -22,6 +22,9 @@ export class Session {
 
   @Column({ type: 'timestamp' })
   updated_at: Date;
+
+  @Column({ type: 'boolean' })
+  is_deleted: boolean;
 
   @OneToMany(() => SessionLogs, (sessionLog) => sessionLog.session)
   sessionLogs: SessionLogs[];

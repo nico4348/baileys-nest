@@ -15,14 +15,17 @@ import { ReactionMessage } from '../ReactionMessages/ReactionMessagesEntity';
 
 @Entity('messages')
 export class Message {
-  @PrimaryColumn({ type: 'uuid' })
+  @PrimaryColumn({ type: 'varchar', length: 25 })
   id: string;
 
   @Column({ type: 'uuid' })
   session_id: string;
 
-  @Column({ type: 'uuid', nullable: true })
+  @Column({ type: 'varchar', length: 25, nullable: true })
   quoted_message_id: string;
+
+  @Column({ type: 'varchar', length: 50 })
+  to: string;
 
   @Column({ type: 'varchar', length: 50 })
   message_type: string;

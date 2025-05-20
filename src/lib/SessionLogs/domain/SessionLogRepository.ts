@@ -9,6 +9,4 @@ export interface SessionLogRepository {
   getBySessionId(sessionId: SessionLogSessionId): Promise<SessionLog[]>;
   update(session: SessionLog): Promise<SessionLog>;
   delete(id: SessionLogId): Promise<void>;
-  deleteAll(): Promise<void>;
-  deleteBySessionId(sessionId: SessionLogSessionId): Promise<void>;
 }

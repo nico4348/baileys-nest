@@ -7,5 +7,4 @@ export interface EventRepository {
   getOneById(id: EventId): Promise<Event | null>;
   edit(event: Event): Promise<void>;
   delete(id: EventId): Promise<void>;
-  deleteAll(): Promise<void>;
 }

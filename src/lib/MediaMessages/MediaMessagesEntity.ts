@@ -6,7 +6,7 @@ export class MediaMessage {
   @PrimaryColumn({ type: 'uuid' })
   id: string;
 
-  @Column({ type: 'uuid' })
+  @Column({ type: 'varchar', length: 25 })
   message_id: string;
 
   @Column({ type: 'varchar', length: 4096, nullable: true })

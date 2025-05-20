@@ -9,5 +9,4 @@ export interface StatusRepository {
   getOneByName(name: StatusName): Promise<Status | null>;
   edit(status: Status): Promise<void>;
   delete(id: StatusId): Promise<void>;
-  deleteAll(): Promise<void>;
 }
