@@ -3,7 +3,9 @@ import { MessageStatusId } from './MessageStatusId';
 
 export interface MessageStatusRepository {
   create(message: MessageStatus): Promise<MessageStatus>;
-  findById(id: MessageStatusId): Promise<MessageStatus | null>;
+  getAll(): Promise<MessageStatus[]>;
+  getById(id: MessageStatusId): Promise<MessageStatus | null>;
   update(message: MessageStatus): Promise<MessageStatus>;
   delete(id: MessageStatusId): Promise<void>;
+  deleteAll(): Promise<void>;
 }

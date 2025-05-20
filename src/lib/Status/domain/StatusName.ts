@@ -7,8 +7,8 @@ export class StatusName {
   }
 
   private ensureIsValid() {
-    if (this.value.length < 3 || this.value.length > 50) {
-      throw new Error('StatusName must be between 3 and 50 characters');
+    if (this.value.length < 3 || this.value.length >= 30) {
+      throw new Error('StatusName must be between 3 and 30 characters');
     }
   }
 }

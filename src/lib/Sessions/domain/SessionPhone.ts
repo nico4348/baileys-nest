@@ -7,8 +7,11 @@ export class SessionPhone {
   }
 
   private ensureIsValid() {
-    if (this.value.length < 5) {
-      throw new Error('SessionPhone must be at least 5 characters long');
+    if (this.value.length >= 15) {
+      throw new Error('SessionPhone must be at most 15 characters long');
+    }
+    if (this.value.length < 1) {
+      throw new Error('SessionPhone must be at least 1 character long');
     }
   }
 }

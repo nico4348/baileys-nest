@@ -7,4 +7,5 @@ export interface MediaMessageRepository {
   getOneById(id: MediaMessageId): Promise<MediaMessage | null>;
   edit(mediaMessage: MediaMessage): Promise<void>;
   delete(id: MediaMessageId): Promise<void>;
+  deleteAll(): Promise<void>;
 }

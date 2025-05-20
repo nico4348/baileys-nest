@@ -7,8 +7,8 @@ export class MessageInOut {
   }
 
   private ensureIsValid() {
-    if (this.value.length < 5) {
-      throw new Error('MessageInOut must be at least 5 characters long');
+    if (this.value.length > 3) {
+      throw new Error('MessageInOut must be at most 3 characters long');
     }
   }
 }

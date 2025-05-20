@@ -7,8 +7,11 @@ export class ReactionMessageEmoji {
   }
 
   private ensureIsValid() {
-    if (this.value.length > 20) {
+    if (this.value.length >= 20) {
       throw new Error('ReactionMessageEmoji must be less than 20 characters');
+    }
+    if (this.value.length < 1) {
+      throw new Error('ReactionMessageEmoji must be at least 1 character long');
     }
   }
 }

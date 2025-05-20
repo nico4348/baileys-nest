@@ -7,8 +7,11 @@ export class SessionLogMessage {
   }
 
   private ensureIsValid() {
-    if (this.value.length < 5) {
-      throw new Error('SessionLogMessage must be at least 5 characters long');
+    if (this.value.length >= 500) {
+      throw new Error('SessionLogMessage must be at most 500 characters long');
+    }
+    if (this.value.length < 1) {
+      throw new Error('SessionLogMessage must be at least 1 character long');
     }
   }
 }

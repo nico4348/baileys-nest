@@ -7,4 +7,5 @@ export interface TextMessageRepository {
   getOneById(id: TextMessageId): Promise<TextMessageBody | null>;
   edit(textMessage: TextMessageBody): Promise<void>;
   delete(id: TextMessageId): Promise<void>;
+  deleteAll(): Promise<void>;
 }
