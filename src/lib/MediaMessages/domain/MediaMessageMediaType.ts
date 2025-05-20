@@ -7,10 +7,10 @@ export class MediaMessageMediaType {
   }
 
   private ensureIsValid() {
-    const validTypes = ['image', 'video', 'audio'];
+    const validTypes = ['image', 'video', 'audio', 'docs'];
     if (!validTypes.includes(this.value)) {
       throw new Error(
-        'MediaMessageMediaType must be one of: image, video, audio',
+        `MediaMessageMediaType must be one of: ${validTypes.join(', ')}`,
       );
     }
   }
