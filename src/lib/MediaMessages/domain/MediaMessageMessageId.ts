@@ -7,8 +7,10 @@ export class MediaMessageMessageId {
   }
 
   private ensureIsValid() {
-    if (this.value.length === 0) {
-      throw new Error('MediaMessageMessageId cannot be empty');
+    if (this.value.length > 5) {
+      throw new Error(
+        'MediaMessageMessageId must be at most 5 characters long',
+      );
     }
   }
 }

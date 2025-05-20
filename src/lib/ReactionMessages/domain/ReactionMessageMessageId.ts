@@ -7,8 +7,10 @@ export class ReactionMessageMessageId {
   }
 
   private ensureIsValid() {
-    if (this.value.length === 0) {
-      throw new Error('ReactionMessageMessageId cannot be empty');
+    if (this.value.length < 5) {
+      throw new Error(
+        'ReactionMessageMessageId must be at least 5 characters long',
+      );
     }
   }
 }

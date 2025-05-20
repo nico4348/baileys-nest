@@ -7,8 +7,10 @@ export class TextMessageMessageId {
   }
 
   private ensureIsValid() {
-    if (!this.value) {
-      throw new Error('TextMessageMessageId cannot be empty');
+    if (this.value.length < 5) {
+      throw new Error(
+        'TextMessageMessageId must be at least 5 characters long',
+      );
     }
   }
 }

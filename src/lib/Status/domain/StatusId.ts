@@ -7,8 +7,8 @@ export class StatusId {
   }
 
   private ensureIsValid() {
-    if (!this.value) {
-      throw new Error('StatusId cannot be empty');
+    if (this.value.length < 5) {
+      throw new Error('StatusId must be at least 5 characters long');
     }
   }
 }
