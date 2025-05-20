@@ -5,7 +5,7 @@ import { SessionStatus } from '../domain/SessionStatus';
 export class SessionsGetByStatus {
   constructor(private readonly repository: SessionsRepository) {}
 
-  async getByStatus(status: boolean): Promise<Session[]> {
+  async run(status: boolean): Promise<Session[]> {
     return this.repository.getByStatus(new SessionStatus(status));
   }
 }

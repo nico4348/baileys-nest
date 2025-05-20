@@ -4,7 +4,7 @@ import { SessionsRepository } from '../domain/SessionsRepository';
 export class SessionsGetAll {
   constructor(private readonly repository: SessionsRepository) {}
 
-  async getAll(): Promise<Session[]> {
+  async run(): Promise<Session[]> {
     return this.repository.getAll();
   }
 }
