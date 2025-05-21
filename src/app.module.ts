@@ -1,15 +1,8 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { databaseProviders } from './database.providers';
+import { DatabaseProvider } from './database.providers';
+import { SessionsModule } from './lib/Sessions/sessions.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forRoot({
-      synchronize: false,
-      migrationsRun: false,
-    }),
-  ],
-  providers: [...databaseProviders],
-  exports: [...databaseProviders],
+  imports: [DatabaseProvider, SessionsModule],
 })
 export class AppModule {}
