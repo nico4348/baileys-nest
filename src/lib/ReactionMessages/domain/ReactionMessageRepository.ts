@@ -5,6 +5,6 @@ export interface ReactionMessageRepository {
   create(reactionMessage: ReactionMessage): Promise<void>;
   getAll(): Promise<ReactionMessage[]>;
   getOneById(id: ReactionMessageId): Promise<ReactionMessage | null>;
-  edit(reactionMessage: ReactionMessage): Promise<void>;
+  update(reactionMessage: ReactionMessage): Promise<void>;
   delete(id: ReactionMessageId): Promise<void>;
 }

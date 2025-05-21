@@ -4,10 +4,10 @@ import { StatusId } from './StatusId';
 import { StatusName } from './StatusName';
 
 export class Status {
-  id: StatusId;
-  name: StatusName;
-  description: StatusDescription;
-  created_at: StatusCreatedAt;
+  readonly id: StatusId;
+  readonly name: StatusName;
+  readonly description: StatusDescription;
+  readonly created_at: StatusCreatedAt;
 
   constructor(
     id: StatusId,

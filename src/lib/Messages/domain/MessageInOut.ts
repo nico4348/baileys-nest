@@ -7,8 +7,8 @@ export class MessageInOut {
   }
 
   private ensureIsValid() {
-    if (this.value.length > 3) {
-      throw new Error('MessageInOut must be at most 3 characters long');
+    if (this.value !== 'in' && this.value !== 'out') {
+      throw new Error('MessageInOut must be either "in" or "out"');
     }
   }
 }

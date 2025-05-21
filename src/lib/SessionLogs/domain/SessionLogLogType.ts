@@ -1,4 +1,4 @@
-export class SessionLogType {
+export class SessionLogLogType {
   value: string;
 
   constructor(value: string) {
@@ -8,10 +8,10 @@ export class SessionLogType {
 
   private ensureIsValid() {
     if (this.value.length >= 20) {
-      throw new Error('SessionLogType must be at most 20 characters long');
+      throw new Error('SessionLogLogType must be at most 20 characters long');
     }
     if (this.value.length < 1) {
-      throw new Error('SessionLogType must be at least 1 character long');
+      throw new Error('SessionLogLogType must be at least 1 character long');
     }
   }
 }

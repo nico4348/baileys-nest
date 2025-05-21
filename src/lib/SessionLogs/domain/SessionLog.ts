@@ -1,21 +1,20 @@
 import { SessionLogId } from './SessionLogId';
 import { SessionLogSessionId } from './SessionLogSessionId';
-import { SessionLogType } from './SessionLogType';
+import { SessionLogLogType } from './SessionLogLogType';
 import { SessionLogMessage } from './SessionLogMessage';
 import { SessionLogCreatedAt } from './SessionLogCreatedAt';
-
 
 export class SessionLog {
   id: SessionLogId;
   session_id: SessionLogSessionId;
-  log_type: SessionLogType;
+  log_type: SessionLogLogType;
   message: SessionLogMessage;
   created_at: SessionLogCreatedAt;
 
   constructor(
     id: SessionLogId,
     session_id: SessionLogSessionId,
-    log_type: SessionLogType,
+    log_type: SessionLogLogType,
     message: SessionLogMessage,
     created_at: SessionLogCreatedAt,
   ) {
