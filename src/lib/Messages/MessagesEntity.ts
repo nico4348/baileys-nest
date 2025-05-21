@@ -7,7 +7,7 @@ import {
   OneToOne,
   JoinColumn,
 } from 'typeorm';
-import { Session } from '../Sessions/SessionsEntity';
+import { Session } from '../Sessions/infrastructure/TypeOrm/TypeOrmSessionsEntity';
 import { MessageStatus } from '../MessageStatus/MessageEstatusEntity';
 import { TextMessage } from '../TextMessages/TextMessagesEntity';
 import { MediaMessage } from '../MediaMessages/MediaMessagesEntity';

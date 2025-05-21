@@ -4,7 +4,7 @@ import { SessionPhone } from './SessionPhone';
 import { SessionStatus } from './SessionStatus';
 
 export interface SessionsRepository {
-  create(session: Session): Promise<Session>;
+  create(session: Session): Promise<void>;
   getAll(): Promise<Session[]>;
   getOneById(id: SessionId): Promise<Session | null>;
   getOneByPhone(phone: SessionPhone): Promise<Session | null>;

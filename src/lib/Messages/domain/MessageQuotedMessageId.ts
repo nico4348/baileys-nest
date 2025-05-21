@@ -1,16 +1,7 @@
 export class MessageQuotedMessageId {
-  value: string;
+  value: string | null;
 
-  constructor(value: string) {
+  constructor(value: string | null) {
     this.value = value;
-    this.ensureIsValid();
-  }
-
-  private ensureIsValid() {
-    if (this.value.length < 5) {
-      throw new Error(
-        'MessageQuotedMessageId must be at least 5 characters long',
-      );
-    }
   }
 }

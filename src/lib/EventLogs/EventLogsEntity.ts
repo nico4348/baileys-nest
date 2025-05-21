@@ -1,5 +1,5 @@
 import { Entity, PrimaryColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
-import { Session } from '../Sessions/SessionsEntity';
+import { Session } from '../Sessions/infrastructure/TypeOrm/TypeOrmSessionsEntity';
 import { Event } from '../Events/EventsEntity';
 
 @Entity('event_logs')

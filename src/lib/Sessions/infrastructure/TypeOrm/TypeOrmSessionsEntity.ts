@@ -1,10 +1,10 @@
 import { Entity, PrimaryColumn, Column, OneToMany } from 'typeorm';
-import { SessionLogs } from '../SessionLogs/SessionLogsEntity';
-import { Message } from '../Messages/MessagesEntity';
-import { EventLog } from '../EventLogs/EventLogsEntity';
+import { SessionLogs } from '../../../SessionLogs/SessionLogsEntity';
+import { Message } from '../../../Messages/MessagesEntity';
+import { EventLog } from '../../../EventLogs/EventLogsEntity';
 
 @Entity('sessions')
-export class Session {
+export class TypeOrmSessionsEntity {
   @PrimaryColumn({ type: 'uuid' })
   id: string;
 

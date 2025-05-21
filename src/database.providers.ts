@@ -1,5 +1,5 @@
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Session } from './lib/Sessions/SessionsEntity';
+import { Session } from './lib/Sessions/infrastructure/TypeOrm/TypeOrmSessionsEntity';
 import { EventLog } from './lib/EventLogs/EventLogsEntity';
 import { Event } from './lib/Events/EventsEntity';
 import { MediaMessage } from './lib/MediaMessages/MediaMessagesEntity';

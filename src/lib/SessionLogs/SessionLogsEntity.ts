@@ -1,5 +1,5 @@
 import { Entity, PrimaryColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
-import { Session } from '../Sessions/SessionsEntity'; // Assuming this is the correct path
+import { Session } from '../Sessions/infrastructure/TypeOrm/TypeOrmSessionsEntity'; // Assuming this is the correct path
 
 @Entity('session_logs')
 export class SessionLogs {
