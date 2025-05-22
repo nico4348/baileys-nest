@@ -11,6 +11,7 @@ import {
   Inject,
 } from '@nestjs/common';
 import { SessionsCreate } from './application/SessionsCreate';
+import { randomUUID } from 'crypto';
 
 @Controller('sessions')
 export class SessionsController {
@@ -28,8 +29,9 @@ export class SessionsController {
 
   @Post()
   async create(@Body() body) {
+    const generatedId = randomUUID();
     return await this.sessionsCreate.run(
-      body.id,
+      generatedId,
       body.session_name,
       body.phone,
       true,
