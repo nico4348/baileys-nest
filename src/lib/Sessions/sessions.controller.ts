@@ -38,8 +38,9 @@ export class SessionsController {
       false,
     );
   }
+
   // @Post('start')
-  // async startSession(@Body() startSessionDto: StartSessionDto) {
+  // async startSession(@Body() startSessionDto) {
   //   try {
   //     const { phone, authFolder, sessionName } = startSessionDto;
   //     const sessionId = await this.sessionStartSocket.start({
