@@ -1,5 +1,5 @@
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Session } from './lib/Sessions/infrastructure/TypeOrm/TypeOrmSessionsEntity';
+import { TypeOrmSessionsEntity } from './lib/Sessions/infrastructure/TypeOrm/TypeOrmSessionsEntity';
 import { EventLog } from './lib/EventLogs/EventLogsEntity';
 import { Event } from './lib/Events/EventsEntity';
 import { MediaMessage } from './lib/MediaMessages/MediaMessagesEntity';
@@ -18,7 +18,7 @@ export const DatabaseProvider = TypeOrmModule.forRoot({
   password: 'root',
   database: 'pruebaNest',
   entities: [
-    Session,
+    TypeOrmSessionsEntity,
     EventLog,
     Event,
     MediaMessage,

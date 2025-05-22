@@ -1,5 +1,5 @@
 import { Entity, PrimaryColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
-import { Session } from '../Sessions/infrastructure/TypeOrm/TypeOrmSessionsEntity'; // Assuming this is the correct path
+import { TypeOrmSessionsEntity } from '../Sessions/infrastructure/TypeOrm/TypeOrmSessionsEntity'; // Assuming this is the correct path
 
 @Entity('session_logs')
 export class SessionLogs {
@@ -18,7 +18,7 @@ export class SessionLogs {
   @Column({ type: 'timestamp' })
   created_at: Date;
 
-  @ManyToOne(() => Session, (session) => session.sessionLogs)
+  @ManyToOne(() => TypeOrmSessionsEntity, (session) => session.sessionLogs)
   @JoinColumn({ name: 'session_id' })
-  session: Session;
+  session: TypeOrmSessionsEntity;
 }

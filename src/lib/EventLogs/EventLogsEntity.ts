@@ -1,5 +1,5 @@
 import { Entity, PrimaryColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
-import { Session } from '../Sessions/infrastructure/TypeOrm/TypeOrmSessionsEntity';
+import { TypeOrmSessionsEntity } from '../Sessions/infrastructure/TypeOrm/TypeOrmSessionsEntity';
 import { Event } from '../Events/EventsEntity';
 
 @Entity('event_logs')
@@ -16,9 +16,9 @@ export class EventLog {
   @Column({ type: 'timestamp' })
   created_at: Date;
 
-  @ManyToOne(() => Session, (session) => session.eventLogs)
+  @ManyToOne(() => TypeOrmSessionsEntity, (session) => session.eventLogs)
   @JoinColumn({ name: 'session_id' })
-  session: Session;
+  session: TypeOrmSessionsEntity;
 
   @ManyToOne(() => Event, (event) => event.eventLogs)
   @JoinColumn({ name: 'event_id' })

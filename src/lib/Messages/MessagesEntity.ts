@@ -7,7 +7,7 @@ import {
   OneToOne,
   JoinColumn,
 } from 'typeorm';
-import { Session } from '../Sessions/infrastructure/TypeOrm/TypeOrmSessionsEntity';
+import { TypeOrmSessionsEntity } from '../Sessions/infrastructure/TypeOrm/TypeOrmSessionsEntity';
 import { MessageStatus } from '../MessageStatus/MessageEstatusEntity';
 import { TextMessage } from '../TextMessages/TextMessagesEntity';
 import { MediaMessage } from '../MediaMessages/MediaMessagesEntity';
@@ -36,9 +36,9 @@ export class Message {
   @Column({ type: 'timestamp' })
   created_at: Date;
 
-  @ManyToOne(() => Session, (session) => session.messages)
+  @ManyToOne(() => TypeOrmSessionsEntity, (session) => session.messages)
   @JoinColumn({ name: 'session_id' })
-  session: Session;
+  session: TypeOrmSessionsEntity;
 
   @OneToOne(() => TextMessage, (textMessage) => textMessage.message)
   textMessage: TextMessage;

@@ -8,28 +8,28 @@ import { SessionUpdatedAt } from './SessionUpdatedAt';
 
 export class Session {
   id: SessionId;
-  session_name: SessionName;
+  sessionName: SessionName;
   phone: SessionPhone;
   status: SessionStatus;
-  created_at: SessionCreatedAt;
-  updated_at: SessionUpdatedAt;
-  is_deleted: SessionIsDeleted;
+  createdAt: SessionCreatedAt;
+  updatedAt: SessionUpdatedAt;
+  isDeleted: SessionIsDeleted;
 
   constructor(
     id: SessionId,
-    session_name: SessionName,
+    sessionName: SessionName,
     phone: SessionPhone,
     status: SessionStatus,
-    created_at: SessionCreatedAt,
-    updated_at: SessionUpdatedAt,
-    is_deleted: SessionIsDeleted,
+    createdAt: SessionCreatedAt,
+    updatedAt: SessionUpdatedAt,
+    isDeleted: SessionIsDeleted,
   ) {
     this.id = id;
-    this.session_name = session_name;
+    this.sessionName = sessionName;
     this.phone = phone;
     this.status = status;
-    this.created_at = created_at;
-    this.updated_at = updated_at;
-    this.is_deleted = is_deleted;
+    this.createdAt = createdAt;
+    this.updatedAt = updatedAt;
+    this.isDeleted = isDeleted;
   }
 }

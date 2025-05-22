@@ -8,18 +8,14 @@ import {
   Body,
   NotFoundException,
   InternalServerErrorException,
+  Inject,
 } from '@nestjs/common';
-import { SessionStartSocket } from './application/SessionStartSocket';
 import { SessionsCreate } from './application/SessionsCreate';
-import { Session } from './domain/Session';
-import { SessionsRepository } from './domain/SessionsRepository'; // Import the repository
-// Define a DTO for the request body to start a session
 
 @Controller('sessions')
 export class SessionsController {
   constructor(
-    private readonly sessionStartSocket: SessionStartSocket,
-    private readonly sessionsRepository: SessionsRepository, // Inject the repository
+    @Inject('SessionsCreate') private readonly sessionsCreate: SessionsCreate,
   ) {}
 
   //   id: SessionId;
@@ -30,36 +26,35 @@ export class SessionsController {
   //   updated_at: SessionUpdatedAt;
   //   is_deleted: SessionIsDeleted;
 
-  @Post('create')
-  async createSession(@Body() session: Session) {
-    try {
-      await this.sessionsRepository.create(session);
-      return { message: 'Session created successfully' };
-    } catch (error) {
-      console.error('Error creating session:', error);
-      throw new InternalServerErrorException(
-        `Failed to create session: ${error.message}`,
-      );
-    }
+  @Post()
+  async create(@Body() body) {
+    return await this.sessionsCreate.run(
+      body.id,
+      body.session_name,
+      body.phone,
+      true,
+      new Date(),
+      new Date(),
+      false,
+    );
   }
-
-  @Post('start')
-  async startSession(@Body() startSessionDto: StartSessionDto) {
-    try {
-      const { phone, authFolder, sessionName } = startSessionDto;
-      const sessionId = await this.sessionStartSocket.start({
-        phone,
-        authFolder,
-        sessionName,
-      });
-      return { sessionId };
-    } catch (error) {
-      console.error('Error starting session:', error);
-      throw new InternalServerErrorException(
-        `Failed to start session: ${error.message}`,
-      );
-    }
-  }
+  // @Post('start')
+  // async startSession(@Body() startSessionDto: StartSessionDto) {
+  //   try {
+  //     const { phone, authFolder, sessionName } = startSessionDto;
+  //     const sessionId = await this.sessionStartSocket.start({
+  //       phone,
+  //       authFolder,
+  //       sessionName,
+  //     });
+  //     return { sessionId };
+  //   } catch (error) {
+  //     console.error('Error starting session:', error);
+  //     throw new InternalServerErrorException(
+  //       `Failed to start session: ${error.message}`,
+  //     );
+  //   }
+  // }
 
   // @Post('start-all')
   // async startAllSessions() {

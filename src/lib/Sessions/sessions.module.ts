@@ -1,17 +1,23 @@
 import { Module } from '@nestjs/common';
 import { SessionsController } from './sessions.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Session } from './infrastructure/TypeOrm/TypeOrmSessionsEntity';
+import { TypeOrmSessionsEntity } from './infrastructure/TypeOrm/TypeOrmSessionsEntity';
+import { TypeOrmSessionsRepository } from './infrastructure/TypeOrm/TypeOrmSessionsRepository';
+import { SessionsCreate } from './application/SessionsCreate';
+
 @Module({
-  imports: [TypeOrmModule.forFeature([Session])],
+  imports: [TypeOrmModule.forFeature([TypeOrmSessionsEntity])],
   controllers: [SessionsController],
   providers: [
     {
-      provide: 'startSession',
-      useFactory: () => {
-        return;
-      },
-      inject: [],
+      provide: 'SessionsRepository',
+      useClass: TypeOrmSessionsRepository,
+    },
+    {
+      provide: 'SessionsCreate',
+      useFactory: (repository: TypeOrmSessionsRepository) =>
+        new SessionsCreate(repository),
+      inject: ['SessionsRepository'],
     },
   ],
 })

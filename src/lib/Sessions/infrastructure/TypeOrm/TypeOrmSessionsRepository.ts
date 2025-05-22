@@ -12,14 +12,13 @@ import { SessionCreatedAt } from '../../domain/SessionCreatedAt';
 import { SessionUpdatedAt } from '../../domain/SessionUpdatedAt';
 import { SessionIsDeleted } from '../../domain/SessionIsDeleted';
 
-@Injectable()
 export class TypeOrmSessionsRepository implements SessionsRepository {
   constructor(
     @InjectRepository(TypeOrmSessionsEntity)
     private readonly repository: Repository<TypeOrmSessionsEntity>,
   ) {}
 
-  private mapToDomain(entity: TypeOrmSessionsEntity): Session {
+  private mapToDomain(entity: TypeOrmSessionsEntity) {
     return new Session(
       new SessionId(entity.id),
       new SessionName(entity.session_name),
@@ -34,12 +33,12 @@ export class TypeOrmSessionsRepository implements SessionsRepository {
   async create(session: Session): Promise<void> {
     await this.repository.save({
       id: session.id.value,
-      session_name: session.session_name.value,
+      session_name: session.sessionName.value,
       phone: session.phone.value,
       status: session.status.value,
-      createdAt: session.created_at.value,
-      updatedAt: session.updated_at.value,
-      is_deleted: session.is_deleted.value,
+      created_at: session.createdAt.value,
+      updated_at: session.updatedAt.value,
+      is_deleted: session.isDeleted.value,
     });
   }
 
@@ -48,45 +47,39 @@ export class TypeOrmSessionsRepository implements SessionsRepository {
     return entities.map((entity) => this.mapToDomain(entity));
   }
 
-  getOneById(id: SessionId): Promise<Session | null> {
-    return this.repository
-      .findOne({ where: { id: id.value } })
-      .then((entity) => {
-        if (!entity) {
-          return null;
-        }
-        return this.mapToDomain(entity);
-      });
+  async getOneById(id: SessionId): Promise<Session | null> {
+    const entity = await this.repository.findOne({ where: { id: id.value } });
+    if (!entity) {
+      return null;
+    }
+    return this.mapToDomain(entity);
   }
-  getOneByPhone(phone: SessionPhone): Promise<Session | null> {
-    return this.repository
-      .findOne({ where: { phone: phone.value } })
-      .then((entity) => {
-        if (!entity) {
-          return null;
-        }
-        return this.mapToDomain(entity);
-      });
+  async getOneByPhone(phone: SessionPhone): Promise<Session | null> {
+    const entity = await this.repository.findOne({
+      where: { phone: phone.value },
+    });
+    if (!entity) {
+      return null;
+    }
+    return this.mapToDomain(entity);
   }
-  getByStatus(status: SessionStatus): Promise<Session[]> {
-    return this.repository
-      .find({ where: { status: status.value } })
-      .then((entities) => {
-        return entities.map((entity) => this.mapToDomain(entity));
-      });
+  async getByStatus(status: SessionStatus): Promise<Session[]> {
+    const entities = await this.repository.find({
+      where: { status: status.value },
+    });
+    return entities.map((entity) => this.mapToDomain(entity));
   }
-  update(session: Session): Promise<Session> {
-    return this.repository
-      .save({
-        id: session.id.value,
-        session_name: session.session_name.value,
-        phone: session.phone.value,
-        status: session.status.value,
-        createdAt: session.created_at.value,
-        updatedAt: session.updated_at.value,
-        is_deleted: session.is_deleted.value,
-      })
-      .then((entity) => this.mapToDomain(entity));
+  async update(session: Session): Promise<Session> {
+    const entity_1 = await this.repository.save({
+      id: session.id.value,
+      session_name: session.sessionName.value,
+      phone: session.phone.value,
+      status: session.status.value,
+      created_at: session.createdAt.value,
+      updated_at: session.updatedAt.value,
+      is_deleted: session.isDeleted.value,
+    });
+    return this.mapToDomain(entity_1);
   }
   async delete(id: SessionId): Promise<void> {
     await this.repository.delete({ id: id.value });

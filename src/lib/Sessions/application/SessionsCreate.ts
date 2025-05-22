@@ -9,24 +9,24 @@ import { SessionStatus } from '../domain/SessionStatus';
 import { SessionUpdatedAt } from '../domain/SessionUpdatedAt';
 
 export class SessionsCreate {
-  constructor(private readonly repository: SessionsRepository) {}
+  constructor(private repository: SessionsRepository) {}
   async run(
     id: string,
-    session_name: string,
+    sessionName: string,
     phone: string,
     status: boolean,
     createdAt: Date,
     updatedAt: Date,
-    is_deleted: boolean,
+    isDeleted: boolean,
   ): Promise<void> {
     const session = new Session(
       new SessionId(id),
-      new SessionName(session_name),
+      new SessionName(sessionName),
       new SessionPhone(phone),
       new SessionStatus(status),
       new SessionCreatedAt(createdAt),
       new SessionUpdatedAt(updatedAt),
-      new SessionIsDeleted(is_deleted),
+      new SessionIsDeleted(isDeleted),
     );
 
     await this.repository.create(session);
