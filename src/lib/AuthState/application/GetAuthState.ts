@@ -1,12 +1,11 @@
 // Caso de uso para obtener el estado de autenticación
 import { AuthDataRepository } from '../domain/AuthDataRepository';
-import { AuthStateService } from './AuthStateService';
 
 export class GetAuthState {
   constructor(
     private readonly authDataRepository: AuthDataRepository,
-    private readonly bufferConverter: any, // Servicio de dominio para convertir
-    private readonly authCredsInitializer: any, // Servicio de dominio para inicializar
+    private readonly bufferConverter: any,
+    private readonly authCredsInitializer: any,
   ) {}
 
   async execute(sessionId: string): Promise<any> {

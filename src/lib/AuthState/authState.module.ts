@@ -3,8 +3,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthDataEntity } from './infraestructure/TypeOrm/AuthDataEntity';
 import { AuthDataTypeOrmRepository } from './infraestructure/TypeOrm/AuthDataTypeOrmRepository';
 import { AuthStateServiceImpl } from './infraestructure/AuthStateServiceImpl';
-import { AuthStateController } from './authState.service';
 import { AuthStateFactory } from './infraestructure/AuthStateFactory';
+import { AuthDataRepository } from './domain/AuthDataRepository';
+import { AuthStateService } from './application/AuthStateService';
 
 @Module({
   imports: [TypeOrmModule.forFeature([AuthDataEntity])],
@@ -15,18 +16,16 @@ import { AuthStateFactory } from './infraestructure/AuthStateFactory';
     },
     {
       provide: 'AuthStateService',
-      useFactory: (repository: AuthDataTypeOrmRepository) =>
+      useFactory: (repository: AuthDataRepository) =>
         new AuthStateServiceImpl(repository),
       inject: ['AuthDataRepository'],
     },
     {
-      provide: AuthStateFactory,
-      useFactory: (service: AuthStateServiceImpl) =>
-        new AuthStateFactory(service),
+      provide: 'AuthStateFactory',
+      useFactory: (service: AuthStateService) => new AuthStateFactory(service),
       inject: ['AuthStateService'],
     },
   ],
-  controllers: [AuthStateController],
-  exports: ['AuthStateService', AuthStateFactory],
+  exports: ['AuthStateService', 'AuthStateFactory'],
 })
 export class AuthModule {}

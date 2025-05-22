@@ -1,10 +1,10 @@
-import { Entity, PrimaryColumn, Column } from 'typeorm';
+import { Entity, Column, PrimaryColumn } from 'typeorm';
 
 @Entity('auth_data')
 export class AuthDataEntity {
-  @PrimaryColumn({ type: 'varchar', length: 255 })
+  @PrimaryColumn()
   session_key: string;
 
-  @Column({ type: 'text' })
+  @Column('text')
   data: string;
 }
