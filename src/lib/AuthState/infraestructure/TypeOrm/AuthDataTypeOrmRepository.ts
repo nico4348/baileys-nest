@@ -11,11 +11,30 @@ export class AuthDataTypeOrmRepository implements AuthDataRepository {
     private readonly authDataRepository: Repository<AuthDataEntity>,
   ) {}
 
-  async save(key: string, data: string): Promise<void> {
-    await this.authDataRepository.save({
-      session_key: key,
-      data: data,
+  async saveData(sessionId: string, key: string, data: string): Promise<void> {
+    const session_key = `${sessionId}:${key}`;
+    await this.authDataRepository.upsert({ session_key, data }, [
+      'session_key',
+    ]);
+  }
+
+  async getData(sessionId: string, key: string): Promise<string | null> {
+    const session_key = `${sessionId}:${key}`;
+    const entity = await this.authDataRepository.findOne({
+      where: { session_key },
     });
+    return entity ? entity.data : null;
+  }
+
+  async removeData(sessionId: string, key: string): Promise<void> {
+    const session_key = `${sessionId}:${key}`;
+    await this.authDataRepository.delete({ session_key });
+  }
+
+  async save(key: string, data: string): Promise<void> {
+    await this.authDataRepository.upsert({ session_key: key, data: data }, [
+      'session_key',
+    ]);
   }
 
   async findByKey(key: string): Promise<string | null> {

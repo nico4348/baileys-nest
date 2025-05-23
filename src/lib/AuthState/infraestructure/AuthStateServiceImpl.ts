@@ -6,6 +6,10 @@ import { DeleteAuthSession } from '../application/DeleteAuthSession';
 import { AuthDataRepository } from '../domain/AuthDataRepository';
 import { BufferConverter } from './BufferConverter';
 import { AuthCredsFactory } from './AuthCredsFactory';
+import { SessionId } from '../domain/SessionId';
+import { WriteData } from '../application/WriteData';
+import { ReadData } from '../application/ReadData';
+import { RemoveData } from '../application/RemoveData';
 
 @Injectable()
 export class AuthStateServiceImpl implements AuthStateService {
@@ -13,6 +17,9 @@ export class AuthStateServiceImpl implements AuthStateService {
   private readonly saveAuthCredsUseCase: SaveAuthCreds;
   private readonly deleteAuthSessionUseCase: DeleteAuthSession;
   private readonly bufferConverter: BufferConverter;
+  private readonly writeDataUseCase: WriteData;
+  private readonly readDataUseCase: ReadData;
+  private readonly removeDataUseCase: RemoveData;
 
   constructor(authDataRepository: AuthDataRepository) {
     this.bufferConverter = new BufferConverter();
@@ -20,7 +27,6 @@ export class AuthStateServiceImpl implements AuthStateService {
 
     this.getAuthStateUseCase = new GetAuthState(
       authDataRepository,
-      this.bufferConverter,
       authCredsFactory,
     );
 
@@ -30,34 +36,38 @@ export class AuthStateServiceImpl implements AuthStateService {
     );
 
     this.deleteAuthSessionUseCase = new DeleteAuthSession(authDataRepository);
+    this.writeDataUseCase = new WriteData(
+      authDataRepository,
+      this.bufferConverter,
+    );
+    this.readDataUseCase = new ReadData(
+      authDataRepository,
+      this.bufferConverter,
+    );
+    this.removeDataUseCase = new RemoveData(authDataRepository);
   }
 
   async getAuthState(sessionId: string): Promise<any> {
-    return this.getAuthStateUseCase.execute(sessionId);
+    return this.getAuthStateUseCase.run(new SessionId(sessionId));
   }
 
   async saveCreds(sessionId: string, creds: any): Promise<void> {
-    await this.saveAuthCredsUseCase.execute(sessionId, creds);
+    await this.saveAuthCredsUseCase.run(sessionId, creds);
   }
 
   async deleteSession(sessionId: string): Promise<void> {
-    await this.deleteAuthSessionUseCase.execute(sessionId);
+    await this.deleteAuthSessionUseCase.run(sessionId);
   }
 
   async writeData(sessionId: string, key: string, data: any): Promise<void> {
-    // Esta sería una implementación simplificada para compatibilidad
-    // En un sistema real, cada operación podría tener su propio caso de uso
-    const fullKey = `${sessionId}:${key}`;
-    const serialized = JSON.stringify(this.bufferConverter.bufferToJSON(data));
-    // Usamos el repositorio directamente o creamos un caso de uso específico
+    await this.writeDataUseCase.run(sessionId, key, data);
   }
 
   async readData(sessionId: string, key: string): Promise<any | null> {
-    // Implementación simplificada similar
-    return null;
+    return this.readDataUseCase.run(sessionId, key);
   }
 
   async removeData(sessionId: string, key: string): Promise<void> {
-    // Implementación simplificada similar
+    await this.removeDataUseCase.run(sessionId, key);
   }
 }
