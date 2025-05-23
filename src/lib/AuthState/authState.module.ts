@@ -10,6 +10,7 @@ import { AuthStateService } from './application/AuthStateService';
 @Module({
   imports: [TypeOrmModule.forFeature([AuthDataEntity])],
   providers: [
+    AuthStateFactory,
     {
       provide: 'AuthDataRepository',
       useClass: AuthDataTypeOrmRepository,
@@ -21,11 +22,16 @@ import { AuthStateService } from './application/AuthStateService';
       inject: ['AuthDataRepository'],
     },
     {
+      provide: AuthStateFactory,
+      useFactory: (service: AuthStateService) => new AuthStateFactory(service),
+      inject: ['AuthStateService'],
+    },
+    {
       provide: 'AuthStateFactory',
       useFactory: (service: AuthStateService) => new AuthStateFactory(service),
       inject: ['AuthStateService'],
     },
   ],
-  exports: ['AuthStateService', 'AuthStateFactory'],
+  exports: ['AuthStateService', 'AuthStateFactory', AuthStateFactory],
 })
 export class AuthModule {}

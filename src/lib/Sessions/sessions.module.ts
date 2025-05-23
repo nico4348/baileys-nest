@@ -5,8 +5,10 @@ import { TypeOrmSessionsEntity } from './infrastructure/TypeOrm/TypeOrmSessionsE
 import { TypeOrmSessionsRepository } from './infrastructure/TypeOrm/TypeOrmSessionsRepository';
 import { SessionsCreate } from './application/SessionsCreate';
 import { SessionsOnInit } from './application/SessionsOnInit';
+import { WhatsAppSessionManager } from './infrastructure/WhatsAppSessionManager';
+import { AuthModule } from '../AuthState/authState.module';
 @Module({
-  imports: [TypeOrmModule.forFeature([TypeOrmSessionsEntity])],
+  imports: [TypeOrmModule.forFeature([TypeOrmSessionsEntity]), AuthModule],
   controllers: [SessionsController],
   providers: [
     {
@@ -25,6 +27,7 @@ import { SessionsOnInit } from './application/SessionsOnInit';
         new SessionsCreate(repository),
       inject: ['SessionsRepository'],
     },
+    WhatsAppSessionManager,
   ],
 })
 export class SessionsModule {}
