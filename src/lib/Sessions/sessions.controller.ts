@@ -114,7 +114,6 @@ export class SessionsController {
       );
     }
   }
-
   @Delete(':sessionId/delete')
   async deleteWhatsAppSession(@Param('sessionId') sessionId: string) {
     try {
@@ -126,6 +125,59 @@ export class SessionsController {
     } catch (error) {
       throw new InternalServerErrorException(
         'Error al eliminar sesión: ' + error.message,
+      );
+    }
+  }
+  @Get(':sessionId/qr')
+  async getSessionQR(@Param('sessionId') sessionId: string) {
+    try {
+      const qrCode = this.whatsAppSessionManager.getSessionQR(sessionId);
+      const hasQR = this.whatsAppSessionManager.hasSessionQR(sessionId);
+
+      if (!hasQR) {
+        return {
+          success: false,
+          message: 'No hay código QR disponible para esta sesión.',
+          qrCode: null,
+        };
+      }
+
+      return {
+        success: true,
+        message: 'Código QR obtenido exitosamente.',
+        qrCode: qrCode,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Error al obtener código QR: ' + error.message,
+      );
+    }
+  }
+
+  @Get(':sessionId/qr/image')
+  async getSessionQRAsImage(@Param('sessionId') sessionId: string) {
+    try {
+      const hasQR = this.whatsAppSessionManager.hasSessionQR(sessionId);
+
+      if (!hasQR) {
+        return {
+          success: false,
+          message: 'No hay código QR disponible para esta sesión.',
+          qrImage: null,
+        };
+      }
+
+      const qrImage =
+        await this.whatsAppSessionManager.getSessionQRAsBase64(sessionId);
+
+      return {
+        success: true,
+        message: 'Imagen QR obtenida exitosamente.',
+        qrImage: qrImage,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Error al obtener imagen QR: ' + error.message,
       );
     }
   }

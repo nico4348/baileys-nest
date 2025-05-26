@@ -1,5 +1,6 @@
 import makeWASocket, { fetchLatestBaileysVersion, Browsers } from 'baileys';
 import * as qrcode from 'qrcode-terminal';
+import * as QRCode from 'qrcode';
 import pino from 'pino';
 import { Boom } from '@hapi/boom';
 import { DisconnectReason } from 'baileys';
@@ -8,6 +9,7 @@ import { AuthStateFactory } from '../../AuthState/infrastructure/AuthStateFactor
 
 export class WhatsAppSocketFactory {
   private qrGenerated: Map<string, boolean> = new Map();
+  private qrCodes: Map<string, string> = new Map(); // Almacenar QR codes
 
   constructor(
     private authStateFactory: AuthStateFactory,
@@ -15,6 +17,32 @@ export class WhatsAppSocketFactory {
     private retryCache: any = undefined,
     private sessionManager?: any, // Referencia al manager para reconexión
   ) {}
+
+  // Método para obtener el QR de una sesión
+  getQR(sessionId: string): string | null {
+    return this.qrCodes.get(sessionId) || null;
+  }
+  // Método para verificar si hay QR disponible
+  hasQR(sessionId: string): boolean {
+    return this.qrCodes.has(sessionId);
+  }
+
+  // Método para obtener el QR como imagen base64
+  async getQRAsBase64(sessionId: string): Promise<string | null> {
+    const qrString = this.qrCodes.get(sessionId);
+    if (!qrString) return null;
+
+    try {
+      const qrCodeDataURL = await QRCode.toDataURL(qrString);
+      return qrCodeDataURL;
+    } catch (error) {
+      console.error(
+        `Error generando QR base64 para sesión ${sessionId}:`,
+        error,
+      );
+      return null;
+    }
+  }
 
   async createSocket(sessionId: string): Promise<any> {
     const { state, saveCreds, deleteSession } =
@@ -41,6 +69,9 @@ export class WhatsAppSocketFactory {
         const update = events['connection.update'];
         const { connection, lastDisconnect, qr } = update;
         if (qr && !state.creds?.registered) {
+          // Almacenar el QR code
+          this.qrCodes.set(sessionId, qr);
+
           // Verificar si la sesión está pausada
           const isPaused = this.sessionManager
             ? await this.sessionManager.isSessionPaused(sessionId)
@@ -57,30 +88,18 @@ export class WhatsAppSocketFactory {
         }
         if (connection === 'close') {
           const statusCode = (lastDisconnect?.error as Boom)?.output
-            ?.statusCode; // Reconectar si no fue logout Y la sesión no está pausada intencionalmente Y no está en restart manual Y no está siendo eliminada
+            ?.statusCode;
+          // Reconectar si no fue logout Y la sesión no está pausada intencionalmente
           if (statusCode !== DisconnectReason.loggedOut) {
             try {
               // Verificar si la sesión está pausada antes de reconectar
               const isPaused = this.sessionManager
                 ? await this.sessionManager.isSessionPaused(sessionId)
                 : false;
-
-              // Verificar si la sesión está siendo reiniciada manualmente
-              const isRestarting = this.sessionManager?.isSessionRestarting
-                ? this.sessionManager.isSessionRestarting(sessionId)
-                : false;
-
-              // Verificar si la sesión está siendo eliminada
-              const isDeleting = this.sessionManager?.isSessionDeleting
-                ? this.sessionManager.isSessionDeleting(sessionId)
-                : false;
-
               if (
                 this.sessionManager &&
                 this.sessionManager.recreateSession &&
-                !isPaused &&
-                !isRestarting &&
-                !isDeleting
+                !isPaused
               ) {
                 console.log(
                   `🔄 Reconectando sesión automáticamente: ${sessionId}`,
@@ -89,14 +108,6 @@ export class WhatsAppSocketFactory {
               } else if (isPaused) {
                 console.log(
                   `⏸️ Sesión ${sessionId} está pausada, no se reconecta automáticamente`,
-                );
-              } else if (isRestarting) {
-                console.log(
-                  `🔄 Sesión ${sessionId} está siendo reiniciada manualmente, evitando reconexión automática`,
-                );
-              } else if (isDeleting) {
-                console.log(
-                  `🗑️ Sesión ${sessionId} está siendo eliminada, evitando reconexión automática`,
                 );
               }
             } catch (error) {
@@ -113,6 +124,7 @@ export class WhatsAppSocketFactory {
           }
 
           this.qrGenerated.delete(sessionId); // Limpiar flag de QR
+          this.qrCodes.delete(sessionId); // Limpiar QR code almacenado
         }
       } // Credenciales actualizadas - guardar
       if (events['creds.update']) {
@@ -121,6 +133,7 @@ export class WhatsAppSocketFactory {
         if (hadQR && state.creds && !state.creds.registered) {
           state.creds.registered = true;
           this.qrGenerated.delete(sessionId);
+          this.qrCodes.delete(sessionId); // Limpiar QR code almacenado
         }
 
         try {
