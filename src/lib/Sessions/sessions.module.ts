@@ -4,6 +4,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { TypeOrmSessionsEntity } from './infrastructure/TypeOrm/TypeOrmSessionsEntity';
 import { TypeOrmSessionsRepository } from './infrastructure/TypeOrm/TypeOrmSessionsRepository';
 import { SessionsCreate } from './application/SessionsCreate';
+import { SessionsUpdate } from './application/SessionsUpdate';
+import { SessionsGetOneById } from './application/SessionsGetOneById';
 import { SessionsOnInit } from './application/SessionsOnInit';
 import { WhatsAppSessionManager } from './infrastructure/WhatsAppSessionManager';
 import { AuthModule } from '../AuthState/authState.module';
@@ -25,6 +27,18 @@ import { AuthModule } from '../AuthState/authState.module';
       provide: 'SessionsCreate',
       useFactory: (repository: TypeOrmSessionsRepository) =>
         new SessionsCreate(repository),
+      inject: ['SessionsRepository'],
+    },
+    {
+      provide: 'SessionsUpdate',
+      useFactory: (repository: TypeOrmSessionsRepository) =>
+        new SessionsUpdate(repository),
+      inject: ['SessionsRepository'],
+    },
+    {
+      provide: 'SessionsGetOneById',
+      useFactory: (repository: TypeOrmSessionsRepository) =>
+        new SessionsGetOneById(repository),
       inject: ['SessionsRepository'],
     },
     WhatsAppSessionManager,

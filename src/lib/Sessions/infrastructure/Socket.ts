@@ -41,23 +41,49 @@ export class WhatsAppSocketFactory {
         const update = events['connection.update'];
         const { connection, lastDisconnect, qr } = update;
         if (qr && !state.creds?.registered) {
+          // Verificar si la sesión está pausada
+          const isPaused = this.sessionManager
+            ? await this.sessionManager.isSessionPaused(sessionId)
+            : false;
+          if (isPaused) {
+            console.log(
+              `⚠️ ADVERTENCIA: QR generado para sesión PAUSADA: ${sessionId}`,
+            );
+          } else {
+            console.log(`📱 QR generado para la sesión: ${sessionId}`);
+          }
           qrcode.generate(qr, { small: true });
           this.qrGenerated.set(sessionId, true);
         }
-
         if (connection === 'close') {
           const statusCode = (lastDisconnect?.error as Boom)?.output
             ?.statusCode;
-          // Reconectar si no fue logout
+          // Reconectar si no fue logout Y la sesión no está pausada intencionalmente
           if (statusCode !== DisconnectReason.loggedOut) {
             try {
-              if (this.sessionManager && this.sessionManager.recreateSession) {
+              // Verificar si la sesión está pausada antes de reconectar
+              const isPaused = this.sessionManager
+                ? await this.sessionManager.isSessionPaused(sessionId)
+                : false;
+              if (
+                this.sessionManager &&
+                this.sessionManager.recreateSession &&
+                !isPaused
+              ) {
+                console.log(
+                  `🔄 Reconectando sesión automáticamente: ${sessionId}`,
+                );
                 await this.sessionManager.recreateSession(sessionId);
+              } else if (isPaused) {
+                console.log(
+                  `⏸️ Sesión ${sessionId} está pausada, no se reconecta automáticamente`,
+                );
               }
             } catch (error) {
-              // Error en reconexión
+              console.error(`Error en reconexión de ${sessionId}:`, error);
             }
           } else {
+            console.log(`🚪 Sesión ${sessionId} cerrada por logout`);
             await deleteSession();
           }
         } else if (connection === 'open') {

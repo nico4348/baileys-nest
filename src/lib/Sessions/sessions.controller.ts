@@ -71,6 +71,21 @@ export class SessionsController {
     }
   }
 
+  @Post(':sessionId/resume')
+  async resumeWhatsAppSession(@Param('sessionId') sessionId: string) {
+    try {
+      await this.whatsAppSessionManager.resumeSession(sessionId);
+      return {
+        success: true,
+        message: 'Sesión de WhatsApp reanudada exitosamente.',
+      };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Error al reanudar sesión: ' + error.message,
+      );
+    }
+  }
+
   @Post(':sessionId/restart')
   async restartWhatsAppSession(@Param('sessionId') sessionId: string) {
     try {
@@ -85,18 +100,32 @@ export class SessionsController {
       );
     }
   }
-
   @Delete(':sessionId/stop')
   async stopWhatsAppSession(@Param('sessionId') sessionId: string) {
+    try {
+      await this.whatsAppSessionManager.stopSession(sessionId);
+      return {
+        success: true,
+        message: 'Sesión de WhatsApp pausada exitosamente.',
+      };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Error al pausar sesión: ' + error.message,
+      );
+    }
+  }
+
+  @Delete(':sessionId/delete')
+  async deleteWhatsAppSession(@Param('sessionId') sessionId: string) {
     try {
       await this.whatsAppSessionManager.deleteSession(sessionId);
       return {
         success: true,
-        message: 'Sesión de WhatsApp detenida exitosamente.',
+        message: 'Sesión de WhatsApp eliminada exitosamente.',
       };
     } catch (error) {
       throw new InternalServerErrorException(
-        'Error al detener sesión: ' + error.message,
+        'Error al eliminar sesión: ' + error.message,
       );
     }
   }
