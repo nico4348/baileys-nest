@@ -34,20 +34,14 @@ export class WhatsAppSessionManager implements OnModuleInit {
     this.sessions.set(sessionId, socket); // Ahora el manager almacena el socket
     return socket;
   }
-
   async recreateSession(sessionId: string) {
-    console.log(`[${sessionId}] 🔄 Recreando sesión...`);
-
     // Cerrar socket existente si existe
     const existingSocket = this.sessions.get(sessionId);
     if (existingSocket) {
       try {
         existingSocket.close();
       } catch (error) {
-        console.warn(
-          `[${sessionId}] ⚠️ Error cerrando socket existente:`,
-          error,
-        );
+        // Error cerrando socket existente
       }
       this.sessions.delete(sessionId);
     }

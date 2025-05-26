@@ -1,10 +1,8 @@
-import { AuthState } from './AuthState';
 import { AuthStateSessionKey } from './AuthStateSessionKey';
 
 export interface AuthStateRepository {
-  create(authState: AuthState): Promise<AuthState>;
-  getAll(): Promise<AuthState[]>;
-  getOneById(id: AuthStateSessionKey): Promise<AuthState | null>;
-  update(authState: AuthState): Promise<AuthState>;
-  delete(id: AuthStateSessionKey): Promise<void>;
+  save(key: AuthStateSessionKey, data: string): Promise<void>;
+  findByKey(key: AuthStateSessionKey): Promise<any | null>;
+  deleteByKey(key: AuthStateSessionKey): Promise<void>;
+  deleteByKeyPattern(pattern: string): Promise<void>;
 }
