@@ -20,10 +20,11 @@ export class WhatsAppSessionManager implements OnModuleInit {
       (s) => s.status.value && !s.isDeleted.value,
     );
     for (const session of activeSessions) {
-      await this.createSession(session.id.value);
+      await this.startSession(session.id.value);
     }
   }
-  async createSession(sessionId: string) {
+
+  async startSession(sessionId: string) {
     const socketFactory = new WhatsAppSocketFactory(
       this.authStateFactory,
       undefined, // logger
@@ -34,6 +35,7 @@ export class WhatsAppSessionManager implements OnModuleInit {
     this.sessions.set(sessionId, socket); // Ahora el manager almacena el socket
     return socket;
   }
+
   async recreateSession(sessionId: string) {
     // Cerrar socket existente si existe
     const existingSocket = this.sessions.get(sessionId);
@@ -47,7 +49,7 @@ export class WhatsAppSessionManager implements OnModuleInit {
     }
 
     // Crear nueva sesión
-    return await this.createSession(sessionId);
+    return await this.startSession(sessionId);
   }
 
   async deleteSession(sessionId: string) {
