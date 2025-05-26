@@ -1,14 +1,27 @@
 export class AuthStateData {
-  private readonly _value: Record<string, any>;
+  private readonly creds: any;
+  private readonly keys: Map<string, Map<string, any>>;
 
-  constructor(value: Record<string, any>) {
-    this._value = value;
+  constructor(creds: any, keys?: Map<string, Map<string, any>>) {
+    this.creds = creds;
+    this.keys = keys || new Map();
     this.ensureIsValid();
   }
 
   private ensureIsValid() {
-    if (!this._value || Object.keys(this._value).length === 0) {
-      throw new Error('SessionId must be a non-empty JSON object');
+    if (!this.creds) {
+      throw new Error('Credentials must be provided');
     }
+  }
+
+  toJSON(): { creds: any; keys: any } {
+    const keysObj: any = {};
+    for (const [type, typeMap] of this.keys.entries()) {
+      keysObj[type] = Object.fromEntries(typeMap);
+    }
+    return {
+      creds: this.creds,
+      keys: keysObj,
+    };
   }
 }

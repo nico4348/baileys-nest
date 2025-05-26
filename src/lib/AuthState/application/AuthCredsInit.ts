@@ -2,7 +2,7 @@ import { proto, generateRegistrationId, Curve, signedKeyPair } from 'baileys';
 import { randomBytes } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 
-export class AuthCredsFactory {
+export class AuthCredsInit {
   initAuthCreds() {
     const identityKey = Curve.generateKeyPair();
     return {

@@ -1,5 +1,5 @@
 import { AuthStateSessionKey } from '../domain/AuthStateSessionKey';
-import { AuthStateRepository } from '../domain/MessageRepository';
+import { AuthStateRepository } from '../domain/AuthStateRepository';
 
 export class AuthStateDelete {
   constructor(private readonly repository: AuthStateRepository) {}

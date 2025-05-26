@@ -1,37 +1,32 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AuthDataEntity } from './infraestructure/TypeOrm/AuthDataEntity';
-import { AuthDataTypeOrmRepository } from './infraestructure/TypeOrm/AuthDataTypeOrmRepository';
-import { AuthStateServiceImpl } from './infraestructure/AuthStateServiceImpl';
-import { AuthStateFactory } from './infraestructure/AuthStateFactory';
-import { AuthDataRepository } from './domain/AuthDataRepository';
-import { AuthStateService } from './application/AuthStateService';
+import { AuthDataEntity } from './infrastructure/TypeOrm/AuthDataEntity';
+import { AuthStateTypeOrmRepository } from './infrastructure/TypeOrm/AuthDataTypeOrmRepository';
+import { AuthStateFactory } from './infrastructure/AuthStateFactory';
+import { AuthStateService } from './infrastructure/AuthStateService';
+import { AuthCredsInit } from './application/AuthCredsInit';
 
 @Module({
   imports: [TypeOrmModule.forFeature([AuthDataEntity])],
   providers: [
+    AuthStateTypeOrmRepository,
+    AuthCredsInit,
+    AuthStateService,
     AuthStateFactory,
     {
-      provide: 'AuthDataRepository',
-      useClass: AuthDataTypeOrmRepository,
-    },
-    {
-      provide: 'AuthStateService',
-      useFactory: (repository: AuthDataRepository) =>
-        new AuthStateServiceImpl(repository),
-      inject: ['AuthDataRepository'],
-    },
-    {
-      provide: AuthStateFactory,
-      useFactory: (service: AuthStateService) => new AuthStateFactory(service),
-      inject: ['AuthStateService'],
+      provide: 'AuthStateRepository',
+      useClass: AuthStateTypeOrmRepository,
     },
     {
       provide: 'AuthStateFactory',
-      useFactory: (service: AuthStateService) => new AuthStateFactory(service),
-      inject: ['AuthStateService'],
+      useClass: AuthStateFactory,
     },
   ],
-  exports: ['AuthStateService', 'AuthStateFactory', AuthStateFactory],
+  exports: [
+    'AuthStateRepository',
+    'AuthStateFactory',
+    AuthStateService,
+    AuthStateFactory,
+  ],
 })
 export class AuthModule {}

@@ -1,6 +1,6 @@
 import { AuthState } from '../domain/AuthState';
 import { AuthStateSessionKey } from '../domain/AuthStateSessionKey';
-import { AuthStateRepository } from '../domain/MessageRepository';
+import { AuthStateRepository } from '../domain/AuthStateRepository';
 import { AuthStateData } from '../domain/AuthStateData';
 
 export class AuthStateCreate {

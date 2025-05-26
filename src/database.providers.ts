@@ -9,7 +9,7 @@ import { ReactionMessage } from './lib/ReactionMessages/ReactionMessagesEntity';
 import { SessionLogs } from './lib/SessionLogs/SessionLogsEntity';
 import { Status } from './lib/Status/StatusEntity';
 import { TextMessage } from './lib/TextMessages/TextMessagesEntity';
-import { AuthDataEntity } from './lib/AuthState/infraestructure/TypeOrm/AuthDataEntity';
+import { AuthDataEntity } from './lib/AuthState/infrastructure/TypeOrm/AuthDataEntity';
 
 export const DatabaseProvider = TypeOrmModule.forRoot({
   type: 'postgres',
