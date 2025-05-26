@@ -5,10 +5,13 @@ export class SessionCreatedAt {
     this.value = value;
     this.ensureIsValid();
   }
-
   private ensureIsValid() {
-    if (this.value > new Date()) {
-      throw new Error('SessionCreatedAt must be in the past');
+    // Permitir fechas actuales con un margen de tolerancia de 1 segundo
+    const now = new Date();
+    const maxAllowedTime = new Date(now.getTime() + 1000); // 1 segundo de tolerancia
+
+    if (this.value > maxAllowedTime) {
+      throw new Error('SessionCreatedAt cannot be in the future');
     }
   }
 }

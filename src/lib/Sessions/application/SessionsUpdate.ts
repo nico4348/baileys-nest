@@ -7,10 +7,10 @@ import { SessionPhone } from '../domain/SessionPhone';
 import { SessionsRepository } from '../domain/SessionsRepository';
 import { SessionStatus } from '../domain/SessionStatus';
 import { SessionUpdatedAt } from '../domain/SessionUpdatedAt';
+import { SessionDeletedAt } from '../domain/SessionDeletedAt';
 
 export class SessionsUpdate {
   constructor(private repository: SessionsRepository) {}
-
   async run(
     id: string,
     session_name: string,
@@ -19,6 +19,7 @@ export class SessionsUpdate {
     created_at: Date,
     updated_at: Date,
     is_deleted: boolean,
+    deleted_at?: Date,
   ): Promise<void> {
     const session = new Session(
       new SessionId(id),
@@ -28,6 +29,7 @@ export class SessionsUpdate {
       new SessionCreatedAt(created_at),
       new SessionUpdatedAt(updated_at),
       new SessionIsDeleted(is_deleted),
+      new SessionDeletedAt(deleted_at || null),
     );
     await this.repository.update(session);
   }

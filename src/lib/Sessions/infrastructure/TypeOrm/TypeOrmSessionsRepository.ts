@@ -11,6 +11,7 @@ import { SessionName } from '../../domain/SessionName';
 import { SessionCreatedAt } from '../../domain/SessionCreatedAt';
 import { SessionUpdatedAt } from '../../domain/SessionUpdatedAt';
 import { SessionIsDeleted } from '../../domain/SessionIsDeleted';
+import { SessionDeletedAt } from '../../domain/SessionDeletedAt';
 
 export class TypeOrmSessionsRepository implements SessionsRepository {
   constructor(
@@ -27,9 +28,9 @@ export class TypeOrmSessionsRepository implements SessionsRepository {
       new SessionCreatedAt(entity.created_at),
       new SessionUpdatedAt(entity.updated_at),
       new SessionIsDeleted(entity.is_deleted),
+      new SessionDeletedAt(entity.deleted_at),
     );
   }
-
   async create(session: Session): Promise<void> {
     await this.repository.save({
       id: session.id.value,
@@ -39,6 +40,7 @@ export class TypeOrmSessionsRepository implements SessionsRepository {
       created_at: session.createdAt.value,
       updated_at: session.updatedAt.value,
       is_deleted: session.isDeleted.value,
+      deleted_at: session.deletedAt.value,
     });
   }
 
@@ -78,16 +80,17 @@ export class TypeOrmSessionsRepository implements SessionsRepository {
       created_at: session.createdAt.value,
       updated_at: session.updatedAt.value,
       is_deleted: session.isDeleted.value,
+      deleted_at: session.deletedAt.value,
     });
     return this.mapToDomain(entity_1);
-  }
-  async delete(id: SessionId): Promise<void> {
-    await this.repository.delete({ id: id.value });
   }
   async hardDelete(id: SessionId): Promise<void> {
     await this.repository.delete({ id: id.value });
   }
-  async softDelete(id: SessionId): Promise<void> {
-    await this.repository.update({ id: id.value }, { is_deleted: true });
+  async softDelete(id: SessionId, deletedAt: SessionDeletedAt): Promise<void> {
+    await this.repository.update(
+      { id: id.value },
+      { is_deleted: true, status: false, deleted_at: deletedAt.value },
+    );
   }
 }

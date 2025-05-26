@@ -5,6 +5,6 @@ export class SessionsDelete {
   constructor(private readonly repository: SessionsRepository) {}
 
   async run(id: string): Promise<void> {
-    return this.repository.delete(new SessionId(id));
+    return this.repository.hardDelete(new SessionId(id));
   }
 }

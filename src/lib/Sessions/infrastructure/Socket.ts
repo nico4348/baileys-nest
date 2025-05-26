@@ -57,18 +57,30 @@ export class WhatsAppSocketFactory {
         }
         if (connection === 'close') {
           const statusCode = (lastDisconnect?.error as Boom)?.output
-            ?.statusCode;
-          // Reconectar si no fue logout Y la sesión no está pausada intencionalmente
+            ?.statusCode; // Reconectar si no fue logout Y la sesión no está pausada intencionalmente Y no está en restart manual Y no está siendo eliminada
           if (statusCode !== DisconnectReason.loggedOut) {
             try {
               // Verificar si la sesión está pausada antes de reconectar
               const isPaused = this.sessionManager
                 ? await this.sessionManager.isSessionPaused(sessionId)
                 : false;
+
+              // Verificar si la sesión está siendo reiniciada manualmente
+              const isRestarting = this.sessionManager?.isSessionRestarting
+                ? this.sessionManager.isSessionRestarting(sessionId)
+                : false;
+
+              // Verificar si la sesión está siendo eliminada
+              const isDeleting = this.sessionManager?.isSessionDeleting
+                ? this.sessionManager.isSessionDeleting(sessionId)
+                : false;
+
               if (
                 this.sessionManager &&
                 this.sessionManager.recreateSession &&
-                !isPaused
+                !isPaused &&
+                !isRestarting &&
+                !isDeleting
               ) {
                 console.log(
                   `🔄 Reconectando sesión automáticamente: ${sessionId}`,
@@ -77,6 +89,14 @@ export class WhatsAppSocketFactory {
               } else if (isPaused) {
                 console.log(
                   `⏸️ Sesión ${sessionId} está pausada, no se reconecta automáticamente`,
+                );
+              } else if (isRestarting) {
+                console.log(
+                  `🔄 Sesión ${sessionId} está siendo reiniciada manualmente, evitando reconexión automática`,
+                );
+              } else if (isDeleting) {
+                console.log(
+                  `🗑️ Sesión ${sessionId} está siendo eliminada, evitando reconexión automática`,
                 );
               }
             } catch (error) {

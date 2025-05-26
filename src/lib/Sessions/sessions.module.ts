@@ -7,6 +7,7 @@ import { SessionsCreate } from './application/SessionsCreate';
 import { SessionsUpdate } from './application/SessionsUpdate';
 import { SessionsGetOneById } from './application/SessionsGetOneById';
 import { SessionsOnInit } from './application/SessionsOnInit';
+import { SessionSoftDelete } from './application/SessionSoftDelete';
 import { WhatsAppSessionManager } from './infrastructure/WhatsAppSessionManager';
 import { AuthModule } from '../AuthState/authState.module';
 @Module({
@@ -39,6 +40,12 @@ import { AuthModule } from '../AuthState/authState.module';
       provide: 'SessionsGetOneById',
       useFactory: (repository: TypeOrmSessionsRepository) =>
         new SessionsGetOneById(repository),
+      inject: ['SessionsRepository'],
+    },
+    {
+      provide: 'SessionSoftDelete',
+      useFactory: (repository: TypeOrmSessionsRepository) =>
+        new SessionSoftDelete(repository),
       inject: ['SessionsRepository'],
     },
     WhatsAppSessionManager,

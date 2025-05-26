@@ -26,6 +26,9 @@ export class TypeOrmSessionsEntity {
   @Column({ type: 'boolean' })
   is_deleted: boolean;
 
+  @Column({ type: 'timestamp', nullable: true })
+  deleted_at: Date | null;
+
   @OneToMany(() => SessionLogs, (sessionLog) => sessionLog.session)
   sessionLogs: SessionLogs[];
 
