@@ -182,6 +182,7 @@ export class SessionsController {
   async resumeWhatsAppSession(@Param('sessionId') sessionId: string) {
     try {
       await this.whatsAppSessionManager.resumeSession(sessionId);
+
       return {
         success: true,
         message: 'Sesión de WhatsApp reanudada exitosamente.',
@@ -210,7 +211,7 @@ export class SessionsController {
   @Post(':sessionId/pause')
   async pauseWhatsAppSession(@Param('sessionId') sessionId: string) {
     try {
-      await this.whatsAppSessionManager.stopSession(sessionId);
+      await this.whatsAppSessionManager.pauseSession(sessionId);
       return {
         success: true,
         message: 'Sesión de WhatsApp pausada exitosamente.',

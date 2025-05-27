@@ -54,14 +54,32 @@ export class WhatsAppSessionManager
 
     return socket;
   }
-
   async resumeSession(sessionId: string): Promise<any> {
     await this.sessionOperations.resumeSession(sessionId);
 
+    // Check if session is in memory and active
     if (this.lifecycleManager.isSessionActive(sessionId)) {
       return this.lifecycleManager.getSession(sessionId);
     }
 
+    // Check if session is paused and can be resumed
+    if (this.lifecycleManager.isPaused(sessionId)) {
+      const socketFactory = new WhatsAppSocketFactory(
+        this.authStateFactory,
+        this.qrManager,
+        this.connectionManager,
+        this,
+      );
+
+      this.sessionQrService.setSocketFactory(sessionId, socketFactory);
+      const socket = await this.lifecycleManager.resumeSession(
+        sessionId,
+        socketFactory,
+      );
+      return socket;
+    }
+
+    // Otherwise start new session
     return await this.startSession(sessionId);
   }
 
@@ -81,9 +99,9 @@ export class WhatsAppSessionManager
     }
   }
 
-  async stopSession(sessionId: string): Promise<void> {
-    await this.sessionOperations.stopSession(sessionId);
-    await this.lifecycleManager.closeSession(sessionId);
+  async pauseSession(sessionId: string): Promise<void> {
+    await this.sessionOperations.pauseSession(sessionId);
+    await this.lifecycleManager.pauseSession(sessionId);
   }
 
   async deleteSession(sessionId: string): Promise<void> {
@@ -106,8 +124,12 @@ export class WhatsAppSessionManager
   isSessionDeleting(sessionId: string): boolean {
     return this.lifecycleManager.isDeleting(sessionId);
   }
-
   async isSessionPaused(sessionId: string): Promise<boolean> {
+    // First check if it's marked as paused in lifecycle manager
+    if (this.lifecycleManager.isPaused(sessionId)) {
+      return true;
+    }
+
     try {
       const session = await this.sessionsGetOneById.run(sessionId);
       if (!session) {

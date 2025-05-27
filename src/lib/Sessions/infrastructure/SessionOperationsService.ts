@@ -47,12 +47,13 @@ export class SessionOperationsService {
     }
   }
 
-  async stopSession(sessionId: string): Promise<void> {
+  async pauseSession(sessionId: string): Promise<void> {
     try {
+      // Para pause, solo cambiar el estado en la BD sin hacer logout completo
       await this.sessionsStop.run(sessionId);
-      this.logger.info('Session stopped', sessionId);
+      this.logger.info('Session paused', sessionId);
     } catch (error) {
-      this.logger.error('Failed to stop session', error, sessionId);
+      this.logger.error('Failed to pause session', error, sessionId);
       throw error;
     }
   }
