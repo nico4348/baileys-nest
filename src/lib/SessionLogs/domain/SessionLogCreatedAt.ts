@@ -42,8 +42,11 @@ export class SessionLogCreatedAt {
   toString(): string {
     return this.value.toISOString();
   }
-
   toLocaleString(): string {
     return this.value.toLocaleString();
+  }
+
+  toJSON(): string {
+    return this.value.toISOString();
   }
 }

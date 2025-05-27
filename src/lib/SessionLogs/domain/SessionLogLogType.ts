@@ -14,7 +14,7 @@ export enum SessionLogType {
   RECONNECTION = 'RECONNECTION',
   MESSAGE_SENT = 'MESSAGE_SENT',
   MESSAGE_RECEIVED = 'MESSAGE_RECEIVED',
-  MESSAGE_FAILED = 'MESSAGE_FAILED'
+  MESSAGE_FAILED = 'MESSAGE_FAILED',
 }
 
 export class SessionLogLogType {
@@ -38,8 +38,11 @@ export class SessionLogLogType {
   toString(): string {
     return this.value;
   }
-
   equals(other: SessionLogLogType): boolean {
     return this.value === other.value;
+  }
+
+  toJSON(): string {
+    return this.value;
   }
 }

@@ -5,7 +5,6 @@ export class SessionLogMessage {
     this.value = value;
     this.ensureIsValid();
   }
-
   private ensureIsValid() {
     if (this.value.length >= 500) {
       throw new Error('SessionLogMessage must be at most 500 characters long');
@@ -13,5 +12,9 @@ export class SessionLogMessage {
     if (this.value.length < 1) {
       throw new Error('SessionLogMessage must be at least 1 character long');
     }
+  }
+
+  toJSON(): string {
+    return this.value;
   }
 }

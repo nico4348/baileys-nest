@@ -66,8 +66,17 @@ export class SessionLog {
   isWarning(): boolean {
     return this.logType.value === 'WARNING';
   }
-
   isInfo(): boolean {
     return this.logType.value === 'INFO';
+  }
+  toJSON(): any {
+    return {
+      id: this.id.toString(),
+      sessionId: this.sessionId.value,
+      logType: this.logType.toString(),
+      message: this.message.value,
+      createdAt: this.createdAt.toString(),
+      metadata: this.metadata,
+    };
   }
 }
