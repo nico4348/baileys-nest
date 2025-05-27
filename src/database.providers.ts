@@ -6,7 +6,7 @@ import { MediaMessage } from './lib/MediaMessages/MediaMessagesEntity';
 import { Message } from './lib/Messages/MessagesEntity';
 import { MessageStatus } from './lib/MessageStatus/MessageEstatusEntity';
 import { ReactionMessage } from './lib/ReactionMessages/ReactionMessagesEntity';
-import { SessionLogs } from './lib/SessionLogs/SessionLogsEntity';
+import { TypeOrmSessionLogsEntity } from './lib/SessionLogs/infrastructure/TypeOrm/TypeOrmSessionLogsEntity';
 import { Status } from './lib/Status/StatusEntity';
 import { TextMessage } from './lib/TextMessages/TextMessagesEntity';
 import { AuthDataEntity } from './lib/AuthState/infrastructure/TypeOrm/AuthDataEntity';
@@ -26,7 +26,7 @@ export const DatabaseProvider = TypeOrmModule.forRoot({
     Message,
     MessageStatus,
     ReactionMessage,
-    SessionLogs,
+    TypeOrmSessionLogsEntity,
     Status,
     TextMessage,
     AuthDataEntity,

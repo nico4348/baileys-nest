@@ -1,17 +1,45 @@
-export class SessionLogLogType {
-  value: string;
+export enum SessionLogType {
+  CONNECTION = 'CONNECTION',
+  DISCONNECTION = 'DISCONNECTION',
+  QR_GENERATED = 'QR_GENERATED',
+  AUTH_SUCCESS = 'AUTH_SUCCESS',
+  AUTH_FAILURE = 'AUTH_FAILURE',
+  ERROR = 'ERROR',
+  WARNING = 'WARNING',
+  INFO = 'INFO',
+  SESSION_START = 'SESSION_START',
+  SESSION_STOP = 'SESSION_STOP',
+  SESSION_PAUSE = 'SESSION_PAUSE',
+  SESSION_RESUME = 'SESSION_RESUME',
+  RECONNECTION = 'RECONNECTION',
+  MESSAGE_SENT = 'MESSAGE_SENT',
+  MESSAGE_RECEIVED = 'MESSAGE_RECEIVED',
+  MESSAGE_FAILED = 'MESSAGE_FAILED'
+}
 
-  constructor(value: string) {
-    this.value = value;
-    this.ensureIsValid();
+export class SessionLogLogType {
+  readonly value: SessionLogType;
+
+  constructor(value: string | SessionLogType) {
+    if (typeof value === 'string') {
+      if (!Object.values(SessionLogType).includes(value as SessionLogType)) {
+        throw new Error(`Invalid log type: ${value}`);
+      }
+      this.value = value as SessionLogType;
+    } else {
+      this.value = value;
+    }
   }
 
-  private ensureIsValid() {
-    if (this.value.length >= 20) {
-      throw new Error('SessionLogLogType must be at most 20 characters long');
-    }
-    if (this.value.length < 1) {
-      throw new Error('SessionLogLogType must be at least 1 character long');
-    }
+  static fromString(value: string): SessionLogLogType {
+    return new SessionLogLogType(value);
+  }
+
+  toString(): string {
+    return this.value;
+  }
+
+  equals(other: SessionLogLogType): boolean {
+    return this.value === other.value;
   }
 }

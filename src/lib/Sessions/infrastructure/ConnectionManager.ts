@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { Boom } from '@hapi/boom';
 import { DisconnectReason } from 'baileys';
 import { IConnectionManager } from './interfaces/IConnectionManager';
 import { IQrManager } from './interfaces/IQrManager';
 import { ISessionStateManager } from './interfaces/ISessionStateManager';
 import { ISessionLogger } from './interfaces/ISessionLogger';
+import { ISessionLogLogger } from '../../SessionLogs/infrastructure/interfaces/ISessionLogLogger';
 import * as qrcode from 'qrcode-terminal';
 
 @Injectable()
@@ -14,6 +15,8 @@ export class ConnectionManager implements IConnectionManager {
   constructor(
     private readonly qrManager: IQrManager,
     private readonly logger: ISessionLogger,
+    @Inject('ISessionLogLogger')
+    private readonly sessionLogLogger: ISessionLogLogger,
   ) {}
 
   setSessionStateManager(sessionStateManager: ISessionStateManager): void {
@@ -55,6 +58,9 @@ export class ConnectionManager implements IConnectionManager {
       this.logger.info('QR generated for session', sessionId);
     }
 
+    // Log QR generation event
+    await this.sessionLogLogger.logQrEvent(sessionId);
+
     qrcode.generate(qr, { small: true });
   }
   private async handleConnectionClose(
@@ -62,6 +68,10 @@ export class ConnectionManager implements IConnectionManager {
     lastDisconnect: any,
   ): Promise<void> {
     const statusCode = (lastDisconnect?.error as Boom)?.output?.statusCode;
+    const reason = lastDisconnect?.error?.message || 'Unknown reason';
+
+    // Log disconnection event
+    await this.sessionLogLogger.logConnectionEvent(sessionId, false, reason);
 
     if (statusCode !== DisconnectReason.loggedOut) {
       try {
@@ -71,6 +81,7 @@ export class ConnectionManager implements IConnectionManager {
 
           if (!isPaused) {
             this.logger.info('Auto-reconnecting session', sessionId);
+            await this.sessionLogLogger.logReconnection(sessionId, reason);
             await this.sessionStateManager.recreateSession(sessionId);
           } else {
             this.logger.info(
@@ -86,6 +97,7 @@ export class ConnectionManager implements IConnectionManager {
         }
       } catch (error) {
         this.logger.error('Error during reconnection', error, sessionId);
+        await this.sessionLogLogger.logError(sessionId, error, 'Reconnection failed');
       }
     } else {
       this.logger.info('Session closed by logout', sessionId);
@@ -102,5 +114,9 @@ export class ConnectionManager implements IConnectionManager {
 
     this.qrManager.removeQr(sessionId);
     this.logger.info('Session connected successfully', sessionId);
+
+    // Log connection event
+    await this.sessionLogLogger.logConnectionEvent(sessionId, true);
+    await this.sessionLogLogger.logAuthEvent(sessionId, true);
   }
 }

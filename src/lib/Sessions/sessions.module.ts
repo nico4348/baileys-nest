@@ -26,8 +26,13 @@ import { SessionLogger } from './infrastructure/SessionLogger';
 import { SessionAutoInitializer } from './infrastructure/SessionAutoInitializer';
 import { AuthModule } from '../AuthState/authState.module';
 import { AuthStateFactory } from '../AuthState/infrastructure/AuthStateFactory';
+import { SessionLogsModule } from '../SessionLogs/sessionLogs.module';
 @Module({
-  imports: [TypeOrmModule.forFeature([TypeOrmSessionsEntity]), AuthModule],
+  imports: [
+    TypeOrmModule.forFeature([TypeOrmSessionsEntity]), 
+    AuthModule,
+    SessionLogsModule,
+  ],
   controllers: [SessionsController],
   providers: [
     {
@@ -141,6 +146,7 @@ import { AuthStateFactory } from '../AuthState/infrastructure/AuthStateFactory';
         sessionsStop: SessionsStop,
         sessionsDelete: SessionsDelete,
         logger: SessionLogger,
+        sessionLogLogger: any,
       ) =>
         new SessionOperationsService(
           sessionsStart,
@@ -149,6 +155,7 @@ import { AuthStateFactory } from '../AuthState/infrastructure/AuthStateFactory';
           sessionsStop,
           sessionsDelete,
           logger,
+          sessionLogLogger,
         ),
       inject: [
         'SessionsStart',
@@ -157,6 +164,7 @@ import { AuthStateFactory } from '../AuthState/infrastructure/AuthStateFactory';
         'SessionsStop',
         'SessionsDelete',
         SessionLogger,
+        'ISessionLogLogger',
       ],
     },
     {
@@ -174,9 +182,21 @@ import { AuthStateFactory } from '../AuthState/infrastructure/AuthStateFactory';
     },
     {
       provide: ConnectionManager,
-      useFactory: (qrManager: QrManager, logger: SessionLogger) =>
-        new ConnectionManager(qrManager, logger),
-      inject: [QrManager, SessionLogger],
+      useFactory: (
+        qrManager: QrManager,
+        logger: SessionLogger,
+        sessionLogLogger: any,
+      ) =>
+        new ConnectionManager(
+          qrManager,
+          logger,
+          sessionLogLogger,
+        ),
+      inject: [
+        QrManager,
+        SessionLogger,
+        'ISessionLogLogger',
+      ],
     },
     {
       provide: WhatsAppSessionManager,

@@ -1,22 +1,21 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { SessionLog } from '../domain/SessionLog';
 import { SessionLogRepository } from '../domain/SessionLogRepository';
 import { SessionLogSessionId } from '../domain/SessionLogSessionId';
 
 @Injectable()
-export class SessionLogsGetBySessionId {
+export class SessionLogsDeleteBySessionId {
   constructor(
     @Inject('SessionLogRepository')
     private readonly repository: SessionLogRepository,
   ) {}
 
-  async run(sessionId: string): Promise<SessionLog[]> {
+  async run(sessionId: string): Promise<void> {
     try {
       const sessionLogSessionId = new SessionLogSessionId(sessionId);
-      return await this.repository.getBySessionId(sessionLogSessionId);
+      await this.repository.deleteBySessionId(sessionLogSessionId);
     } catch (error) {
       throw new Error(
-        `Failed to get session logs by session id: ${error.message}`,
+        `Failed to delete session logs by session id: ${error.message}`,
       );
     }
   }

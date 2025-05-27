@@ -1,5 +1,5 @@
 import { Entity, PrimaryColumn, Column, OneToMany } from 'typeorm';
-import { SessionLogs } from '../../../SessionLogs/SessionLogsEntity';
+import { TypeOrmSessionLogsEntity } from '../../../SessionLogs/infrastructure/TypeOrm/TypeOrmSessionLogsEntity';
 import { Message } from '../../../Messages/MessagesEntity';
 import { EventLog } from '../../../EventLogs/EventLogsEntity';
 
@@ -28,9 +28,8 @@ export class TypeOrmSessionsEntity {
 
   @Column({ type: 'timestamp', nullable: true })
   deleted_at: Date | null;
-
-  @OneToMany(() => SessionLogs, (sessionLog) => sessionLog.session)
-  sessionLogs: SessionLogs[];
+  @OneToMany(() => TypeOrmSessionLogsEntity, (sessionLog) => sessionLog.session)
+  sessionLogs: TypeOrmSessionLogsEntity[];
 
   @OneToMany(() => Message, (message) => message.session)
   messages: Message[];
