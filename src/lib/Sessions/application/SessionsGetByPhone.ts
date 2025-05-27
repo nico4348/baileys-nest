@@ -10,10 +10,18 @@ export class SessionsGetByPhone {
     private readonly sessionsRepository: SessionsRepository,
   ) {}
 
-  async run(phone: string): Promise<Session[]> {
+  async run(
+    phone: string,
+    limit?: number,
+    offset?: number,
+  ): Promise<Session[]> {
     try {
       const sessionPhone = new SessionPhone(phone);
-      return await this.sessionsRepository.getByPhone(sessionPhone);
+      return await this.sessionsRepository.getByPhone(
+        sessionPhone,
+        limit,
+        offset,
+      );
     } catch (error) {
       throw new Error(`Failed to get sessions by phone: ${error.message}`);
     }

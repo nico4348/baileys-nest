@@ -10,10 +10,18 @@ export class SessionsGetByIsDeleted {
     private readonly repository: SessionsRepository,
   ) {}
 
-  async run(isDeleted: boolean): Promise<Session[]> {
+  async run(
+    isDeleted: boolean,
+    limit?: number,
+    offset?: number,
+  ): Promise<Session[]> {
     try {
       const sessionIsDeleted = new SessionIsDeleted(isDeleted);
-      return await this.repository.getByIsDeleted(sessionIsDeleted);
+      return await this.repository.getByIsDeleted(
+        sessionIsDeleted,
+        limit,
+        offset,
+      );
     } catch (error) {
       throw new Error(
         `Failed to get sessions by isDeleted status: ${error.message}`,

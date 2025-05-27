@@ -103,23 +103,17 @@ export class TypeOrmSessionsRepository implements SessionsRepository {
     }
   }
 
-  async getByStatus(status: SessionStatus): Promise<Session[]> {
-    try {
-      const entities = await this.repository.find({
-        where: { status: status.value },
-        order: { created_at: 'DESC' },
-      });
-      return entities.map((entity) => this.mapToDomain(entity));
-    } catch (error) {
-      throw new Error(`Failed to get sessions by status: ${error.message}`);
-    }
-  }
-
-  async getByPhone(phone: SessionPhone): Promise<Session[]> {
+  async getByPhone(
+    phone: SessionPhone,
+    limit?: number,
+    offset?: number,
+  ): Promise<Session[]> {
     try {
       const entities = await this.repository.find({
         where: { phone: phone.value },
         order: { created_at: 'DESC' },
+        take: limit,
+        skip: offset,
       });
       return entities.map((entity) => this.mapToDomain(entity));
     } catch (error) {
@@ -127,11 +121,35 @@ export class TypeOrmSessionsRepository implements SessionsRepository {
     }
   }
 
-  async getByIsDeleted(isDeleted: SessionIsDeleted): Promise<Session[]> {
+  async getByStatus(
+    status: SessionStatus,
+    limit?: number,
+    offset?: number,
+  ): Promise<Session[]> {
+    try {
+      const entities = await this.repository.find({
+        where: { status: status.value },
+        order: { created_at: 'DESC' },
+        take: limit,
+        skip: offset,
+      });
+      return entities.map((entity) => this.mapToDomain(entity));
+    } catch (error) {
+      throw new Error(`Failed to get sessions by status: ${error.message}`);
+    }
+  }
+
+  async getByIsDeleted(
+    isDeleted: SessionIsDeleted,
+    limit?: number,
+    offset?: number,
+  ): Promise<Session[]> {
     try {
       const entities = await this.repository.find({
         where: { is_deleted: isDeleted.value },
         order: { created_at: 'DESC' },
+        take: limit,
+        skip: offset,
       });
       return entities.map((entity) => this.mapToDomain(entity));
     } catch (error) {
@@ -142,6 +160,8 @@ export class TypeOrmSessionsRepository implements SessionsRepository {
   async getByCreatedAtRange(
     startDate: Date,
     endDate: Date,
+    limit?: number,
+    offset?: number,
   ): Promise<Session[]> {
     try {
       const entities = await this.repository
@@ -149,6 +169,8 @@ export class TypeOrmSessionsRepository implements SessionsRepository {
         .where('session.created_at >= :startDate', { startDate })
         .andWhere('session.created_at <= :endDate', { endDate })
         .orderBy('session.created_at', 'DESC')
+        .take(limit)
+        .skip(offset)
         .getMany();
 
       return entities.map((entity) => this.mapToDomain(entity));
@@ -162,6 +184,8 @@ export class TypeOrmSessionsRepository implements SessionsRepository {
   async getByUpdatedAtRange(
     startDate: Date,
     endDate: Date,
+    limit?: number,
+    offset?: number,
   ): Promise<Session[]> {
     try {
       const entities = await this.repository
@@ -169,6 +193,8 @@ export class TypeOrmSessionsRepository implements SessionsRepository {
         .where('session.updated_at >= :startDate', { startDate })
         .andWhere('session.updated_at <= :endDate', { endDate })
         .orderBy('session.updated_at', 'DESC')
+        .take(limit)
+        .skip(offset)
         .getMany();
 
       return entities.map((entity) => this.mapToDomain(entity));

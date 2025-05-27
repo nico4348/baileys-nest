@@ -10,11 +10,33 @@ export interface SessionsRepository {
   getAll(): Promise<Session[]>;
   getOneById(id: SessionId): Promise<Session | null>;
   getOneByPhone(phone: SessionPhone): Promise<Session | null>;
-  getByPhone(phone: SessionPhone): Promise<Session[]>;
-  getByStatus(status: SessionStatus): Promise<Session[]>;
-  getByIsDeleted(isDeleted: SessionIsDeleted): Promise<Session[]>;
-  getByCreatedAtRange(startDate: Date, endDate: Date): Promise<Session[]>;
-  getByUpdatedAtRange(startDate: Date, endDate: Date): Promise<Session[]>;
+  getByPhone(
+    phone: SessionPhone,
+    limit?: number,
+    offset?: number,
+  ): Promise<Session[]>;
+  getByStatus(
+    status: SessionStatus,
+    limit?: number,
+    offset?: number,
+  ): Promise<Session[]>;
+  getByIsDeleted(
+    isDeleted: SessionIsDeleted,
+    limit?: number,
+    offset?: number,
+  ): Promise<Session[]>;
+  getByCreatedAtRange(
+    startDate: Date,
+    endDate: Date,
+    limit?: number,
+    offset?: number,
+  ): Promise<Session[]>;
+  getByUpdatedAtRange(
+    startDate: Date,
+    endDate: Date,
+    limit?: number,
+    offset?: number,
+  ): Promise<Session[]>;
   update(session: Session): Promise<Session>;
   hardDelete(id: SessionId): Promise<void>;
   softDelete(id: SessionId, deletedAt: SessionDeletedAt): Promise<void>;

@@ -129,12 +129,22 @@ export class SessionsController {
     }
   }
   @Get('filter/phone')
-  async getSessionsByPhone(@Query('phone') phone: string) {
+  async getSessionsByPhone(
+    @Query('phone') phone: string,
+    @Query('limit') limit?: string,
+    @Query('offset') offset?: string,
+  ) {
     try {
       if (!phone) {
         throw new BadRequestException('Phone parameter is required');
       }
-      const sessions = await this.sessionsGetByPhone.run(phone);
+      const limitNum = limit ? parseInt(limit, 10) : undefined;
+      const offsetNum = offset ? parseInt(offset, 10) : undefined;
+      const sessions = await this.sessionsGetByPhone.run(
+        phone,
+        limitNum,
+        offsetNum,
+      );
       return {
         success: true,
         message: 'Sesiones obtenidas exitosamente.',
@@ -151,13 +161,23 @@ export class SessionsController {
   }
 
   @Get('filter/status')
-  async getSessionsByStatusQuery(@Query('status') status: string) {
+  async getSessionsByStatusQuery(
+    @Query('status') status: string,
+    @Query('limit') limit?: string,
+    @Query('offset') offset?: string,
+  ) {
     try {
       if (!status) {
         throw new BadRequestException('status parameter is required');
       }
       const statusBoolean = status.toLowerCase() === 'true';
-      const sessions = await this.sessionsGetByStatus.run(statusBoolean);
+      const limitNum = limit ? parseInt(limit, 10) : undefined;
+      const offsetNum = offset ? parseInt(offset, 10) : undefined;
+      const sessions = await this.sessionsGetByStatus.run(
+        statusBoolean,
+        limitNum,
+        offsetNum,
+      );
       return {
         success: true,
         message: 'Sesiones obtenidas exitosamente.',
@@ -174,13 +194,23 @@ export class SessionsController {
   }
 
   @Get('filter/deleted')
-  async getSessionsByIsDeleted(@Query('is_deleted') isDeleted: string) {
+  async getSessionsByIsDeleted(
+    @Query('is_deleted') isDeleted: string,
+    @Query('limit') limit?: string,
+    @Query('offset') offset?: string,
+  ) {
     try {
       if (!isDeleted) {
         throw new BadRequestException('is_deleted parameter is required');
       }
       const isDeletedBoolean = isDeleted.toLowerCase() === 'true';
-      const sessions = await this.sessionsGetByIsDeleted.run(isDeletedBoolean);
+      const limitNum = limit ? parseInt(limit, 10) : undefined;
+      const offsetNum = offset ? parseInt(offset, 10) : undefined;
+      const sessions = await this.sessionsGetByIsDeleted.run(
+        isDeletedBoolean,
+        limitNum,
+        offsetNum,
+      );
       return {
         success: true,
         message: 'Sesiones obtenidas exitosamente.',
@@ -200,6 +230,8 @@ export class SessionsController {
   async getSessionsByCreatedAtRange(
     @Query('start_date') startDate: string,
     @Query('end_date') endDate: string,
+    @Query('limit') limit?: string,
+    @Query('offset') offset?: string,
   ) {
     try {
       if (!startDate || !endDate) {
@@ -220,10 +252,13 @@ export class SessionsController {
       if (start > end) {
         throw new BadRequestException('start_date must be before end_date');
       }
-
+      const limitNum = limit ? parseInt(limit, 10) : undefined;
+      const offsetNum = offset ? parseInt(offset, 10) : undefined;
       const sessions = await this.sessionsGetByDateRange.runByCreatedAt(
         start,
         end,
+        limitNum,
+        offsetNum,
       );
       return {
         success: true,
@@ -245,6 +280,8 @@ export class SessionsController {
   async getSessionsByUpdatedAtRange(
     @Query('start_date') startDate: string,
     @Query('end_date') endDate: string,
+    @Query('limit') limit?: string,
+    @Query('offset') offset?: string,
   ) {
     try {
       if (!startDate || !endDate) {
@@ -265,10 +302,13 @@ export class SessionsController {
       if (start > end) {
         throw new BadRequestException('start_date must be before end_date');
       }
-
+      const limitNum = limit ? parseInt(limit, 10) : undefined;
+      const offsetNum = offset ? parseInt(offset, 10) : undefined;
       const sessions = await this.sessionsGetByDateRange.runByUpdatedAt(
         start,
         end,
+        limitNum,
+        offsetNum,
       );
       return {
         success: true,

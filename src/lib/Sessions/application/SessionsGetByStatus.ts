@@ -5,7 +5,15 @@ import { SessionStatus } from '../domain/SessionStatus';
 export class SessionsGetByStatus {
   constructor(private readonly repository: SessionsRepository) {}
 
-  async run(status: boolean): Promise<Session[]> {
-    return this.repository.getByStatus(new SessionStatus(status));
+  async run(
+    status: boolean,
+    limit?: number,
+    offset?: number,
+  ): Promise<Session[]> {
+    return this.repository.getByStatus(
+      new SessionStatus(status),
+      limit,
+      offset,
+    );
   }
 }
