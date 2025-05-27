@@ -1,10 +1,11 @@
 import { SessionId } from '../domain/SessionId';
 import { SessionsRepository } from '../domain/SessionsRepository';
 
-export class SessionsDelete {
-  constructor(private readonly repository: SessionsRepository) {}
+export class SessionsHardDelete {
+  constructor(private readonly sessionsRepository: SessionsRepository) {}
 
-  async run(id: string): Promise<void> {
-    return this.repository.hardDelete(new SessionId(id));
+  async run(sessionId: string): Promise<void> {
+    await this.sessionsRepository.hardDelete(new SessionId(sessionId));
+    console.log(`Sesión ${sessionId} eliminada permanentemente`);
   }
 }

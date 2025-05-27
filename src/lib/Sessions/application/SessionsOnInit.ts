@@ -4,12 +4,14 @@ import { SessionsRepository } from '../domain/SessionsRepository';
 @Injectable()
 export class SessionsOnInit implements OnApplicationBootstrap {
   constructor(private readonly sessionsRepository: SessionsRepository) {}
-
   async onApplicationBootstrap() {
-    const sessions = (await this.sessionsRepository.getAll()).map((session) =>
-      session.toPlainObject(),
+    const sessions = await this.sessionsRepository.getAll();
+    const activeSessions = sessions.filter(
+      (session) => session.status.value && !session.isDeleted.value,
     );
-    const activeSessions = sessions.filter((session) => !session.isDeleted);
-    console.log('Sesiones activas al arrancar el servidor:', activeSessions);
+    console.log(
+      'Sesiones activas al arrancar el servidor:',
+      activeSessions.map((session) => session.toPlainObject()),
+    );
   }
 }

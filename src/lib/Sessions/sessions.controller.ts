@@ -3,14 +3,23 @@ import {
   Controller,
   Get,
   Post,
+  Put,
   Param,
   Delete,
   Body,
   NotFoundException,
   InternalServerErrorException,
+  BadRequestException,
   Inject,
 } from '@nestjs/common';
 import { SessionsCreate } from './application/SessionsCreate';
+import { SessionsGetAll } from './application/SessionsGetAll';
+import { SessionsGetOneById } from './application/SessionsGetOneById';
+import { SessionsGetOneByPhone } from './application/SessionsGetOneByPhone';
+import { SessionsGetByStatus } from './application/SessionsGetByStatus';
+import { SessionsUpdate } from './application/SessionsUpdate';
+import { SessionsDelete } from './application/SessionsDelete';
+import { SessionsHardDelete } from './application/SessionsHardDelete';
 import { WhatsAppSessionManager } from './infrastructure/WhatsAppSessionManager';
 import { randomUUID } from 'crypto';
 
@@ -18,11 +27,109 @@ import { randomUUID } from 'crypto';
 export class SessionsController {
   constructor(
     @Inject('SessionsCreate') private readonly sessionsCreate: SessionsCreate,
+    @Inject('SessionsGetAll') private readonly sessionsGetAll: SessionsGetAll,
+    @Inject('SessionsGetOneById')
+    private readonly sessionsGetOneById: SessionsGetOneById,
+    @Inject('SessionsGetOneByPhone')
+    private readonly sessionsGetOneByPhone: SessionsGetOneByPhone,
+    @Inject('SessionsGetByStatus')
+    private readonly sessionsGetByStatus: SessionsGetByStatus,
+    @Inject('SessionsUpdate') private readonly sessionsUpdate: SessionsUpdate,
+    @Inject('SessionsDelete') private readonly sessionsDelete: SessionsDelete,
+    @Inject('SessionsHardDelete')
+    private readonly sessionsHardDelete: SessionsHardDelete,
     private readonly whatsAppSessionManager: WhatsAppSessionManager,
   ) {}
 
-  @Post()
-  async create(@Body() body) {
+  @Get()
+  async getAllSessions() {
+    try {
+      const sessions = await this.sessionsGetAll.run();
+      return {
+        success: true,
+        message: 'Sesiones obtenidas exitosamente.',
+        data: sessions.map((session) => session.toPlainObject()),
+      };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Error al obtener sesiones: ' + error.message,
+      );
+    }
+  }
+
+  @Get(':sessionId')
+  async getSessionById(@Param('sessionId') sessionId: string) {
+    try {
+      const session = await this.sessionsGetOneById.run(sessionId);
+      if (!session) {
+        throw new NotFoundException('Sesión no encontrada');
+      }
+      return {
+        success: true,
+        message: 'Sesión obtenida exitosamente.',
+        data: session.toPlainObject(),
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        'Error al obtener sesión: ' + error.message,
+      );
+    }
+  }
+
+  @Get('phone/:phone')
+  async getSessionByPhone(@Param('phone') phone: string) {
+    try {
+      const session = await this.sessionsGetOneByPhone.run(phone);
+      if (!session) {
+        throw new NotFoundException(
+          'Sesión no encontrada para este número de teléfono',
+        );
+      }
+      return {
+        success: true,
+        message: 'Sesión obtenida exitosamente.',
+        data: session.toPlainObject(),
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        'Error al obtener sesión por teléfono: ' + error.message,
+      );
+    }
+  }
+
+  @Get('status/:status')
+  async getSessionsByStatus(@Param('status') status: string) {
+    try {
+      const statusBoolean = status.toLowerCase() === 'true';
+      const sessions = await this.sessionsGetByStatus.run(statusBoolean);
+      return {
+        success: true,
+        message: 'Sesiones obtenidas exitosamente.',
+        data: sessions.map((session) => session.toPlainObject()),
+      };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Error al obtener sesiones por estado: ' + error.message,
+      );
+    }
+  }
+  @Post('create')
+  async create(
+    @Body() body: { session_name: string; phone: string },
+  ): Promise<{ success: boolean; sessionId: string; message?: string }> {
+    // Validar que los campos requeridos están presentes
+    if (!body.session_name || !body.phone) {
+      throw new BadRequestException(
+        'Los campos session_name y phone son requeridos',
+      );
+    }
+
     const generatedId = randomUUID();
 
     // Crear la sesión en la base de datos
@@ -100,8 +207,8 @@ export class SessionsController {
       );
     }
   }
-  @Delete(':sessionId/stop')
-  async stopWhatsAppSession(@Param('sessionId') sessionId: string) {
+  @Post(':sessionId/pause')
+  async pauseWhatsAppSession(@Param('sessionId') sessionId: string) {
     try {
       await this.whatsAppSessionManager.stopSession(sessionId);
       return {
@@ -128,9 +235,86 @@ export class SessionsController {
       );
     }
   }
+
+  @Put(':sessionId')
+  async updateSession(
+    @Param('sessionId') sessionId: string,
+    @Body()
+    body: {
+      session_name?: string;
+      phone?: string;
+      status?: boolean;
+    },
+  ) {
+    try {
+      const existingSession = await this.sessionsGetOneById.run(sessionId);
+      if (!existingSession) {
+        throw new NotFoundException('Sesión no encontrada');
+      }
+      await this.sessionsUpdate.run(
+        sessionId,
+        body.session_name || existingSession.sessionName.value,
+        body.phone || existingSession.phone.value,
+        body.status !== undefined ? body.status : existingSession.status.value,
+        existingSession.createdAt.value,
+        new Date(), // updatedAt
+        existingSession.isDeleted.value,
+        existingSession.deletedAt?.value || undefined,
+      ); // Obtener la sesión actualizada
+      const updatedSession = await this.sessionsGetOneById.run(sessionId);
+
+      if (!updatedSession) {
+        throw new InternalServerErrorException(
+          'Error al obtener la sesión actualizada',
+        );
+      }
+
+      return {
+        success: true,
+        message: 'Sesión actualizada exitosamente.',
+        data: updatedSession.toPlainObject(),
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        'Error al actualizar sesión: ' + error.message,
+      );
+    }
+  }
+
+  @Delete(':sessionId/hard')
+  async hardDeleteSession(@Param('sessionId') sessionId: string) {
+    try {
+      const existingSession = await this.sessionsGetOneById.run(sessionId);
+      if (!existingSession) {
+        throw new NotFoundException('Sesión no encontrada');
+      }
+
+      await this.sessionsHardDelete.run(sessionId);
+      return {
+        success: true,
+        message: 'Sesión eliminada permanentemente.',
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        'Error al eliminar sesión permanentemente: ' + error.message,
+      );
+    }
+  }
   @Get(':sessionId/qr')
   async getSessionQR(@Param('sessionId') sessionId: string) {
     try {
+      // Verificar que la sesión existe
+      const session = await this.sessionsGetOneById.run(sessionId);
+      if (!session) {
+        throw new InternalServerErrorException('Sesión no encontrada');
+      }
+
       const qrCode = this.whatsAppSessionManager.getSessionQR(sessionId);
       const hasQR = this.whatsAppSessionManager.hasSessionQR(sessionId);
 

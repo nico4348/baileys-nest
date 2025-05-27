@@ -2,7 +2,7 @@ import { Session } from '../domain/Session';
 import { SessionPhone } from '../domain/SessionPhone';
 import { SessionsRepository } from '../domain/SessionsRepository';
 
-export class SessionsGetOneById {
+export class SessionsGetOneByPhone {
   constructor(private readonly repository: SessionsRepository) {}
 
   async run(phone: string): Promise<Session | null> {

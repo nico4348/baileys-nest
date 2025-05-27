@@ -9,25 +9,23 @@ import { AuthStateFactory } from '../../AuthState/infrastructure/AuthStateFactor
 
 export class WhatsAppSocketFactory {
   private qrGenerated: Map<string, boolean> = new Map();
-  private qrCodes: Map<string, string> = new Map(); // Almacenar QR codes
+  private qrCodes: Map<string, string> = new Map();
 
   constructor(
     private authStateFactory: AuthStateFactory,
     private logger: any = pino({ level: 'silent' }),
     private retryCache: any = undefined,
-    private sessionManager?: any, // Referencia al manager para reconexión
+    private sessionManager?: any,
   ) {}
 
-  // Método para obtener el QR de una sesión
   getQR(sessionId: string): string | null {
     return this.qrCodes.get(sessionId) || null;
   }
-  // Método para verificar si hay QR disponible
+
   hasQR(sessionId: string): boolean {
     return this.qrCodes.has(sessionId);
   }
 
-  // Método para obtener el QR como imagen base64
   async getQRAsBase64(sessionId: string): Promise<string | null> {
     const qrString = this.qrCodes.get(sessionId);
     if (!qrString) return null;
@@ -62,17 +60,13 @@ export class WhatsAppSocketFactory {
       emitOwnEvents: false,
     });
 
-    // Manejo de eventos usando process() como en el ejemplo
     socket.ev.process(async (events) => {
-      // Manejo de actualización de conexión
       if (events['connection.update']) {
         const update = events['connection.update'];
         const { connection, lastDisconnect, qr } = update;
         if (qr && !state.creds?.registered) {
-          // Almacenar el QR code
           this.qrCodes.set(sessionId, qr);
 
-          // Verificar si la sesión está pausada
           const isPaused = this.sessionManager
             ? await this.sessionManager.isSessionPaused(sessionId)
             : false;
@@ -89,10 +83,9 @@ export class WhatsAppSocketFactory {
         if (connection === 'close') {
           const statusCode = (lastDisconnect?.error as Boom)?.output
             ?.statusCode;
-          // Reconectar si no fue logout Y la sesión no está pausada intencionalmente
+
           if (statusCode !== DisconnectReason.loggedOut) {
             try {
-              // Verificar si la sesión está pausada antes de reconectar
               const isPaused = this.sessionManager
                 ? await this.sessionManager.isSessionPaused(sessionId)
                 : false;
@@ -118,28 +111,29 @@ export class WhatsAppSocketFactory {
             await deleteSession();
           }
         } else if (connection === 'open') {
-          // Marcar como registrado si es la primera vez
           if (!state.creds?.registered) {
             state.creds.registered = true;
           }
 
-          this.qrGenerated.delete(sessionId); // Limpiar flag de QR
-          this.qrCodes.delete(sessionId); // Limpiar QR code almacenado
+          this.qrGenerated.delete(sessionId);
+          this.qrCodes.delete(sessionId);
         }
-      } // Credenciales actualizadas - guardar
+      }
       if (events['creds.update']) {
-        // Si había QR y ahora se actualizan credenciales, probablemente se escaneó
         const hadQR = this.qrGenerated.get(sessionId);
         if (hadQR && state.creds && !state.creds.registered) {
           state.creds.registered = true;
           this.qrGenerated.delete(sessionId);
-          this.qrCodes.delete(sessionId); // Limpiar QR code almacenado
+          this.qrCodes.delete(sessionId);
         }
 
         try {
           await saveCreds();
         } catch (error) {
-          // Error guardando credenciales
+          console.error(
+            `Error guardando credenciales para sesión ${sessionId}:`,
+            error,
+          );
         }
       }
     });

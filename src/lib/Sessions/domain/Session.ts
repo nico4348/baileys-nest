@@ -43,8 +43,6 @@ export class Session {
       status: this.status.value,
       createdAt: this.createdAt.value,
       updatedAt: this.updatedAt.value,
-      isDeleted: this.isDeleted.value,
-      deletedAt: this.deletedAt.value,
     };
   }
 }
