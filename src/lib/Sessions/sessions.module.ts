@@ -23,6 +23,7 @@ import { SessionLifecycleManager } from './infrastructure/SessionLifecycleManage
 import { QrManager } from './infrastructure/QrManager';
 import { ConnectionManager } from './infrastructure/ConnectionManager';
 import { SessionLogger } from './infrastructure/SessionLogger';
+import { SessionAutoInitializer } from './infrastructure/SessionAutoInitializer';
 import { AuthModule } from '../AuthState/authState.module';
 import { AuthStateFactory } from '../AuthState/infrastructure/AuthStateFactory';
 @Module({
@@ -212,6 +213,17 @@ import { AuthStateFactory } from '../AuthState/infrastructure/AuthStateFactory';
         ConnectionManager,
         SessionLogger,
       ],
+    },
+    // Auto-initializer for starting sessions on bootstrap
+    {
+      provide: SessionAutoInitializer,
+      useFactory: (
+        sessionManager: WhatsAppSessionManager,
+        sessionsRepository: TypeOrmSessionsRepository,
+        logger: SessionLogger,
+      ) =>
+        new SessionAutoInitializer(sessionManager, sessionsRepository, logger),
+      inject: [WhatsAppSessionManager, 'SessionsRepository', SessionLogger],
     },
   ],
 })
