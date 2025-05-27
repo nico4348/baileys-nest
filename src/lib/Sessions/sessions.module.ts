@@ -18,6 +18,11 @@ import { SessionsRestart } from './application/SessionsRestart';
 import { SessionsStop } from './application/SessionsStop';
 import { WhatsAppSessionManager } from './infrastructure/WhatsAppSessionManager';
 import { SessionQrService } from './infrastructure/SessionQrService';
+import { SessionOperationsService } from './infrastructure/SessionOperationsService';
+import { SessionLifecycleManager } from './infrastructure/SessionLifecycleManager';
+import { QrManager } from './infrastructure/QrManager';
+import { ConnectionManager } from './infrastructure/ConnectionManager';
+import { SessionLogger } from './infrastructure/SessionLogger';
 import { AuthModule } from '../AuthState/authState.module';
 import { AuthStateFactory } from '../AuthState/infrastructure/AuthStateFactory';
 @Module({
@@ -119,45 +124,93 @@ import { AuthStateFactory } from '../AuthState/infrastructure/AuthStateFactory';
         sessionsUpdate: SessionsUpdate,
       ) => new SessionsStop(repository, sessionsGetOneById, sessionsUpdate),
       inject: ['SessionsRepository', 'SessionsGetOneById', 'SessionsUpdate'],
+    }, // New specialized services
+    SessionLogger,
+    {
+      provide: SessionQrService,
+      useFactory: (logger: SessionLogger) => new SessionQrService(logger),
+      inject: [SessionLogger],
     },
-    SessionQrService,
+    {
+      provide: SessionOperationsService,
+      useFactory: (
+        sessionsStart: SessionsStart,
+        sessionsResume: SessionsResume,
+        sessionsRestart: SessionsRestart,
+        sessionsStop: SessionsStop,
+        sessionsDelete: SessionsDelete,
+        logger: SessionLogger,
+      ) =>
+        new SessionOperationsService(
+          sessionsStart,
+          sessionsResume,
+          sessionsRestart,
+          sessionsStop,
+          sessionsDelete,
+          logger,
+        ),
+      inject: [
+        'SessionsStart',
+        'SessionsResume',
+        'SessionsRestart',
+        'SessionsStop',
+        'SessionsDelete',
+        SessionLogger,
+      ],
+    },
+    {
+      provide: SessionLifecycleManager,
+      useFactory: (
+        sessionsRepository: TypeOrmSessionsRepository,
+        logger: SessionLogger,
+      ) => new SessionLifecycleManager(sessionsRepository, logger),
+      inject: ['SessionsRepository', SessionLogger],
+    },
+    {
+      provide: QrManager,
+      useFactory: (logger: SessionLogger) => new QrManager(logger),
+      inject: [SessionLogger],
+    },
+    {
+      provide: ConnectionManager,
+      useFactory: (qrManager: QrManager, logger: SessionLogger) =>
+        new ConnectionManager(qrManager, logger),
+      inject: [QrManager, SessionLogger],
+    },
     {
       provide: WhatsAppSessionManager,
       useFactory: (
         authStateFactory: AuthStateFactory,
         sessionsRepository: TypeOrmSessionsRepository,
-        sessionsUpdate: SessionsUpdate,
         sessionsGetOneById: SessionsGetOneById,
-        sessionsDelete: SessionsDelete,
         sessionQrService: SessionQrService,
-        sessionsStart: SessionsStart,
-        sessionsResume: SessionsResume,
-        sessionsRestart: SessionsRestart,
-        sessionsStop: SessionsStop,
+        sessionOperations: SessionOperationsService,
+        lifecycleManager: SessionLifecycleManager,
+        qrManager: QrManager,
+        connectionManager: ConnectionManager,
+        logger: SessionLogger,
       ) =>
         new WhatsAppSessionManager(
           authStateFactory,
           sessionsRepository,
-          sessionsUpdate,
           sessionsGetOneById,
-          sessionsDelete,
           sessionQrService,
-          sessionsStart,
-          sessionsResume,
-          sessionsRestart,
-          sessionsStop,
+          sessionOperations,
+          lifecycleManager,
+          qrManager,
+          connectionManager,
+          logger,
         ),
       inject: [
         'AuthStateFactory',
         'SessionsRepository',
-        'SessionsUpdate',
         'SessionsGetOneById',
-        'SessionsDelete',
         SessionQrService,
-        'SessionsStart',
-        'SessionsResume',
-        'SessionsRestart',
-        'SessionsStop',
+        SessionOperationsService,
+        SessionLifecycleManager,
+        QrManager,
+        ConnectionManager,
+        SessionLogger,
       ],
     },
   ],

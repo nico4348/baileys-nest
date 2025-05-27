@@ -13,26 +13,32 @@ import { SessionUpdatedAt } from '../../domain/SessionUpdatedAt';
 import { SessionIsDeleted } from '../../domain/SessionIsDeleted';
 import { SessionDeletedAt } from '../../domain/SessionDeletedAt';
 
+@Injectable()
 export class TypeOrmSessionsRepository implements SessionsRepository {
   constructor(
     @InjectRepository(TypeOrmSessionsEntity)
     private readonly repository: Repository<TypeOrmSessionsEntity>,
   ) {}
 
-  private mapToDomain(entity: TypeOrmSessionsEntity) {
-    return new Session(
-      new SessionId(entity.id),
-      new SessionName(entity.session_name),
-      new SessionPhone(entity.phone),
-      new SessionStatus(entity.status),
-      new SessionCreatedAt(entity.created_at),
-      new SessionUpdatedAt(entity.updated_at),
-      new SessionIsDeleted(entity.is_deleted),
-      new SessionDeletedAt(entity.deleted_at),
-    );
+  private mapToDomain(entity: TypeOrmSessionsEntity): Session {
+    try {
+      return new Session(
+        new SessionId(entity.id),
+        new SessionName(entity.session_name),
+        new SessionPhone(entity.phone),
+        new SessionStatus(entity.status),
+        new SessionCreatedAt(entity.created_at),
+        new SessionUpdatedAt(entity.updated_at),
+        new SessionIsDeleted(entity.is_deleted),
+        new SessionDeletedAt(entity.deleted_at),
+      );
+    } catch (error) {
+      throw new Error(`Failed to map entity to domain object: ${error.message}`);
+    }
   }
-  async create(session: Session): Promise<void> {
-    await this.repository.save({
+
+  private mapToEntity(session: Session): Partial<TypeOrmSessionsEntity> {
+    return {
       id: session.id.value,
       session_name: session.sessionName.value,
       phone: session.phone.value,
@@ -41,56 +47,110 @@ export class TypeOrmSessionsRepository implements SessionsRepository {
       updated_at: session.updatedAt.value,
       is_deleted: session.isDeleted.value,
       deleted_at: session.deletedAt.value,
-    });
+    };
+  }
+  async create(session: Session): Promise<void> {
+    try {
+      const entity = this.mapToEntity(session);
+      await this.repository.save(entity);
+    } catch (error) {
+      throw new Error(`Failed to create session: ${error.message}`);
+    }
   }
 
   async getAll(): Promise<Session[]> {
-    const entities = await this.repository.find();
-    return entities.map((entity) => this.mapToDomain(entity));
+    try {
+      const entities = await this.repository.find({
+        order: { created_at: 'DESC' },
+      });
+      return entities.map((entity) => this.mapToDomain(entity));
+    } catch (error) {
+      throw new Error(`Failed to get all sessions: ${error.message}`);
+    }
   }
 
   async getOneById(id: SessionId): Promise<Session | null> {
-    const entity = await this.repository.findOne({ where: { id: id.value } });
-    if (!entity) {
-      return null;
+    try {
+      const entity = await this.repository.findOne({ 
+        where: { id: id.value } 
+      });
+      
+      if (!entity) {
+        return null;
+      }
+      
+      return this.mapToDomain(entity);
+    } catch (error) {
+      throw new Error(`Failed to get session by id: ${error.message}`);
     }
-    return this.mapToDomain(entity);
   }
+
   async getOneByPhone(phone: SessionPhone): Promise<Session | null> {
-    const entity = await this.repository.findOne({
-      where: { phone: phone.value },
-    });
-    if (!entity) {
-      return null;
+    try {
+      const entity = await this.repository.findOne({
+        where: { phone: phone.value },
+      });
+      
+      if (!entity) {
+        return null;
+      }
+      
+      return this.mapToDomain(entity);
+    } catch (error) {
+      throw new Error(`Failed to get session by phone: ${error.message}`);
     }
-    return this.mapToDomain(entity);
   }
+
   async getByStatus(status: SessionStatus): Promise<Session[]> {
-    const entities = await this.repository.find({
-      where: { status: status.value },
-    });
-    return entities.map((entity) => this.mapToDomain(entity));
+    try {
+      const entities = await this.repository.find({
+        where: { status: status.value },
+        order: { created_at: 'DESC' },
+      });
+      return entities.map((entity) => this.mapToDomain(entity));
+    } catch (error) {
+      throw new Error(`Failed to get sessions by status: ${error.message}`);
+    }
   }
+
   async update(session: Session): Promise<Session> {
-    const entity_1 = await this.repository.save({
-      id: session.id.value,
-      session_name: session.sessionName.value,
-      phone: session.phone.value,
-      status: session.status.value,
-      created_at: session.createdAt.value,
-      updated_at: session.updatedAt.value,
-      is_deleted: session.isDeleted.value,
-      deleted_at: session.deletedAt.value,
-    });
-    return this.mapToDomain(entity_1);
+    try {
+      const entity = this.mapToEntity(session);
+      const savedEntity = await this.repository.save(entity);
+      return this.mapToDomain(savedEntity as TypeOrmSessionsEntity);
+    } catch (error) {
+      throw new Error(`Failed to update session: ${error.message}`);
+    }
   }
+
   async hardDelete(id: SessionId): Promise<void> {
-    await this.repository.delete({ id: id.value });
+    try {
+      const result = await this.repository.delete({ id: id.value });
+      
+      if (result.affected === 0) {
+        throw new Error(`Session with id ${id.value} not found`);
+      }
+    } catch (error) {
+      throw new Error(`Failed to hard delete session: ${error.message}`);
+    }
   }
+
   async softDelete(id: SessionId, deletedAt: SessionDeletedAt): Promise<void> {
-    await this.repository.update(
-      { id: id.value },
-      { is_deleted: true, status: false, deleted_at: deletedAt.value },
-    );
+    try {
+      const result = await this.repository.update(
+        { id: id.value },
+        { 
+          is_deleted: true, 
+          status: false, 
+          deleted_at: deletedAt.value 
+        },
+      );
+
+      if (result.affected === 0) {
+        throw new Error(`Session with id ${id.value} not found`);
+      }
+    } catch (error) {
+      throw new Error(`Failed to soft delete session: ${error.message}`);
+    }
   }
 }

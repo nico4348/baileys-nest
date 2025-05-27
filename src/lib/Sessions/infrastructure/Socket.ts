@@ -1,45 +1,36 @@
-import makeWASocket, { fetchLatestBaileysVersion, Browsers } from 'baileys';
-import * as qrcode from 'qrcode-terminal';
-import * as QRCode from 'qrcode';
-import pino from 'pino';
+import makeWASocket, {
+  fetchLatestBaileysVersion,
+  Browsers,
+  DisconnectReason,
+} from 'baileys';
 import { Boom } from '@hapi/boom';
-import { DisconnectReason } from 'baileys';
-
+import pino from 'pino';
 import { AuthStateFactory } from '../../AuthState/infrastructure/AuthStateFactory';
+import { ISocketFactory } from './interfaces/ISocketFactory';
+import { IConnectionManager } from './interfaces/IConnectionManager';
+import { IQrManager } from './interfaces/IQrManager';
+import { ISessionStateManager } from './interfaces/ISessionStateManager';
 
-export class WhatsAppSocketFactory {
-  private qrGenerated: Map<string, boolean> = new Map();
-  private qrCodes: Map<string, string> = new Map();
-
+export class WhatsAppSocketFactory implements ISocketFactory {
   constructor(
-    private authStateFactory: AuthStateFactory,
-    private logger: any = pino({ level: 'silent' }),
-    private retryCache: any = undefined,
-    private sessionManager?: any,
+    private readonly authStateFactory: AuthStateFactory,
+    private readonly qrManager: IQrManager,
+    private readonly connectionManager: IConnectionManager,
+    private readonly sessionStateManager: ISessionStateManager,
+    private readonly logger: any = pino({ level: 'silent' }),
+    private readonly retryCache: any = undefined,
   ) {}
 
   getQR(sessionId: string): string | null {
-    return this.qrCodes.get(sessionId) || null;
+    return this.qrManager.getQr(sessionId);
   }
 
   hasQR(sessionId: string): boolean {
-    return this.qrCodes.has(sessionId);
+    return this.qrManager.hasQr(sessionId);
   }
 
   async getQRAsBase64(sessionId: string): Promise<string | null> {
-    const qrString = this.qrCodes.get(sessionId);
-    if (!qrString) return null;
-
-    try {
-      const qrCodeDataURL = await QRCode.toDataURL(qrString);
-      return qrCodeDataURL;
-    } catch (error) {
-      console.error(
-        `Error generando QR base64 para sesión ${sessionId}:`,
-        error,
-      );
-      return null;
-    }
+    return this.qrManager.getQrAsBase64(sessionId);
   }
 
   async createSocket(sessionId: string): Promise<any> {
@@ -62,76 +53,25 @@ export class WhatsAppSocketFactory {
 
     socket.ev.process(async (events) => {
       if (events['connection.update']) {
-        const update = events['connection.update'];
-        const { connection, lastDisconnect, qr } = update;
-        if (qr && !state.creds?.registered) {
-          this.qrCodes.set(sessionId, qr);
-
-          const isPaused = this.sessionManager
-            ? await this.sessionManager.isSessionPaused(sessionId)
-            : false;
-          if (isPaused) {
-            console.log(
-              `⚠️ ADVERTENCIA: QR generado para sesión PAUSADA: ${sessionId}`,
-            );
-          } else {
-            console.log(`📱 QR generado para la sesión: ${sessionId}`);
-          }
-          qrcode.generate(qr, { small: true });
-          this.qrGenerated.set(sessionId, true);
-        }
-        if (connection === 'close') {
-          const statusCode = (lastDisconnect?.error as Boom)?.output
-            ?.statusCode;
-
-          if (statusCode !== DisconnectReason.loggedOut) {
-            try {
-              const isPaused = this.sessionManager
-                ? await this.sessionManager.isSessionPaused(sessionId)
-                : false;
-              if (
-                this.sessionManager &&
-                this.sessionManager.recreateSession &&
-                !isPaused
-              ) {
-                console.log(
-                  `🔄 Reconectando sesión automáticamente: ${sessionId}`,
-                );
-                await this.sessionManager.recreateSession(sessionId);
-              } else if (isPaused) {
-                console.log(
-                  `⏸️ Sesión ${sessionId} está pausada, no se reconecta automáticamente`,
-                );
-              }
-            } catch (error) {
-              console.error(`Error en reconexión de ${sessionId}:`, error);
-            }
-          } else {
-            console.log(`🚪 Sesión ${sessionId} cerrada por logout`);
-            await deleteSession();
-          }
-        } else if (connection === 'open') {
-          if (!state.creds?.registered) {
-            state.creds.registered = true;
-          }
-
-          this.qrGenerated.delete(sessionId);
-          this.qrCodes.delete(sessionId);
+        const update = { ...events['connection.update'], state };
+        await this.connectionManager.handleConnectionUpdate(sessionId, update);
+        if (
+          update.connection === 'close' &&
+          (update.lastDisconnect?.error as Boom)?.output?.statusCode ===
+            DisconnectReason.loggedOut
+        ) {
+          await deleteSession();
         }
       }
+
       if (events['creds.update']) {
-        const hadQR = this.qrGenerated.get(sessionId);
-        if (hadQR && state.creds && !state.creds.registered) {
-          state.creds.registered = true;
-          this.qrGenerated.delete(sessionId);
-          this.qrCodes.delete(sessionId);
-        }
+        await this.connectionManager.handleCredentialsUpdate(sessionId);
 
         try {
           await saveCreds();
         } catch (error) {
           console.error(
-            `Error guardando credenciales para sesión ${sessionId}:`,
+            `Error saving credentials for session ${sessionId}:`,
             error,
           );
         }
