@@ -24,12 +24,13 @@ import { QrManager } from './infrastructure/QrManager';
 import { ConnectionManager } from './infrastructure/ConnectionManager';
 import { SessionLogger } from './infrastructure/SessionLogger';
 import { SessionAutoInitializer } from './infrastructure/SessionAutoInitializer';
+import { QrCounterManager } from './infrastructure/QrCounterManager';
 import { AuthModule } from '../AuthState/authState.module';
 import { AuthStateFactory } from '../AuthState/infrastructure/AuthStateFactory';
 import { SessionLogsModule } from '../SessionLogs/sessionLogs.module';
 @Module({
   imports: [
-    TypeOrmModule.forFeature([TypeOrmSessionsEntity]), 
+    TypeOrmModule.forFeature([TypeOrmSessionsEntity]),
     AuthModule,
     SessionLogsModule,
   ],
@@ -181,22 +182,25 @@ import { SessionLogsModule } from '../SessionLogs/sessionLogs.module';
       inject: [SessionLogger],
     },
     {
+      provide: QrCounterManager,
+      useFactory: (logger: SessionLogger) => new QrCounterManager(logger),
+      inject: [SessionLogger],
+    },
+    {
       provide: ConnectionManager,
       useFactory: (
         qrManager: QrManager,
+        qrCounterManager: QrCounterManager,
         logger: SessionLogger,
         sessionLogLogger: any,
       ) =>
         new ConnectionManager(
           qrManager,
+          qrCounterManager,
           logger,
           sessionLogLogger,
         ),
-      inject: [
-        QrManager,
-        SessionLogger,
-        'ISessionLogLogger',
-      ],
+      inject: [QrManager, QrCounterManager, SessionLogger, 'ISessionLogLogger'],
     },
     {
       provide: WhatsAppSessionManager,
@@ -209,6 +213,7 @@ import { SessionLogsModule } from '../SessionLogs/sessionLogs.module';
         lifecycleManager: SessionLifecycleManager,
         qrManager: QrManager,
         connectionManager: ConnectionManager,
+        qrCounterManager: QrCounterManager,
         logger: SessionLogger,
       ) =>
         new WhatsAppSessionManager(
@@ -220,6 +225,7 @@ import { SessionLogsModule } from '../SessionLogs/sessionLogs.module';
           lifecycleManager,
           qrManager,
           connectionManager,
+          qrCounterManager,
           logger,
         ),
       inject: [
@@ -231,6 +237,7 @@ import { SessionLogsModule } from '../SessionLogs/sessionLogs.module';
         SessionLifecycleManager,
         QrManager,
         ConnectionManager,
+        QrCounterManager,
         SessionLogger,
       ],
     },

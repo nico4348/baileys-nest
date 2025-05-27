@@ -8,6 +8,7 @@ import { SessionOperationsService } from './SessionOperationsService';
 import { SessionLifecycleManager } from './SessionLifecycleManager';
 import { QrManager } from './QrManager';
 import { ConnectionManager } from './ConnectionManager';
+import { QrCounterManager } from './QrCounterManager';
 import { ISessionStateManager } from './interfaces/ISessionStateManager';
 import { ISessionLogger } from './interfaces/ISessionLogger';
 
@@ -27,6 +28,7 @@ export class WhatsAppSessionManager
     private readonly lifecycleManager: SessionLifecycleManager,
     private readonly qrManager: QrManager,
     private readonly connectionManager: ConnectionManager,
+    private readonly qrCounterManager: QrCounterManager,
     private readonly logger: ISessionLogger,
   ) {}
 
@@ -103,13 +105,16 @@ export class WhatsAppSessionManager
     await this.sessionOperations.pauseSession(sessionId);
     await this.lifecycleManager.pauseSession(sessionId);
   }
-
   async deleteSession(sessionId: string): Promise<void> {
     this.lifecycleManager.setDeleting(sessionId);
 
     try {
       await this.lifecycleManager.closeSession(sessionId);
       this.sessionQrService.removeSocketFactory(sessionId);
+
+      // Clean up QR counter when session is deleted
+      this.qrCounterManager.removeSession(sessionId);
+
       await this.sessionOperations.deleteSession(sessionId);
     } catch (error) {
       this.logger.error('Failed to delete session', error, sessionId);
@@ -142,7 +147,6 @@ export class WhatsAppSessionManager
       return true; // En caso de error, considerar pausada por seguridad
     }
   }
-
   // QR methods delegated to SessionQrService
   getSessionQR(sessionId: string): string | null {
     return this.sessionQrService.getQr(sessionId);
@@ -152,5 +156,10 @@ export class WhatsAppSessionManager
   }
   async getSessionQRAsBase64(sessionId: string): Promise<string | null> {
     return await this.sessionQrService.getQrAsBase64(sessionId);
+  }
+
+  // QR Counter Manager access
+  getQrCounterManager(): QrCounterManager {
+    return this.qrCounterManager;
   }
 }

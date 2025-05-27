@@ -4,4 +4,5 @@ export interface ISessionStateManager {
   isSessionDeleting(sessionId: string): boolean;
   recreateSession(sessionId: string): Promise<any>;
   resumeSession(sessionId: string): Promise<any>;
+  pauseSession(sessionId: string): Promise<void>;
 }

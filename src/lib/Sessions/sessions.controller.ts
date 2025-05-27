@@ -338,7 +338,6 @@ export class SessionsController {
       );
     }
   }
-
   @Get(':sessionId/qr/image')
   async getSessionQRAsImage(@Param('sessionId') sessionId: string) {
     try {
@@ -363,6 +362,49 @@ export class SessionsController {
     } catch (error) {
       throw new InternalServerErrorException(
         'Error al obtener imagen QR: ' + error.message,
+      );
+    }
+  }
+
+  @Get(':sessionId/qr/status')
+  async getQRCounterStatus(@Param('sessionId') sessionId: string) {
+    try {
+      // Verificar que la sesión existe
+      const session = await this.sessionsGetOneById.run(sessionId);
+      if (!session) {
+        throw new NotFoundException('Sesión no encontrada');
+      }
+
+      // Get QR counter information from the WhatsAppSessionManager
+      const qrCounterManager =
+        this.whatsAppSessionManager.getQrCounterManager();
+
+      const currentCount = qrCounterManager.getCurrentCount(sessionId);
+      const maxLimit = qrCounterManager.getMaxLimit();
+      const remainingAttempts =
+        qrCounterManager.getRemainingAttempts(sessionId);
+      const hasExceededLimit = qrCounterManager.hasExceededLimit(sessionId);
+      const canGenerateQr = qrCounterManager.canGenerateQr(sessionId);
+
+      return {
+        success: true,
+        message: 'Estado del contador QR obtenido exitosamente.',
+        data: {
+          sessionId,
+          currentQrCount: currentCount,
+          maxQrLimit: maxLimit,
+          remainingAttempts,
+          hasExceededLimit,
+          canGenerateMoreQr: canGenerateQr,
+          status: hasExceededLimit ? 'LIMIT_EXCEEDED' : 'ACTIVE',
+        },
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        'Error al obtener estado del contador QR: ' + error.message,
       );
     }
   }
