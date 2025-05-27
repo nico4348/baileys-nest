@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   Body,
+  Query,
   NotFoundException,
   InternalServerErrorException,
   BadRequestException,
@@ -17,6 +18,9 @@ import { SessionsGetAll } from './application/SessionsGetAll';
 import { SessionsGetOneById } from './application/SessionsGetOneById';
 import { SessionsGetOneByPhone } from './application/SessionsGetOneByPhone';
 import { SessionsGetByStatus } from './application/SessionsGetByStatus';
+import { SessionsGetByPhone } from './application/SessionsGetByPhone';
+import { SessionsGetByIsDeleted } from './application/SessionsGetByIsDeleted';
+import { SessionsGetByDateRange } from './application/SessionsGetByDateRange';
 import { SessionsUpdate } from './application/SessionsUpdate';
 import { SessionsDelete } from './application/SessionsDelete';
 import { SessionsHardDelete } from './application/SessionsHardDelete';
@@ -34,6 +38,12 @@ export class SessionsController {
     private readonly sessionsGetOneByPhone: SessionsGetOneByPhone,
     @Inject('SessionsGetByStatus')
     private readonly sessionsGetByStatus: SessionsGetByStatus,
+    @Inject('SessionsGetByPhone')
+    private readonly sessionsGetByPhone: SessionsGetByPhone,
+    @Inject('SessionsGetByIsDeleted')
+    private readonly sessionsGetByIsDeleted: SessionsGetByIsDeleted,
+    @Inject('SessionsGetByDateRange')
+    private readonly sessionsGetByDateRange: SessionsGetByDateRange,
     @Inject('SessionsUpdate') private readonly sessionsUpdate: SessionsUpdate,
     @Inject('SessionsDelete') private readonly sessionsDelete: SessionsDelete,
     @Inject('SessionsHardDelete')
@@ -102,7 +112,6 @@ export class SessionsController {
       );
     }
   }
-
   @Get('status/:status')
   async getSessionsByStatus(@Param('status') status: string) {
     try {
@@ -116,6 +125,163 @@ export class SessionsController {
     } catch (error) {
       throw new InternalServerErrorException(
         'Error al obtener sesiones por estado: ' + error.message,
+      );
+    }
+  }
+  @Get('filter/phone')
+  async getSessionsByPhone(@Query('phone') phone: string) {
+    try {
+      if (!phone) {
+        throw new BadRequestException('Phone parameter is required');
+      }
+      const sessions = await this.sessionsGetByPhone.run(phone);
+      return {
+        success: true,
+        message: 'Sesiones obtenidas exitosamente.',
+        data: sessions.map((session) => session.toPlainObject()),
+      };
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        'Error al obtener sesiones por teléfono: ' + error.message,
+      );
+    }
+  }
+
+  @Get('filter/status')
+  async getSessionsByStatusQuery(@Query('status') status: string) {
+    try {
+      if (!status) {
+        throw new BadRequestException('status parameter is required');
+      }
+      const statusBoolean = status.toLowerCase() === 'true';
+      const sessions = await this.sessionsGetByStatus.run(statusBoolean);
+      return {
+        success: true,
+        message: 'Sesiones obtenidas exitosamente.',
+        data: sessions.map((session) => session.toPlainObject()),
+      };
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        'Error al obtener sesiones por estado: ' + error.message,
+      );
+    }
+  }
+
+  @Get('filter/deleted')
+  async getSessionsByIsDeleted(@Query('is_deleted') isDeleted: string) {
+    try {
+      if (!isDeleted) {
+        throw new BadRequestException('is_deleted parameter is required');
+      }
+      const isDeletedBoolean = isDeleted.toLowerCase() === 'true';
+      const sessions = await this.sessionsGetByIsDeleted.run(isDeletedBoolean);
+      return {
+        success: true,
+        message: 'Sesiones obtenidas exitosamente.',
+        data: sessions.map((session) => session.toPlainObject()),
+      };
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        'Error al obtener sesiones por estado de eliminación: ' + error.message,
+      );
+    }
+  }
+
+  @Get('filter/created-at')
+  async getSessionsByCreatedAtRange(
+    @Query('start_date') startDate: string,
+    @Query('end_date') endDate: string,
+  ) {
+    try {
+      if (!startDate || !endDate) {
+        throw new BadRequestException(
+          'start_date and end_date parameters are required',
+        );
+      }
+
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+
+      if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+        throw new BadRequestException(
+          'Invalid date format. Use ISO format (YYYY-MM-DD or YYYY-MM-DDTHH:mm:ss.sssZ)',
+        );
+      }
+
+      if (start > end) {
+        throw new BadRequestException('start_date must be before end_date');
+      }
+
+      const sessions = await this.sessionsGetByDateRange.runByCreatedAt(
+        start,
+        end,
+      );
+      return {
+        success: true,
+        message: 'Sesiones obtenidas exitosamente.',
+        data: sessions.map((session) => session.toPlainObject()),
+      };
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        'Error al obtener sesiones por rango de fecha de creación: ' +
+          error.message,
+      );
+    }
+  }
+
+  @Get('filter/updated-at')
+  async getSessionsByUpdatedAtRange(
+    @Query('start_date') startDate: string,
+    @Query('end_date') endDate: string,
+  ) {
+    try {
+      if (!startDate || !endDate) {
+        throw new BadRequestException(
+          'start_date and end_date parameters are required',
+        );
+      }
+
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+
+      if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+        throw new BadRequestException(
+          'Invalid date format. Use ISO format (YYYY-MM-DD or YYYY-MM-DDTHH:mm:ss.sssZ)',
+        );
+      }
+
+      if (start > end) {
+        throw new BadRequestException('start_date must be before end_date');
+      }
+
+      const sessions = await this.sessionsGetByDateRange.runByUpdatedAt(
+        start,
+        end,
+      );
+      return {
+        success: true,
+        message: 'Sesiones obtenidas exitosamente.',
+        data: sessions.map((session) => session.toPlainObject()),
+      };
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        'Error al obtener sesiones por rango de fecha de actualización: ' +
+          error.message,
       );
     }
   }

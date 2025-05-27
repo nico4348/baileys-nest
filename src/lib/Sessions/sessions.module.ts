@@ -9,6 +9,9 @@ import { SessionsUpdate } from './application/SessionsUpdate';
 import { SessionsGetOneById } from './application/SessionsGetOneById';
 import { SessionsGetOneByPhone } from './application/SessionsGetOneByPhone';
 import { SessionsGetByStatus } from './application/SessionsGetByStatus';
+import { SessionsGetByPhone } from './application/SessionsGetByPhone';
+import { SessionsGetByIsDeleted } from './application/SessionsGetByIsDeleted';
+import { SessionsGetByDateRange } from './application/SessionsGetByDateRange';
 import { SessionsOnInit } from './application/SessionsOnInit';
 import { SessionsDelete } from './application/SessionsDelete';
 import { SessionsHardDelete } from './application/SessionsHardDelete';
@@ -80,6 +83,24 @@ import { SessionLogsModule } from '../SessionLogs/sessionLogs.module';
       provide: 'SessionsGetByStatus',
       useFactory: (repository: TypeOrmSessionsRepository) =>
         new SessionsGetByStatus(repository),
+      inject: ['SessionsRepository'],
+    },
+    {
+      provide: 'SessionsGetByPhone',
+      useFactory: (repository: TypeOrmSessionsRepository) =>
+        new SessionsGetByPhone(repository),
+      inject: ['SessionsRepository'],
+    },
+    {
+      provide: 'SessionsGetByIsDeleted',
+      useFactory: (repository: TypeOrmSessionsRepository) =>
+        new SessionsGetByIsDeleted(repository),
+      inject: ['SessionsRepository'],
+    },
+    {
+      provide: 'SessionsGetByDateRange',
+      useFactory: (repository: TypeOrmSessionsRepository) =>
+        new SessionsGetByDateRange(repository),
       inject: ['SessionsRepository'],
     },
     {

@@ -35,6 +35,52 @@
 - **Parámetros**: `status` (string: "true" o "false")
 - **Respuesta**: Lista de sesiones con el estado especificado
 
+### 1.1. Endpoints de Consulta Avanzada
+
+#### Filtrar sesiones por teléfono
+
+- **GET** `/sessions/filter/phone?phone=X`
+- **Descripción**: Obtiene todas las sesiones asociadas a un número de teléfono específico
+- **Use Case**: `SessionsGetByPhone`
+- **Query Parameters**: `phone` (required)
+- **Respuesta**: Lista de sesiones con el teléfono especificado
+
+#### Filtrar sesiones por estado
+
+- **GET** `/sessions/filter/status?status=true/false`
+- **Descripción**: Obtiene sesiones filtradas por su estado de actividad
+- **Use Case**: `SessionsGetByStatus`
+- **Query Parameters**: `status` (required: "true" o "false")
+- **Respuesta**: Lista de sesiones con el estado especificado
+
+#### Filtrar sesiones por estado de eliminación
+
+- **GET** `/sessions/filter/deleted?is_deleted=true/false`
+- **Descripción**: Obtiene sesiones basadas en su estado de eliminación (soft delete)
+- **Use Case**: `SessionsGetByIsDeleted`
+- **Query Parameters**: `is_deleted` (required: "true" o "false")
+- **Respuesta**: Lista de sesiones según estado de eliminación
+
+#### Filtrar sesiones por rango de fecha de creación
+
+- **GET** `/sessions/filter/created-at?start_date=X&end_date=Y`
+- **Descripción**: Obtiene sesiones creadas dentro de un rango de fechas específico
+- **Use Case**: `SessionsGetByDateRange.runByCreatedAt`
+- **Query Parameters**:
+  - `start_date` (required): Fecha inicio en formato ISO
+  - `end_date` (required): Fecha fin en formato ISO
+- **Respuesta**: Lista de sesiones creadas en el rango especificado
+
+#### Filtrar sesiones por rango de fecha de actualización
+
+- **GET** `/sessions/filter/updated-at?start_date=X&end_date=Y`
+- **Descripción**: Obtiene sesiones actualizadas dentro de un rango de fechas específico
+- **Use Case**: `SessionsGetByDateRange.runByUpdatedAt`
+- **Query Parameters**:
+  - `start_date` (required): Fecha inicio en formato ISO
+  - `end_date` (required): Fecha fin en formato ISO
+- **Respuesta**: Lista de sesiones actualizadas en el rango especificado
+
 #### Crear nueva sesión
 
 - **POST** `/sessions/create`
@@ -194,10 +240,13 @@
 3. **SessionsGetOneById** - Obtener sesión por ID
 4. **SessionsGetOneByPhone** - Obtener sesión por teléfono
 5. **SessionsGetByStatus** - Obtener sesiones por estado
-6. **SessionsUpdate** - Actualizar sesiones (incluye updatedAt para QR)
-7. **SessionsDelete** - Eliminación lógica (soft delete)
-8. **SessionsHardDelete** - Eliminación física (hard delete)
-9. **WhatsAppSessionManager** - Gestión completa de sesiones WhatsApp
+6. **SessionsGetByPhone** - Filtrar sesiones por teléfono (query)
+7. **SessionsGetByIsDeleted** - Filtrar sesiones por estado de eliminación
+8. **SessionsGetByDateRange** - Filtrar sesiones por rangos de fecha
+9. **SessionsUpdate** - Actualizar sesiones (incluye updatedAt para QR)
+10. **SessionsDelete** - Eliminación lógica (soft delete)
+11. **SessionsHardDelete** - Eliminación física (hard delete)
+12. **WhatsAppSessionManager** - Gestión completa de sesiones WhatsApp
 
 ## Notas Técnicas
 

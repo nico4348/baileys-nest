@@ -33,7 +33,9 @@ export class TypeOrmSessionsRepository implements SessionsRepository {
         new SessionDeletedAt(entity.deleted_at),
       );
     } catch (error) {
-      throw new Error(`Failed to map entity to domain object: ${error.message}`);
+      throw new Error(
+        `Failed to map entity to domain object: ${error.message}`,
+      );
     }
   }
 
@@ -71,14 +73,14 @@ export class TypeOrmSessionsRepository implements SessionsRepository {
 
   async getOneById(id: SessionId): Promise<Session | null> {
     try {
-      const entity = await this.repository.findOne({ 
-        where: { id: id.value } 
+      const entity = await this.repository.findOne({
+        where: { id: id.value },
       });
-      
+
       if (!entity) {
         return null;
       }
-      
+
       return this.mapToDomain(entity);
     } catch (error) {
       throw new Error(`Failed to get session by id: ${error.message}`);
@@ -90,11 +92,11 @@ export class TypeOrmSessionsRepository implements SessionsRepository {
       const entity = await this.repository.findOne({
         where: { phone: phone.value },
       });
-      
+
       if (!entity) {
         return null;
       }
-      
+
       return this.mapToDomain(entity);
     } catch (error) {
       throw new Error(`Failed to get session by phone: ${error.message}`);
@@ -113,6 +115,70 @@ export class TypeOrmSessionsRepository implements SessionsRepository {
     }
   }
 
+  async getByPhone(phone: SessionPhone): Promise<Session[]> {
+    try {
+      const entities = await this.repository.find({
+        where: { phone: phone.value },
+        order: { created_at: 'DESC' },
+      });
+      return entities.map((entity) => this.mapToDomain(entity));
+    } catch (error) {
+      throw new Error(`Failed to get sessions by phone: ${error.message}`);
+    }
+  }
+
+  async getByIsDeleted(isDeleted: SessionIsDeleted): Promise<Session[]> {
+    try {
+      const entities = await this.repository.find({
+        where: { is_deleted: isDeleted.value },
+        order: { created_at: 'DESC' },
+      });
+      return entities.map((entity) => this.mapToDomain(entity));
+    } catch (error) {
+      throw new Error(`Failed to get sessions by is_deleted: ${error.message}`);
+    }
+  }
+
+  async getByCreatedAtRange(
+    startDate: Date,
+    endDate: Date,
+  ): Promise<Session[]> {
+    try {
+      const entities = await this.repository
+        .createQueryBuilder('session')
+        .where('session.created_at >= :startDate', { startDate })
+        .andWhere('session.created_at <= :endDate', { endDate })
+        .orderBy('session.created_at', 'DESC')
+        .getMany();
+
+      return entities.map((entity) => this.mapToDomain(entity));
+    } catch (error) {
+      throw new Error(
+        `Failed to get sessions by created_at range: ${error.message}`,
+      );
+    }
+  }
+
+  async getByUpdatedAtRange(
+    startDate: Date,
+    endDate: Date,
+  ): Promise<Session[]> {
+    try {
+      const entities = await this.repository
+        .createQueryBuilder('session')
+        .where('session.updated_at >= :startDate', { startDate })
+        .andWhere('session.updated_at <= :endDate', { endDate })
+        .orderBy('session.updated_at', 'DESC')
+        .getMany();
+
+      return entities.map((entity) => this.mapToDomain(entity));
+    } catch (error) {
+      throw new Error(
+        `Failed to get sessions by updated_at range: ${error.message}`,
+      );
+    }
+  }
+
   async update(session: Session): Promise<Session> {
     try {
       const entity = this.mapToEntity(session);
@@ -126,7 +192,7 @@ export class TypeOrmSessionsRepository implements SessionsRepository {
   async hardDelete(id: SessionId): Promise<void> {
     try {
       const result = await this.repository.delete({ id: id.value });
-      
+
       if (result.affected === 0) {
         throw new Error(`Session with id ${id.value} not found`);
       }
@@ -139,10 +205,10 @@ export class TypeOrmSessionsRepository implements SessionsRepository {
     try {
       const result = await this.repository.update(
         { id: id.value },
-        { 
-          is_deleted: true, 
-          status: false, 
-          deleted_at: deletedAt.value 
+        {
+          is_deleted: true,
+          status: false,
+          deleted_at: deletedAt.value,
         },
       );
 
