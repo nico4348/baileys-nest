@@ -8,10 +8,8 @@ export class QrManager implements IQrManager {
   private qrCodes: Map<string, string> = new Map();
 
   constructor(private readonly logger: ISessionLogger) {}
-
   storeQr(sessionId: string, qr: string): void {
     this.qrCodes.set(sessionId, qr);
-    this.logger.info('QR code generated', sessionId);
   }
 
   getQr(sessionId: string): string | null {
