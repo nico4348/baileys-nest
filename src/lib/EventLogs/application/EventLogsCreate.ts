@@ -19,6 +19,6 @@ export class EventLogsCreate {
       new EventLogEventId(eventId),
       new EventLogCreatedAt(createdAt),
     );
-    await this.repository.create(eventLog);
+    await this.repository.save(eventLog);
   }
 }

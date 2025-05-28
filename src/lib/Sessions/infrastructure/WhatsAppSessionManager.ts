@@ -11,6 +11,7 @@ import { ConnectionManager } from './ConnectionManager';
 import { QrCounterManager } from './QrCounterManager';
 import { ISessionStateManager } from './interfaces/ISessionStateManager';
 import { ISessionLogger } from './interfaces/ISessionLogger';
+import { BaileysEventLogger } from '../../EventLogs/infrastructure/BaileysEventLogger';
 
 @Injectable()
 export class WhatsAppSessionManager
@@ -30,6 +31,7 @@ export class WhatsAppSessionManager
     private readonly connectionManager: ConnectionManager,
     private readonly qrCounterManager: QrCounterManager,
     private readonly logger: ISessionLogger,
+    private readonly eventLogger: BaileysEventLogger,
   ) {}
 
   onModuleInit(): void {
@@ -48,6 +50,7 @@ export class WhatsAppSessionManager
       this.qrManager,
       this.connectionManager,
       this,
+      this.eventLogger,
     );
 
     this.sessionQrService.setSocketFactory(sessionId, socketFactory);
@@ -62,15 +65,14 @@ export class WhatsAppSessionManager
     // Check if session is in memory and active
     if (this.lifecycleManager.isSessionActive(sessionId)) {
       return this.lifecycleManager.getSession(sessionId);
-    }
-
-    // Check if session is paused and can be resumed
+    } // Check if session is paused and can be resumed
     if (this.lifecycleManager.isPaused(sessionId)) {
       const socketFactory = new WhatsAppSocketFactory(
         this.authStateFactory,
         this.qrManager,
         this.connectionManager,
         this,
+        this.eventLogger,
       );
 
       this.sessionQrService.setSocketFactory(sessionId, socketFactory);

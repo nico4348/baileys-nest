@@ -5,7 +5,7 @@ import { EventDescription } from '../domain/EventDescription';
 import { EventCreatedAt } from '../domain/EventCreatedAt';
 import { EventId } from '../domain/EventId';
 
-export class EventUpdate {
+export class EventsUpdate {
   constructor(private readonly repository: EventRepository) {}
   async run(
     id: string,

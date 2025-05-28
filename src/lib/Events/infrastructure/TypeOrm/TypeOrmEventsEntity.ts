@@ -1,8 +1,8 @@
 import { Entity, PrimaryColumn, Column, OneToMany } from 'typeorm';
-import { EventLog } from '../EventLogs/EventLogsEntity';
+import { TypeOrmEventLogsEntity } from '../../../EventLogs/infrastructure/TypeOrm/TypeOrmEventLogsEntity';
 
 @Entity('events')
-export class Event {
+export class TypeOrmEventsEntity {
   @PrimaryColumn({ type: 'uuid' })
   id: string;
 
@@ -15,6 +15,6 @@ export class Event {
   @Column({ type: 'timestamp' })
   created_at: Date;
 
-  @OneToMany(() => EventLog, (eventLog) => eventLog.event)
-  eventLogs: EventLog[];
+  @OneToMany(() => TypeOrmEventLogsEntity, (eventLog) => eventLog.event)
+  eventLogs: TypeOrmEventLogsEntity[];
 }

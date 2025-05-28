@@ -1,7 +1,7 @@
 import { Entity, PrimaryColumn, Column, OneToMany } from 'typeorm';
 import { TypeOrmSessionLogsEntity } from '../../../SessionLogs/infrastructure/TypeOrm/TypeOrmSessionLogsEntity';
 import { Message } from '../../../Messages/MessagesEntity';
-import { EventLog } from '../../../EventLogs/EventLogsEntity';
+import { TypeOrmEventLogsEntity } from '../../../EventLogs/infrastructure/TypeOrm/TypeOrmEventLogsEntity';
 
 @Entity('sessions')
 export class TypeOrmSessionsEntity {
@@ -33,7 +33,6 @@ export class TypeOrmSessionsEntity {
 
   @OneToMany(() => Message, (message) => message.session)
   messages: Message[];
-
-  @OneToMany(() => EventLog, (eventLog) => eventLog.session)
-  eventLogs: EventLog[];
+  @OneToMany(() => TypeOrmEventLogsEntity, (eventLog) => eventLog.session)
+  eventLogs: TypeOrmEventLogsEntity[];
 }

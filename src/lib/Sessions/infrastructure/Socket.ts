@@ -10,6 +10,7 @@ import { ISocketFactory } from './interfaces/ISocketFactory';
 import { IConnectionManager } from './interfaces/IConnectionManager';
 import { IQrManager } from './interfaces/IQrManager';
 import { ISessionStateManager } from './interfaces/ISessionStateManager';
+import { IBaileysEventLogger } from '../../EventLogs/infrastructure/BaileysEventLogger';
 
 export class WhatsAppSocketFactory implements ISocketFactory {
   constructor(
@@ -17,6 +18,7 @@ export class WhatsAppSocketFactory implements ISocketFactory {
     private readonly qrManager: IQrManager,
     private readonly connectionManager: IConnectionManager,
     private readonly sessionStateManager: ISessionStateManager,
+    private readonly eventLogger: IBaileysEventLogger,
     private readonly logger: any = pino({ level: 'silent' }),
     private readonly retryCache: any = undefined,
   ) {}
@@ -52,6 +54,11 @@ export class WhatsAppSocketFactory implements ISocketFactory {
     });
 
     socket.ev.process(async (events) => {
+      // Log all events to EventLogs
+      for (const eventName of Object.keys(events)) {
+        await this.eventLogger.logEvent(sessionId, eventName);
+      }
+
       if (events['connection.update']) {
         const update = { ...events['connection.update'], state };
         await this.connectionManager.handleConnectionUpdate(sessionId, update);
@@ -75,6 +82,31 @@ export class WhatsAppSocketFactory implements ISocketFactory {
             error,
           );
         }
+      }
+
+      // Handle other Baileys events
+      if (events['messages.upsert']) {
+        // Additional message handling logic can be added here
+      }
+
+      if (events['messages.update']) {
+        // Additional message update handling logic can be added here
+      }
+
+      if (events['presence.update']) {
+        // Additional presence handling logic can be added here
+      }
+
+      if (events['chats.upsert']) {
+        // Additional chat handling logic can be added here
+      }
+
+      if (events['groups.upsert']) {
+        // Additional group handling logic can be added here
+      }
+
+      if (events['call']) {
+        // Additional call handling logic can be added here
       }
     });
 

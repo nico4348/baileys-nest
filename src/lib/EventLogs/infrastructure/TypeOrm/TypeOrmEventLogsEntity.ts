@@ -1,15 +1,14 @@
 import { Entity, PrimaryColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
-import { TypeOrmSessionsEntity } from '../Sessions/infrastructure/TypeOrm/TypeOrmSessionsEntity';
-import { Event } from '../Events/EventsEntity';
+import { TypeOrmSessionsEntity } from '../../../Sessions/infrastructure/TypeOrm/TypeOrmSessionsEntity';
+import { TypeOrmEventsEntity } from '../../../Events/infrastructure/TypeOrm/TypeOrmEventsEntity';
 
 @Entity('event_logs')
-export class EventLog {
+export class TypeOrmEventLogsEntity {
   @PrimaryColumn({ type: 'uuid' })
   id: string;
 
   @Column({ type: 'uuid' })
   session_id: string;
-
   @Column({ type: 'uuid' })
   event_id: string;
 
@@ -20,7 +19,7 @@ export class EventLog {
   @JoinColumn({ name: 'session_id' })
   session: TypeOrmSessionsEntity;
 
-  @ManyToOne(() => Event, (event) => event.eventLogs)
+  @ManyToOne(() => TypeOrmEventsEntity, (event) => event.eventLogs)
   @JoinColumn({ name: 'event_id' })
-  event: Event;
+  event: TypeOrmEventsEntity;
 }

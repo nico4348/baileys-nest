@@ -1,7 +1,7 @@
 import { EventLogId } from '../domain/EventLogId';
 import { EventLogRepository } from '../domain/EventLogRepository';
 
-export class EventLogDelete {
+export class EventLogsDelete {
   constructor(private readonly repository: EventLogRepository) {}
 
   async run(id: string): Promise<void> {

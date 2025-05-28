@@ -1,7 +1,7 @@
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TypeOrmSessionsEntity } from './lib/Sessions/infrastructure/TypeOrm/TypeOrmSessionsEntity';
-import { EventLog } from './lib/EventLogs/EventLogsEntity';
-import { Event } from './lib/Events/EventsEntity';
+import { TypeOrmEventLogsEntity } from './lib/EventLogs/infrastructure/TypeOrm/TypeOrmEventLogsEntity';
+import { TypeOrmEventsEntity } from './lib/Events/infrastructure/TypeOrm/TypeOrmEventsEntity';
 import { MediaMessage } from './lib/MediaMessages/MediaMessagesEntity';
 import { Message } from './lib/Messages/MessagesEntity';
 import { MessageStatus } from './lib/MessageStatus/MessageEstatusEntity';
@@ -20,8 +20,8 @@ export const DatabaseProvider = TypeOrmModule.forRoot({
   database: 'pruebaNest',
   entities: [
     TypeOrmSessionsEntity,
-    EventLog,
-    Event,
+    TypeOrmEventLogsEntity,
+    TypeOrmEventsEntity,
     MediaMessage,
     Message,
     MessageStatus,

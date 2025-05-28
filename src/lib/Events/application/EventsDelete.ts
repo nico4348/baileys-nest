@@ -1,7 +1,7 @@
 import { EventId } from '../domain/EventId';
 import { EventRepository } from '../domain/EventRepository';
 
-export class EventDelete {
+export class EventsDelete {
   constructor(private readonly repository: EventRepository) {}
 
   async run(id: string): Promise<void> {

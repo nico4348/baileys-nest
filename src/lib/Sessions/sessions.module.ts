@@ -31,11 +31,17 @@ import { QrCounterManager } from './infrastructure/QrCounterManager';
 import { AuthModule } from '../AuthState/authState.module';
 import { AuthStateFactory } from '../AuthState/infrastructure/AuthStateFactory';
 import { SessionLogsModule } from '../SessionLogs/sessionLogs.module';
+import { EventsModule } from '../Events/events.module';
+import { EventLogsModule } from '../EventLogs/eventLogs.module';
+import { BaileysEventLogger } from '../EventLogs/infrastructure/BaileysEventLogger';
+import { EventSeeder } from '../Events/infrastructure/EventSeeder';
 @Module({
   imports: [
     TypeOrmModule.forFeature([TypeOrmSessionsEntity]),
     AuthModule,
     SessionLogsModule,
+    EventsModule,
+    EventLogsModule,
   ],
   controllers: [SessionsController],
   providers: [
@@ -236,6 +242,7 @@ import { SessionLogsModule } from '../SessionLogs/sessionLogs.module';
         connectionManager: ConnectionManager,
         qrCounterManager: QrCounterManager,
         logger: SessionLogger,
+        eventLogger: BaileysEventLogger,
       ) =>
         new WhatsAppSessionManager(
           authStateFactory,
@@ -248,6 +255,7 @@ import { SessionLogsModule } from '../SessionLogs/sessionLogs.module';
           connectionManager,
           qrCounterManager,
           logger,
+          eventLogger,
         ),
       inject: [
         'AuthStateFactory',
@@ -260,7 +268,15 @@ import { SessionLogsModule } from '../SessionLogs/sessionLogs.module';
         ConnectionManager,
         QrCounterManager,
         SessionLogger,
+        BaileysEventLogger,
       ],
+    },
+    // Baileys Event Logger
+    {
+      provide: BaileysEventLogger,
+      useFactory: (eventLogsCreate: any, eventsGetOneByName: any) =>
+        new BaileysEventLogger(eventLogsCreate, eventsGetOneByName),
+      inject: ['EventLogsCreate', 'EventsGetOneByName'],
     },
     // Auto-initializer for starting sessions on bootstrap
     {

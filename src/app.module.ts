@@ -3,8 +3,10 @@ import { DatabaseProvider } from './database.providers';
 import { SessionsModule } from './lib/Sessions/sessions.module';
 import { AuthModule } from './lib/AuthState/authState.module';
 import { SessionLogsModule } from './lib/SessionLogs/sessionLogs.module';
+import { EventsModule } from './lib/Events/events.module';
+import { EventLogsModule } from './lib/EventLogs/eventLogs.module';
 
 @Module({
-  imports: [DatabaseProvider, SessionsModule, AuthModule, SessionLogsModule],
+  imports: [DatabaseProvider, SessionsModule, AuthModule, SessionLogsModule, EventsModule, EventLogsModule],
 })
 export class AppModule {}

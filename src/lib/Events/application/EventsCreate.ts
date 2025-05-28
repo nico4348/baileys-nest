@@ -5,7 +5,7 @@ import { EventDescription } from '../domain/EventDescription';
 import { EventCreatedAt } from '../domain/EventCreatedAt';
 import { EventId } from '../domain/EventId';
 
-export class EventCreate {
+export class EventsCreate {
   constructor(private readonly repository: EventRepository) {}
   async run(
     id: string,
@@ -19,6 +19,6 @@ export class EventCreate {
       new EventDescription(description),
       new EventCreatedAt(createdAt),
     );
-    await this.repository.create(event);
+    await this.repository.save(event);
   }
 }
