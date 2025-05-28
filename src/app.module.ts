@@ -5,8 +5,12 @@ import { AuthModule } from './lib/AuthState/authState.module';
 import { SessionLogsModule } from './lib/SessionLogs/sessionLogs.module';
 import { EventsModule } from './lib/Events/events.module';
 import { EventLogsModule } from './lib/EventLogs/eventLogs.module';
+import { MessagesModule } from './lib/Messages/messages.module';
+import { TextMessagesModule } from './lib/TextMessages/textMessages.module';
+import { MediaMessagesModule } from './lib/MediaMessages/mediaMessages.module';
+import { ReactionMessagesModule } from './lib/ReactionMessages/reactionMessages.module';
 
 @Module({
-  imports: [DatabaseProvider, SessionsModule, AuthModule, SessionLogsModule, EventsModule, EventLogsModule],
+  imports: [DatabaseProvider, SessionsModule, AuthModule, SessionLogsModule, EventsModule, EventLogsModule, MessagesModule, TextMessagesModule, MediaMessagesModule, ReactionMessagesModule],
 })
 export class AppModule {}

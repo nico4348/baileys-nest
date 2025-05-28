@@ -8,13 +8,13 @@ import { MessageSessionId } from '../domain/MessageSessionId';
 import { MessageTo } from '../domain/MessageTo';
 import { MessageCreatedAt } from '../domain/MessageCreatedAt';
 
-export class MessageUpdate {
+export class MessagesUpdate {
   constructor(private readonly repository: MessageRepository) {}
   async run(
     id: string,
     inOut: 'in' | 'out',
     messageType: 'txt' | 'media' | 'react',
-    quotedMessageId: string,
+    quotedMessageId: string | null,
     sessionId: string,
     to: string,
     createdAt: Date,

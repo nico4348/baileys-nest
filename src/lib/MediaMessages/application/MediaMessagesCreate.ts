@@ -8,13 +8,13 @@ import { MediaMessageMessageId } from '../domain/MediaMessageMessageId';
 import { MediaMessageMimeType } from '../domain/MediaMessageMimeType';
 import { MediaMessageRepository } from '../domain/MediaMessageRepository';
 
-export class MediaMessageCreate {
+export class MediaMessagesCreate {
   constructor(private readonly repository: MediaMessageRepository) {}
   async run(
     id: string,
     messageId: string,
-    caption: string,
-    mediaType: 'image' | 'video' | 'audio' | 'docs',
+    caption: string | null,
+    mediaType: string,
     mimeType: string,
     fileName: string,
     filePath: string,

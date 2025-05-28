@@ -2,6 +2,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { TypeOrmSessionsEntity } from './lib/Sessions/infrastructure/TypeOrm/TypeOrmSessionsEntity';
 import { TypeOrmEventLogsEntity } from './lib/EventLogs/infrastructure/TypeOrm/TypeOrmEventLogsEntity';
 import { TypeOrmEventsEntity } from './lib/Events/infrastructure/TypeOrm/TypeOrmEventsEntity';
+import { TypeOrmMessagesEntity } from './lib/Messages/infrastructure/TypeOrm/TypeOrmMessagesEntity';
+import { TypeOrmTextMessagesEntity } from './lib/TextMessages/infrastructure/TypeOrm/TypeOrmTextMessagesEntity';
+import { TypeOrmMediaMessagesEntity } from './lib/MediaMessages/infrastructure/TypeOrm/TypeOrmMediaMessagesEntity';
+import { TypeOrmReactionMessagesEntity } from './lib/ReactionMessages/infrastructure/TypeOrm/TypeOrmReactionMessagesEntity';
 import { MediaMessage } from './lib/MediaMessages/MediaMessagesEntity';
 import { Message } from './lib/Messages/MessagesEntity';
 import { MessageStatus } from './lib/MessageStatus/MessageEstatusEntity';
@@ -22,6 +26,10 @@ export const DatabaseProvider = TypeOrmModule.forRoot({
     TypeOrmSessionsEntity,
     TypeOrmEventLogsEntity,
     TypeOrmEventsEntity,
+    TypeOrmMessagesEntity,
+    TypeOrmTextMessagesEntity,
+    TypeOrmMediaMessagesEntity,
+    TypeOrmReactionMessagesEntity,
     MediaMessage,
     Message,
     MessageStatus,

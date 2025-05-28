@@ -160,6 +160,11 @@ export class WhatsAppSessionManager
     return await this.sessionQrService.getQrAsBase64(sessionId);
   }
 
+  // Socket access for message sending
+  getSocket(sessionId: string): any | null {
+    return this.lifecycleManager.getSession(sessionId);
+  }
+
   // QR Counter Manager access
   getQrCounterManager(): QrCounterManager {
     return this.qrCounterManager;

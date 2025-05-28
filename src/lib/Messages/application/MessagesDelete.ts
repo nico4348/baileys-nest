@@ -1,7 +1,7 @@
 import { MessageId } from '../domain/MessageId';
 import { MessageRepository } from '../domain/MessageRepository';
 
-export class MessageDelete {
+export class MessagesDelete {
   constructor(private readonly repository: MessageRepository) {}
 
   async run(id: string): Promise<void> {

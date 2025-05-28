@@ -1,17 +1,14 @@
 export class MediaMessageCaption {
-  value: string;
+  value: string | null;
 
-  constructor(value: string) {
+  constructor(value: string | null) {
     this.value = value;
     this.ensureIsValid();
   }
 
   private ensureIsValid() {
-    if (this.value.length >= 4096) {
+    if (this.value && this.value.length >= 4096) {
       throw new Error('MediaMessageCaption must be less than 4096 characters');
-    }
-    if (this.value.length < 1) {
-      throw new Error('MediaMessageCaption must be at least 1 character long');
     }
   }
 }

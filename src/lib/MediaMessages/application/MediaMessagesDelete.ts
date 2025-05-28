@@ -1,7 +1,7 @@
 import { MediaMessageId } from '../domain/MediaMessageId';
 import { MediaMessageRepository } from '../domain/MediaMessageRepository';
 
-export class MediaMessageDelete {
+export class MediaMessagesDelete {
   constructor(private readonly repository: MediaMessageRepository) {}
 
   async run(id: string): Promise<void> {

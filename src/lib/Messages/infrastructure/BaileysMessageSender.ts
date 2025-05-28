@@ -1,141 +1,158 @@
-// // src/lib/Messages/infrastructure/BaileysMessageSender.ts
-// import { Injectable } from '@nestjs/common';
-// import { proto, type WASocket } from 'baileys';
-// import * as path from 'path';
-// import { lookup } from 'mime-types';
-// import {
-//   MediaPayload,
-//   TextPayload,
-//   ReactPayload,
-// } from '../domain/MessagePayload'; // Tus VOs
-// import { MessageValidatorService } from './MessageValidatorService'; // El servicio de validación
-// import { SocketManager } from '../../Sessions/infrastructure/SocketManager'; // Adaptador para obtener el socket
+import { Injectable } from '@nestjs/common';
+import { proto, type WASocket } from 'baileys';
+import * as path from 'path';
+import { lookup } from 'mime-types';
+import { WhatsAppSessionManager } from '../../Sessions/infrastructure/WhatsAppSessionManager';
 
-// @Injectable()
-// export class BaileysMessageSender {
-//   // Cambiado a Sender para claridad
-//   constructor(
-//     private readonly messageValidatorService: MessageValidatorService,
-//     private readonly socketManager: SocketManager,
-//   ) {}
+export interface TextPayload {
+  text: string;
+  quoted?: any;
+}
 
-//   private getSocket(sessionId: string): WASocket {
-//     return this.socketManager.getSocket(sessionId);
-//   }
+export interface MediaPayload {
+  url: string;
+  caption?: string;
+  quoted?: any;
+}
 
-//   async sendTextMessage(
-//     sessionId: string,
-//     msgId: string, // ID para el log de Baileys
-//     jid: string,
-//     payload: TextPayload,
-//   ): Promise<proto.WebMessageInfo | null> {
-//     // Devuelve el objeto de Baileys
-//     const sock = this.getSocket(sessionId);
-//     const { text, quoted } = payload;
-//     if (this.messageValidatorService.textValidator(text)) {
-//       // this.whatsAppLogger.logStatus(msgId, 1); // La persistencia del log la maneja el caso de uso/logger
-//       const msg = await sock.sendMessage(jid, { text }, { quoted });
-//       // this.whatsAppLogger.logStatus(msgId, 2);
-//       return msg;
-//     } else {
-//       // this.whatsAppLogger.logStatus(msgId, 6);
-//       return null;
-//     }
-//   }
+export interface ReactPayload {
+  key: any;
+  emoji: string;
+}
 
-//   async sendMediaMessage(
-//     sessionId: string,
-//     msgId: string,
-//     jid: string,
-//     mediaType: string,
-//     payload: MediaPayload,
-//   ): Promise<proto.WebMessageInfo | null> {
-//     const sock = this.getSocket(sessionId);
-//     const { url, caption, quoted } = payload;
+@Injectable()
+export class BaileysMessageSender {
+  constructor(
+    private readonly sessionManager: WhatsAppSessionManager,
+  ) {}
 
-//     // La lógica de validación de archivos es compleja y requiere acceso al sistema de archivos.
-//     // Si `url` es una URL externa, la validación de tamaño y duración es más complicada.
-//     // Asumo que `url` es una ruta de archivo local para `fs.statSync`.
-//     // Para URLs remotas, necesitarías descargar encabezados o el archivo completo para validar.
+  private getSocket(sessionId: string): WASocket | null {
+    return this.sessionManager.getSocket(sessionId);
+  }
 
-//     let isValid = false;
-//     if (mediaType === 'audio' || mediaType === 'voiceNote') {
-//       isValid = await this.messageValidatorService.audioDurationValidator(url);
-//     } else if (mediaType === 'document') {
-//       isValid = this.messageValidatorService.size2GbValidator(url);
-//     } else {
-//       // image, video, sticker
-//       isValid = this.messageValidatorService.size16MbValidator(url);
-//     }
+  async sendTextMessage(
+    sessionId: string,
+    jid: string,
+    payload: TextPayload,
+  ): Promise<proto.WebMessageInfo | null> {
+    try {
+      const sock = this.getSocket(sessionId);
+      if (!sock) {
+        throw new Error(`Session ${sessionId} not found or not connected`);
+      }
 
-//     if (!isValid) {
-//       // this.whatsAppLogger.logStatus(msgId, 6);
-//       return null;
-//     }
+      const { text, quoted } = payload;
+      
+      if (!text || text.trim().length === 0) {
+        throw new Error('Text message cannot be empty');
+      }
 
-//     // this.whatsAppLogger.logStatus(msgId, 1);
-//     let msg: proto.WebMessageInfo | null = null;
-//     switch (mediaType) {
-//       case 'voiceNote':
-//         msg = await sock.sendMessage(
-//           jid,
-//           { audio: { url }, ptt: true },
-//           { quoted },
-//         );
-//         break;
-//       case 'audio':
-//         msg = await sock.sendMessage(jid, { audio: { url } }, { quoted });
-//         break;
-//       case 'video':
-//         msg = await sock.sendMessage(
-//           jid,
-//           { video: { url }, caption },
-//           { quoted },
-//         );
-//         break;
-//       case 'image':
-//         msg = await sock.sendMessage(
-//           jid,
-//           { image: { url }, caption },
-//           { quoted },
-//         );
-//         break;
-//       case 'sticker':
-//         msg = await sock.sendMessage(jid, { sticker: { url } }, { quoted });
-//         break;
-//       case 'document':
-//         const fileName = path.basename(url);
-//         const mimetype = lookup(url) || 'application/octet-stream';
-//         msg = await sock.sendMessage(
-//           jid,
-//           {
-//             document: { url },
-//             caption,
-//             fileName,
-//             mimetype,
-//           },
-//           { quoted },
-//         );
-//         break;
-//       default:
-//         console.log('Tipo de media no soportado:', mediaType);
-//         break;
-//     }
-//     // this.whatsAppLogger.logStatus(msgId, 2);
-//     return msg;
-//   }
+      const msg = await sock.sendMessage(jid, { text }, { quoted });
+      return msg || null;
+    } catch (error) {
+      console.error(`Error sending text message to ${jid}:`, error);
+      throw error;
+    }
+  }
 
-//   async sendReactMessage(
-//     sessionId: string,
-//     msgId: string,
-//     jid: string,
-//     payload: ReactPayload,
-//   ): Promise<proto.WebMessageInfo | null> {
-//     const sock = this.getSocket(sessionId);
-//     const { key, emoji } = payload;
-//     const msg = await sock.sendMessage(jid, {
-//       react: { key: key, text: emoji },
-//     });
-//     return msg;
-//   }
-// }
+  async sendMediaMessage(
+    sessionId: string,
+    jid: string,
+    mediaType: string,
+    payload: MediaPayload,
+  ): Promise<proto.WebMessageInfo | null> {
+    try {
+      const sock = this.getSocket(sessionId);
+      if (!sock) {
+        throw new Error(`Session ${sessionId} not found or not connected`);
+      }
+
+      const { url, caption, quoted } = payload;
+
+      if (!url) {
+        throw new Error('Media URL is required');
+      }
+
+      let msg: proto.WebMessageInfo | null = null;
+      
+      switch (mediaType) {
+        case 'voiceNote':
+          msg = (await sock.sendMessage(
+            jid,
+            { audio: { url }, ptt: true },
+            { quoted },
+          )) || null;
+          break;
+        case 'audio':
+          msg = (await sock.sendMessage(jid, { audio: { url } }, { quoted })) || null;
+          break;
+        case 'video':
+          msg = (await sock.sendMessage(
+            jid,
+            { video: { url }, caption },
+            { quoted },
+          )) || null;
+          break;
+        case 'image':
+          msg = (await sock.sendMessage(
+            jid,
+            { image: { url }, caption },
+            { quoted },
+          )) || null;
+          break;
+        case 'sticker':
+          msg = (await sock.sendMessage(jid, { sticker: { url } }, { quoted })) || null;
+          break;
+        case 'document':
+          const fileName = path.basename(url);
+          const mimetype = lookup(url) || 'application/octet-stream';
+          msg = (await sock.sendMessage(
+            jid,
+            {
+              document: { url },
+              caption,
+              fileName,
+              mimetype,
+            },
+            { quoted },
+          )) || null;
+          break;
+        default:
+          throw new Error(`Unsupported media type: ${mediaType}`);
+      }
+
+      return msg;
+    } catch (error) {
+      console.error(`Error sending ${mediaType} message to ${jid}:`, error);
+      throw error;
+    }
+  }
+
+  async sendReactMessage(
+    sessionId: string,
+    jid: string,
+    payload: ReactPayload,
+  ): Promise<proto.WebMessageInfo | null> {
+    try {
+      const sock = this.getSocket(sessionId);
+      if (!sock) {
+        throw new Error(`Session ${sessionId} not found or not connected`);
+      }
+
+      const { key, emoji } = payload;
+      
+      if (!key || !emoji) {
+        throw new Error('Message key and emoji are required for reactions');
+      }
+
+      const msg = await sock.sendMessage(jid, {
+        react: { key: key, text: emoji },
+      });
+      
+      return msg || null;
+    } catch (error) {
+      console.error(`Error sending reaction to ${jid}:`, error);
+      throw error;
+    }
+  }
+}

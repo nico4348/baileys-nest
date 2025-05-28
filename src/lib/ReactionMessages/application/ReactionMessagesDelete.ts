@@ -1,7 +1,7 @@
 import { ReactionMessageId } from '../domain/ReactionMessageId';
 import { ReactionMessageRepository } from '../domain/ReactionMessageRepository';
 
-export class ReactionMessageDelete {
+export class ReactionMessagesDelete {
   constructor(private readonly repository: ReactionMessageRepository) {}
 
   async run(id: string): Promise<void> {

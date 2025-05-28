@@ -1,41 +1,31 @@
-// // src/lib/MediaMessages/application/DownloadMediaMessage.ts
-// import { Injectable } from '@nestjs/common';
-// import { MediaMessageRepository } from '../domain/MediaMessageRepository';
-// // import { BaileysMediaDownloader } from '../infrastructure/BaileysMediaDownloader';
-// import { MessageId } from '../../Messages/domain/MessageId';
-// import { MediaMessage } from '../domain/MediaMessage';
-// import { randomUUID } from 'crypto';
-// import * as path from 'path';
-// import { MessageType } from '../../Messages/domain/MessageType';
+import { MediaMessagesGetOneById } from './MediaMessagesGetOneById';
 
-// @Injectable()
-// export class DownloadMediaMessage {
-//   constructor(
-//     private readonly mediaMessageRepository: MediaMessageRepository,
-//     private readonly baileysMediaDownloader: BaileysMediaDownloader,
-//   ) {}
+export class DownloadMediaMessage {
+  constructor(
+    private readonly mediaMessagesGetOneById: MediaMessagesGetOneById,
+  ) {}
 
-//   async execute(sessionId: string, msg: any): Promise<string | null> {
-//     const filePath = await this.baileysMediaDownloader.downloadMedia(
-//       sessionId,
-//       msg,
-//     );
+  async run(mediaMessageId: string): Promise<{ filePath: string; success: boolean }> {
+    try {
+      const mediaMessage = await this.mediaMessagesGetOneById.run(mediaMessageId);
+      
+      if (!mediaMessage) {
+        throw new Error('Media message not found');
+      }
 
-//     if (filePath) {
-//       const mediaTypeBaileys = Object.keys(msg.message || {})[0]?.replace(
-//         'Message',
-//         '',
-//       );
-//       const mediaMessageEntity = new MediaMessage(
-//         new MessageId(randomUUID()), // Nuevo UUID para PK
-//         new MessageId(msg.key.id), // FK a messages
-//         msg.message[Object.keys(msg.message || {})[0]]?.caption || null, // Caption
-//         new MessageType(mediaTypeBaileys), // media_type
-//         path.basename(filePath), // file_name
-//         filePath, // file_path
-//       );
-//       await this.mediaMessageRepository.save(mediaMessageEntity); // Persistir en `media_messages`
-//     }
-//     return filePath;
-//   }
-// }
+      // Return the file path for download
+      // In a real implementation, you might want to:
+      // 1. Verify file exists
+      // 2. Generate temporary download URL
+      // 3. Handle different storage providers (S3, local, etc.)
+      
+      return {
+        filePath: mediaMessage.file_path.value,
+        success: true,
+      };
+    } catch (error) {
+      console.error('Error downloading media:', error);
+      throw error;
+    }
+  }
+}
