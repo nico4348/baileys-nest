@@ -6,41 +6,37 @@ import { ISessionLogLogger } from './interfaces/ISessionLogLogger';
 @Injectable()
 export class WhatsAppLogger implements ISessionLogLogger {
   constructor(private readonly sessionLogsCreate: SessionLogsCreate) {}
-
   async logSessionEvent(
     sessionId: string,
     logType: SessionLogType,
     message: string,
-    metadata?: Record<string, any>,
   ): Promise<void> {
     try {
-      await this.sessionLogsCreate.run(sessionId, logType, message, metadata);
+      await this.sessionLogsCreate.run(sessionId, logType, message);
       console.log(`[${sessionId}] ${logType}: ${message}`);
     } catch (error) {
       console.error(`Failed to log session event for ${sessionId}:`, error);
     }
   }
-
   async logConnectionEvent(
     sessionId: string,
     connected: boolean,
     reason?: string,
   ): Promise<void> {
-    const logType = connected ? SessionLogType.CONNECTION : SessionLogType.DISCONNECTION;
-    const message = connected 
+    const logType = connected
+      ? SessionLogType.CONNECTION
+      : SessionLogType.DISCONNECTION;
+    const message = connected
       ? 'Session connected successfully'
       : `Session disconnected${reason ? `: ${reason}` : ''}`;
-    
-    const metadata = reason ? { reason } : undefined;
 
-    await this.logSessionEvent(sessionId, logType, message, metadata);
+    await this.logSessionEvent(sessionId, logType, message);
   }
 
   async logQrEvent(sessionId: string, qrCode?: string): Promise<void> {
     const message = 'QR code generated for session';
-    const metadata = qrCode ? { hasQrCode: true } : undefined;
 
-    await this.logSessionEvent(sessionId, SessionLogType.QR_GENERATED, message, metadata);
+    await this.logSessionEvent(sessionId, SessionLogType.QR_GENERATED, message);
   }
 
   async logAuthEvent(
@@ -48,14 +44,14 @@ export class WhatsAppLogger implements ISessionLogLogger {
     success: boolean,
     error?: string,
   ): Promise<void> {
-    const logType = success ? SessionLogType.AUTH_SUCCESS : SessionLogType.AUTH_FAILURE;
-    const message = success 
+    const logType = success
+      ? SessionLogType.AUTH_SUCCESS
+      : SessionLogType.AUTH_FAILURE;
+    const message = success
       ? 'Authentication successful'
       : `Authentication failed${error ? `: ${error}` : ''}`;
-    
-    const metadata = error ? { error } : undefined;
 
-    await this.logSessionEvent(sessionId, logType, message, metadata);
+    await this.logSessionEvent(sessionId, logType, message);
   }
 
   async logError(
@@ -64,16 +60,9 @@ export class WhatsAppLogger implements ISessionLogLogger {
     context?: string,
   ): Promise<void> {
     const errorMessage = error instanceof Error ? error.message : error;
-    const message = context 
-      ? `${context}: ${errorMessage}`
-      : errorMessage;
+    const message = context ? `${context}: ${errorMessage}` : errorMessage;
 
-    const metadata = {
-      context,
-      stack: error instanceof Error ? error.stack : undefined,
-    };
-
-    await this.logSessionEvent(sessionId, SessionLogType.ERROR, message, metadata);
+    await this.logSessionEvent(sessionId, SessionLogType.ERROR, message);
   }
 
   async logWarning(
@@ -82,9 +71,8 @@ export class WhatsAppLogger implements ISessionLogLogger {
     context?: string,
   ): Promise<void> {
     const fullMessage = context ? `${context}: ${message}` : message;
-    const metadata = context ? { context } : undefined;
 
-    await this.logSessionEvent(sessionId, SessionLogType.WARNING, fullMessage, metadata);
+    await this.logSessionEvent(sessionId, SessionLogType.WARNING, fullMessage);
   }
 
   async logInfo(
@@ -93,54 +81,84 @@ export class WhatsAppLogger implements ISessionLogLogger {
     context?: string,
   ): Promise<void> {
     const fullMessage = context ? `${context}: ${message}` : message;
-    const metadata = context ? { context } : undefined;
 
-    await this.logSessionEvent(sessionId, SessionLogType.INFO, fullMessage, metadata);
+    await this.logSessionEvent(sessionId, SessionLogType.INFO, fullMessage);
   }
 
   // Session lifecycle specific methods
   async logSessionStart(sessionId: string): Promise<void> {
-    await this.logSessionEvent(sessionId, SessionLogType.SESSION_START, 'Session started');
+    await this.logSessionEvent(
+      sessionId,
+      SessionLogType.SESSION_START,
+      'Session started',
+    );
   }
 
   async logSessionStop(sessionId: string): Promise<void> {
-    await this.logSessionEvent(sessionId, SessionLogType.SESSION_STOP, 'Session stopped');
+    await this.logSessionEvent(
+      sessionId,
+      SessionLogType.SESSION_STOP,
+      'Session stopped',
+    );
   }
 
   async logSessionPause(sessionId: string): Promise<void> {
-    await this.logSessionEvent(sessionId, SessionLogType.SESSION_PAUSE, 'Session paused');
+    await this.logSessionEvent(
+      sessionId,
+      SessionLogType.SESSION_PAUSE,
+      'Session paused',
+    );
   }
 
   async logSessionResume(sessionId: string): Promise<void> {
-    await this.logSessionEvent(sessionId, SessionLogType.SESSION_RESUME, 'Session resumed');
+    await this.logSessionEvent(
+      sessionId,
+      SessionLogType.SESSION_RESUME,
+      'Session resumed',
+    );
   }
-
   async logReconnection(sessionId: string, reason?: string): Promise<void> {
     const message = `Session reconnecting${reason ? `: ${reason}` : ''}`;
-    const metadata = reason ? { reason } : undefined;
 
-    await this.logSessionEvent(sessionId, SessionLogType.RECONNECTION, message, metadata);
+    await this.logSessionEvent(sessionId, SessionLogType.RECONNECTION, message);
   }
 
   // Message related logging
-  async logMessageSent(sessionId: string, messageId: string, to: string): Promise<void> {
-    const message = `Message sent to ${to}`;
-    const metadata = { messageId, to };
+  async logMessageSent(
+    sessionId: string,
+    messageId: string,
+    to: string,
+  ): Promise<void> {
+    const message = `Message sent to ${to} (ID: ${messageId})`;
 
-    await this.logSessionEvent(sessionId, SessionLogType.MESSAGE_SENT, message, metadata);
+    await this.logSessionEvent(sessionId, SessionLogType.MESSAGE_SENT, message);
   }
 
-  async logMessageReceived(sessionId: string, messageId: string, from: string): Promise<void> {
-    const message = `Message received from ${from}`;
-    const metadata = { messageId, from };
+  async logMessageReceived(
+    sessionId: string,
+    messageId: string,
+    from: string,
+  ): Promise<void> {
+    const message = `Message received from ${from} (ID: ${messageId})`;
 
-    await this.logSessionEvent(sessionId, SessionLogType.MESSAGE_RECEIVED, message, metadata);
+    await this.logSessionEvent(
+      sessionId,
+      SessionLogType.MESSAGE_RECEIVED,
+      message,
+    );
   }
 
-  async logMessageFailed(sessionId: string, messageId: string, error: string): Promise<void> {
-    const message = `Message failed: ${error}`;
-    const metadata = { messageId, error };
+  async logMessageFailed(
+    sessionId: string,
+    messageId: string,
+    error: string,
+  ): Promise<void> {
+    const message = `Message failed (ID: ${messageId}): ${error}`;
 
-    await this.logSessionEvent(sessionId, SessionLogType.MESSAGE_FAILED, message, metadata);
+    await this.logSessionEvent(
+      sessionId,
+      SessionLogType.MESSAGE_FAILED,
+      message,
+    );
   }
 }

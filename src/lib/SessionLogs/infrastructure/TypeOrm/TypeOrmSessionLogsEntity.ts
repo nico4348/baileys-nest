@@ -1,4 +1,12 @@
-import { Entity, PrimaryColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, Index } from 'typeorm';
+import {
+  Entity,
+  PrimaryColumn,
+  Column,
+  ManyToOne,
+  JoinColumn,
+  CreateDateColumn,
+  Index,
+} from 'typeorm';
 import { TypeOrmSessionsEntity } from '../../../Sessions/infrastructure/TypeOrm/TypeOrmSessionsEntity';
 
 @Entity('session_logs')
@@ -13,12 +21,8 @@ export class TypeOrmSessionLogsEntity {
 
   @Column({ type: 'varchar', length: 20, name: 'log_type' })
   log_type: string;
-
   @Column({ type: 'text', name: 'message' })
   message: string;
-
-  @Column({ type: 'jsonb', nullable: true, name: 'metadata' })
-  metadata: Record<string, any> | null;
 
   @CreateDateColumn({ type: 'timestamp', name: 'created_at' })
   created_at: Date;

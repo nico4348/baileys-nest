@@ -27,8 +27,7 @@ Obtiene todos los logs de sesión almacenados en el sistema.
     "sessionId": "session-uuid",
     "logType": "SESSION_START",
     "message": "Session started",
-    "createdAt": "2025-05-27T12:00:00.000Z",
-    "metadata": {}
+    "createdAt": "2025-05-27T12:00:00.000Z"
   }
 ]
 ```
@@ -65,8 +64,7 @@ GET /session-logs/recent?limit=50
     "sessionId": "session-uuid",
     "logType": "CONNECTION",
     "message": "Session connected",
-    "createdAt": "2025-05-27T12:00:00.000Z",
-    "metadata": {}
+    "createdAt": "2025-05-27T12:00:00.000Z"
   }
 ]
 ```
@@ -103,16 +101,14 @@ GET /session-logs/session/30ed47f1-eb16-4573-8696-4546ab37dce0
     "sessionId": "30ed47f1-eb16-4573-8696-4546ab37dce0",
     "logType": "SESSION_START",
     "message": "Session started",
-    "createdAt": "2025-05-27T12:00:00.000Z",
-    "metadata": {}
+    "createdAt": "2025-05-27T12:00:00.000Z"
   },
   {
     "id": "log-uuid-2",
     "sessionId": "30ed47f1-eb16-4573-8696-4546ab37dce0",
     "logType": "CONNECTION",
     "message": "Session connected",
-    "createdAt": "2025-05-27T12:01:00.000Z",
-    "metadata": {}
+    "createdAt": "2025-05-27T12:01:00.000Z"
   }
 ]
 ```
@@ -169,11 +165,7 @@ GET /session-logs/session/30ed47f1-eb16-4573-8696-4546ab37dce0/type/ERROR
     "sessionId": "30ed47f1-eb16-4573-8696-4546ab37dce0",
     "logType": "ERROR",
     "message": "Connection error occurred",
-    "createdAt": "2025-05-27T12:05:00.000Z",
-    "metadata": {
-      "errorCode": "CONNECTION_TIMEOUT",
-      "details": "Socket timeout after 30 seconds"
-    }
+    "createdAt": "2025-05-27T12:05:00.000Z"
   }
 ]
 ```
@@ -209,11 +201,7 @@ GET /session-logs/log-uuid-123
   "sessionId": "session-uuid",
   "logType": "AUTH_SUCCESS",
   "message": "Authentication successful",
-  "createdAt": "2025-05-27T12:00:00.000Z",
-  "metadata": {
-    "authMethod": "qr",
-    "deviceId": "device-123"
-  }
+  "createdAt": "2025-05-27T12:00:00.000Z"
 }
 ```
 

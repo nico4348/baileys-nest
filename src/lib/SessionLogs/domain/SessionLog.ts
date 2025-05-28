@@ -10,7 +10,6 @@ export class SessionLog {
   readonly logType: SessionLogLogType;
   readonly message: SessionLogMessage;
   readonly createdAt: SessionLogCreatedAt;
-  readonly metadata?: Record<string, any>;
 
   constructor(
     id: SessionLogId,
@@ -18,21 +17,17 @@ export class SessionLog {
     logType: SessionLogLogType,
     message: SessionLogMessage,
     createdAt: SessionLogCreatedAt,
-    metadata?: Record<string, any>,
   ) {
     this.id = id;
     this.sessionId = sessionId;
     this.logType = logType;
     this.message = message;
     this.createdAt = createdAt;
-    this.metadata = metadata;
   }
-
   static create(
     sessionId: string,
     logType: string,
     message: string,
-    metadata?: Record<string, any>,
   ): SessionLog {
     return new SessionLog(
       SessionLogId.generate(),
@@ -40,18 +35,6 @@ export class SessionLog {
       new SessionLogLogType(logType),
       new SessionLogMessage(message),
       SessionLogCreatedAt.now(),
-      metadata,
-    );
-  }
-
-  withMetadata(metadata: Record<string, any>): SessionLog {
-    return new SessionLog(
-      this.id,
-      this.sessionId,
-      this.logType,
-      this.message,
-      this.createdAt,
-      { ...this.metadata, ...metadata },
     );
   }
 
@@ -76,7 +59,6 @@ export class SessionLog {
       logType: this.logType.toString(),
       message: this.message.value,
       createdAt: this.createdAt.toString(),
-      metadata: this.metadata,
     };
   }
 }

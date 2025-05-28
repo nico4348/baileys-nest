@@ -369,18 +369,11 @@ async function testGetSessionLogById() {
   if (testLogId) {
     try {
       const response = await makeRequest('GET', `${API_PREFIX}/${testLogId}`);
-
       if (response.statusCode === 200) {
         logSuccess(`Log encontrado: ${response.statusCode}`);
         logInfo(`Log ID: ${response.data.id}, Tipo: ${response.data.logType}`);
         logInfo(`Mensaje: ${response.data.message}`);
         logInfo(`Fecha: ${response.data.createdAt}`);
-
-        if (response.data.metadata) {
-          logInfo(
-            `Metadata presente: ${Object.keys(response.data.metadata).length} campos`,
-          );
-        }
       } else if (response.statusCode === 404) {
         logInfo('Log no encontrado (404)');
       } else {

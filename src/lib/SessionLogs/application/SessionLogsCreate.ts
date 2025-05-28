@@ -13,12 +13,10 @@ export class SessionLogsCreate {
     @Inject('SessionLogRepository')
     private readonly repository: SessionLogRepository,
   ) {}
-
   async run(
     sessionId: string,
     logType: string,
     message: string,
-    metadata?: Record<string, any>,
   ): Promise<SessionLog> {
     try {
       const sessionLog = new SessionLog(
@@ -27,7 +25,6 @@ export class SessionLogsCreate {
         new SessionLogLogType(logType),
         new SessionLogMessage(message),
         SessionLogCreatedAt.now(),
-        metadata,
       );
 
       return await this.repository.create(sessionLog);
@@ -42,7 +39,6 @@ export class SessionLogsCreate {
     logType: string,
     message: string,
     createdAt: Date,
-    metadata?: Record<string, any>,
   ): Promise<SessionLog> {
     try {
       const sessionLog = new SessionLog(
@@ -51,7 +47,6 @@ export class SessionLogsCreate {
         new SessionLogLogType(logType),
         new SessionLogMessage(message),
         new SessionLogCreatedAt(createdAt),
-        metadata,
       );
 
       return await this.repository.create(sessionLog);

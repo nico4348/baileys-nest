@@ -5,7 +5,6 @@ export interface ISessionLogLogger {
     sessionId: string,
     logType: SessionLogType,
     message: string,
-    metadata?: Record<string, any>,
   ): Promise<void>;
 
   logConnectionEvent(

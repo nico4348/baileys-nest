@@ -16,7 +16,6 @@ export class TypeOrmSessionLogsRepository implements SessionLogRepository {
     @InjectRepository(TypeOrmSessionLogsEntity)
     private readonly repository: Repository<TypeOrmSessionLogsEntity>,
   ) {}
-
   private mapToDomain(entity: TypeOrmSessionLogsEntity): SessionLog {
     try {
       return new SessionLog(
@@ -25,20 +24,22 @@ export class TypeOrmSessionLogsRepository implements SessionLogRepository {
         new SessionLogLogType(entity.log_type),
         new SessionLogMessage(entity.message),
         new SessionLogCreatedAt(entity.created_at),
-        entity.metadata || undefined,
       );
     } catch (error) {
-      throw new Error(`Failed to map entity to domain object: ${error.message}`);
+      throw new Error(
+        `Failed to map entity to domain object: ${error.message}`,
+      );
     }
   }
 
-  private mapToEntity(sessionLog: SessionLog): Partial<TypeOrmSessionLogsEntity> {
+  private mapToEntity(
+    sessionLog: SessionLog,
+  ): Partial<TypeOrmSessionLogsEntity> {
     return {
       id: sessionLog.id.value,
       session_id: sessionLog.sessionId.value,
       log_type: sessionLog.logType.value,
       message: sessionLog.message.value,
-      metadata: sessionLog.metadata || null,
       created_at: sessionLog.createdAt.value,
     };
   }
@@ -90,7 +91,9 @@ export class TypeOrmSessionLogsRepository implements SessionLogRepository {
       });
       return entities.map((entity) => this.mapToDomain(entity));
     } catch (error) {
-      throw new Error(`Failed to get session logs by session id: ${error.message}`);
+      throw new Error(
+        `Failed to get session logs by session id: ${error.message}`,
+      );
     }
   }
 
@@ -109,7 +112,9 @@ export class TypeOrmSessionLogsRepository implements SessionLogRepository {
       });
       return entities.map((entity) => this.mapToDomain(entity));
     } catch (error) {
-      throw new Error(`Failed to get session logs by session id and type: ${error.message}`);
+      throw new Error(
+        `Failed to get session logs by session id and type: ${error.message}`,
+      );
     }
   }
 
@@ -138,7 +143,7 @@ export class TypeOrmSessionLogsRepository implements SessionLogRepository {
   async delete(id: SessionLogId): Promise<void> {
     try {
       const result = await this.repository.delete({ id: id.value });
-      
+
       if (result.affected === 0) {
         throw new Error(`Session log with id ${id.value} not found`);
       }
@@ -151,7 +156,9 @@ export class TypeOrmSessionLogsRepository implements SessionLogRepository {
     try {
       await this.repository.delete({ session_id: sessionId.value });
     } catch (error) {
-      throw new Error(`Failed to delete session logs by session id: ${error.message}`);
+      throw new Error(
+        `Failed to delete session logs by session id: ${error.message}`,
+      );
     }
   }
 

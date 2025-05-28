@@ -31,7 +31,6 @@ export class SessionLogsController {
     private readonly sessionLogsDeleteBySessionId: SessionLogsDeleteBySessionId,
     private readonly sessionLogsCleanup: SessionLogsCleanup,
   ) {}
-
   private serializeSessionLog(log: SessionLog): any {
     return {
       id: log.id.toString(),
@@ -39,7 +38,6 @@ export class SessionLogsController {
       logType: log.logType.toString(),
       message: log.message.value,
       createdAt: log.createdAt.toString(),
-      metadata: log.metadata,
     };
   }
   @Get()
