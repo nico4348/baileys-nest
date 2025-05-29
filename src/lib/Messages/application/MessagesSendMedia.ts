@@ -16,12 +16,10 @@ export class MessagesSendMedia {
     mediaType: string,
     mediaUrl: string,
     caption?: string,
-    quotedMessageId?: string,
+    quotedMessageId?: Record<string, any>,
   ): Promise<{ messageId: string; success: boolean }> {
     try {
       const messageId = uuidv4();
-
-      // Extract file information first
       const fileName = path.basename(mediaUrl);
       const mimeType = lookup(mediaUrl) || 'application/octet-stream';
 
@@ -32,21 +30,20 @@ export class MessagesSendMedia {
         mime_type: mimeType,
         file_name: fileName,
         file_path: mediaUrl,
-      }; // Send message through Baileys
+      };
       const sentMessage = await this.messageSender.sendMediaMessage(
         sessionId,
         `${to}@s.whatsapp.net`,
         mediaType,
         payload,
-        quotedMessageId,
+        quotedMessageId ? quotedMessageId : undefined,
       );
       if (sentMessage) {
-        // Save message to database
         await this.messagesCreate.run(
           messageId,
-          sentMessage.key?.id || null, // Baileys message ID
+          sentMessage.key?.id || null,
           'media',
-          quotedMessageId || null,
+          quotedMessageId ? JSON.stringify(quotedMessageId) : null,
           sessionId,
           to,
           new Date(),

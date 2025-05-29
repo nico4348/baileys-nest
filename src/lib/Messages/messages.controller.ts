@@ -167,7 +167,7 @@ export class MessagesController {
       }
       await this.messagesUpdate.run(
         id,
-        existingMessage.baileys_id?.value || null,
+        existingMessage.baileys_json?.value || null,
         (updateMessageDto.message_type as 'txt' | 'media' | 'react') ||
           existingMessage.message_type.value,
         updateMessageDto.quoted_message_id ||

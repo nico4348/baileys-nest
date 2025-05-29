@@ -20,8 +20,8 @@ export class TypeOrmMessagesEntity {
   @PrimaryColumn({ type: 'uuid' })
   id: string;
 
-  @Column({ type: 'varchar', length: 25, nullable: true })
-  baileys_id: string | null;
+  @Column({ type: 'json', nullable: true })
+  baileys_json: any;
 
   @Column({ type: 'uuid' })
   session_id: string;

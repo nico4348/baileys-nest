@@ -12,7 +12,7 @@ export class MessagesSendText {
     sessionId: string,
     to: string,
     text: string,
-    quotedMessageId?: string,
+    quotedMessageId?: Record<string, any>,
   ): Promise<{ messageId: string; success: boolean }> {
     try {
       const messageId = uuidv4();
@@ -21,6 +21,7 @@ export class MessagesSendText {
         sessionId,
         `${to}@s.whatsapp.net`,
         payload,
+        quotedMessageId ? quotedMessageId : undefined,
       );
 
       if (sentMessage) {
@@ -29,7 +30,7 @@ export class MessagesSendText {
           messageId,
           sentMessage.key?.id || null, // Usamos el ID de Baileys si está disponible
           'txt',
-          quotedMessageId || null,
+          quotedMessageId ? JSON.stringify(quotedMessageId) : null,
           sessionId,
           to,
           new Date(),

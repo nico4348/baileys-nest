@@ -10,7 +10,7 @@ import { MessageQuotedMessageId } from '../../domain/MessageQuotedMessageId';
 import { MessageTo } from '../../domain/MessageTo';
 import { MessageMessageType } from '../../domain/MessageMessageType';
 import { MessageCreatedAt } from '../../domain/MessageCreatedAt';
-import { MessageBaileysId } from '../../domain/MessageBaileysId';
+import { MessageBaileysJson } from '../../domain/MessageBaileysJson';
 
 @Injectable()
 export class TypeOrmMessagesRepository implements MessageRepository {
@@ -79,7 +79,7 @@ export class TypeOrmMessagesRepository implements MessageRepository {
   private toEntity(message: Message): TypeOrmMessagesEntity {
     const entity = new TypeOrmMessagesEntity();
     entity.id = message.id.value;
-    entity.baileys_id = message.baileys_id.value;
+    entity.baileys_json = message.baileys_json.value;
     entity.session_id = message.session_id.value;
     entity.quoted_message_id = message.quoted_message_id.value || null;
     entity.to = message.to.value;
@@ -91,7 +91,7 @@ export class TypeOrmMessagesRepository implements MessageRepository {
   private toDomain(entity: TypeOrmMessagesEntity): Message {
     return new Message(
       new MessageId(entity.id),
-      new MessageBaileysId(entity.baileys_id),
+      new MessageBaileysJson(entity.baileys_json),
       new MessageSessionId(entity.session_id),
       new MessageQuotedMessageId(entity.quoted_message_id),
       new MessageTo(entity.to),

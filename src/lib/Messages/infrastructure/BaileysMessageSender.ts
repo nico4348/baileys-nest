@@ -20,20 +20,15 @@ export class BaileysMessageSender implements MessageSender {
     sessionId: string,
     jid: string,
     payload: TextPayload,
-    quoted?: any,
+    quoted?: Record<string, any>,
   ): Promise<proto.WebMessageInfo | null> {
-    quoted = {
-      key: {
-        remoteJid: jid,
-        fromMe: true,
-        id: quoted,
-        participant: undefined,
-      },
-      message: {
-        conversation: 'This is a quoted message',
-      },
-    };
-    const opts = { quoted };
+    let opts = {};
+    if (quoted) {
+      // Si el objeto ya tiene key, úsalo directamente, si no, crea el formato esperado
+      opts = {
+        quoted: quoted.key ? quoted : { key: quoted },
+      };
+    }
     try {
       const sock = this.getSocket(sessionId);
       if (!sock) {
@@ -59,19 +54,14 @@ export class BaileysMessageSender implements MessageSender {
     jid: string,
     mediaType: string,
     payload: MediaPayload,
-    quoted?: any,
+    quoted?: Record<string, any>,
   ): Promise<proto.WebMessageInfo | null> {
-    quoted = {
-      key: {
-        remoteJid: jid,
-        fromMe: true,
-        id: quoted,
-        participant: undefined,
-      },
-      message: {
-        conversation: 'This is a quoted message',
-      },
-    };
+    let opts = {};
+    if (quoted) {
+      opts = {
+        quoted: quoted.key ? quoted : { key: quoted },
+      };
+    }
     try {
       const sock = this.getSocket(sessionId);
       if (!sock) throw new Error(`Session ${sessionId} not found`);
@@ -80,7 +70,6 @@ export class BaileysMessageSender implements MessageSender {
       if (!url) throw new Error('Media URL is required');
 
       let msg: proto.WebMessageInfo | null;
-      const opts = { quoted };
 
       switch (mediaType) {
         case 'voiceNote':

@@ -6,13 +6,13 @@ import { MessageQuotedMessageId } from '../domain/MessageQuotedMessageId';
 import { MessageSessionId } from '../domain/MessageSessionId';
 import { MessageTo } from '../domain/MessageTo';
 import { MessageCreatedAt } from '../domain/MessageCreatedAt';
-import { MessageBaileysId } from '../domain/MessageBaileysId';
+import { MessageBaileysJson } from '../domain/MessageBaileysJson';
 
 export class MessagesUpdate {
   constructor(private readonly repository: MessageRepository) {}
   async run(
     id: string,
-    baileysId: string | null,
+    baileysJson: any,
     messageType: 'txt' | 'media' | 'react',
     quotedMessageId: string | null,
     sessionId: string,
@@ -21,7 +21,7 @@ export class MessagesUpdate {
   ): Promise<void> {
     const message = new Message(
       new MessageId(id),
-      new MessageBaileysId(baileysId),
+      new MessageBaileysJson(baileysJson),
       new MessageSessionId(sessionId),
       new MessageQuotedMessageId(quotedMessageId),
       new MessageTo(to),

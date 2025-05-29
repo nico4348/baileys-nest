@@ -1,10 +1,17 @@
-import { IsString, IsEnum, IsOptional, ValidateNested, IsNotEmpty, IsPhoneNumber } from 'class-validator';
+import {
+  IsString,
+  IsEnum,
+  IsOptional,
+  ValidateNested,
+  IsNotEmpty,
+  IsPhoneNumber,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 export enum MessageType {
   TEXT = 'text',
   MEDIA = 'media',
-  REACTION = 'reaction'
+  REACTION = 'reaction',
 }
 
 export class BaseMessageRequest {
@@ -20,8 +27,8 @@ export class BaseMessageRequest {
   messageType: MessageType;
 
   @IsOptional()
-  @IsString()
-  quotedMessageId?: string;
+  // Ahora acepta un objeto JSON en vez de string
+  quotedMessageId?: Record<string, any>;
 }
 
 export class TextMessageData {

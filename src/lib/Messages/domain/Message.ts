@@ -4,11 +4,11 @@ import { MessageMessageType } from './MessageMessageType';
 import { MessageQuotedMessageId } from './MessageQuotedMessageId';
 import { MessageSessionId } from './MessageSessionId';
 import { MessageTo } from './MessageTo';
-import { MessageBaileysId } from './MessageBaileysId';
+import { MessageBaileysJson } from './MessageBaileysJson';
 
 export class Message {
   id: MessageId;
-  baileys_id: MessageBaileysId;
+  baileys_json: MessageBaileysJson;
   session_id: MessageSessionId;
   quoted_message_id: MessageQuotedMessageId;
   to: MessageTo;
@@ -17,7 +17,7 @@ export class Message {
 
   constructor(
     id: MessageId,
-    baileys_id: MessageBaileysId,
+    baileys_json: MessageBaileysJson,
     session_id: MessageSessionId,
     quoted_message_id: MessageQuotedMessageId,
     to: MessageTo,
@@ -25,7 +25,7 @@ export class Message {
     created_at: MessageCreatedAt,
   ) {
     this.id = id;
-    this.baileys_id = baileys_id;
+    this.baileys_json = baileys_json;
     this.session_id = session_id;
     this.quoted_message_id = quoted_message_id;
     this.to = to;

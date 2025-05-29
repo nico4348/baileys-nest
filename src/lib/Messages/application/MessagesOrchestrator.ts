@@ -31,7 +31,7 @@ export class MessagesOrchestrator {
     sessionId: string,
     to: string,
     text: string,
-    quotedMessageId?: string,
+    quotedMessageId?: Record<string, any>,
   ): Promise<any> {
     try {
       const payload: TextPayload = {
@@ -41,7 +41,7 @@ export class MessagesOrchestrator {
         sessionId,
         `${to}@s.whatsapp.net`,
         payload,
-        quotedMessageId,
+        quotedMessageId ? quotedMessageId : undefined,
       );
 
       if (!sentMessage || !sentMessage.key || !sentMessage.key.id) {
@@ -49,14 +49,13 @@ export class MessagesOrchestrator {
           'Failed to send text message through WhatsApp or invalid message key',
         );
       }
-      const whatsappMessageId = sentMessage.key.id.toString();
       const uuid = crypto.randomUUID();
 
       await this.messagesCreate.run(
         uuid, // UUID como ID principal
-        whatsappMessageId, // ID de Baileys como baileys_id
+        sentMessage, // Complete Baileys message object as JSON
         'txt',
-        quotedMessageId || null,
+        quotedMessageId ? JSON.stringify(quotedMessageId) : null,
         sessionId,
         to,
         new Date(),
@@ -80,7 +79,7 @@ export class MessagesOrchestrator {
     mediaType: string,
     mediaUrl: string,
     caption?: string,
-    quotedMessageId?: string,
+    quotedMessageId?: Record<string, any>,
   ): Promise<any> {
     try {
       // Extract file information first
@@ -100,7 +99,7 @@ export class MessagesOrchestrator {
         `${to}@s.whatsapp.net`,
         mediaType,
         payload,
-        quotedMessageId,
+        quotedMessageId ? quotedMessageId : undefined,
       );
       if (!sentMessage || !sentMessage.key || !sentMessage.key.id) {
         throw new Error(
@@ -108,14 +107,13 @@ export class MessagesOrchestrator {
         );
       }
 
-      const whatsappMessageId = sentMessage.key.id.toString();
       const uuid = crypto.randomUUID(); // 2. Create base message record first (parent record)
 
       await this.messagesCreate.run(
         uuid, // UUID como ID principal
-        whatsappMessageId, // ID de Baileys como baileys_id
+        sentMessage, // Complete Baileys message object as JSON
         'media',
-        quotedMessageId || null,
+        quotedMessageId ? JSON.stringify(quotedMessageId) : null,
         sessionId,
         to,
         new Date(),
@@ -158,12 +156,11 @@ export class MessagesOrchestrator {
         );
       }
 
-      const whatsappMessageId = sentMessage.key.id.toString();
       const uuid = crypto.randomUUID(); // 2. Create base message record first (parent record)
 
       await this.messagesCreate.run(
         uuid, // UUID como ID principal
-        whatsappMessageId, // ID de Baileys como baileys_id
+        sentMessage, // Complete Baileys message object as JSON
         'react',
         targetMessageId,
         sessionId,
