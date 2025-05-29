@@ -40,12 +40,11 @@ export class MessagesSendMedia {
         payload,
         quotedMessageId,
       );
-
       if (sentMessage) {
         // Save message to database
         await this.messagesCreate.run(
           messageId,
-          'out',
+          sentMessage.key?.id || null, // Baileys message ID
           'media',
           quotedMessageId || null,
           sessionId,

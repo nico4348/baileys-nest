@@ -1,5 +1,6 @@
 import {
   Entity,
+  PrimaryGeneratedColumn,
   PrimaryColumn,
   Column,
   ManyToOne,
@@ -16,13 +17,16 @@ import { TypeOrmReactionMessagesEntity } from '../../../ReactionMessages/infrast
 
 @Entity('messages')
 export class TypeOrmMessagesEntity {
-  @PrimaryColumn({ type: 'varchar', length: 25 })
+  @PrimaryColumn({ type: 'uuid' })
   id: string;
+
+  @Column({ type: 'varchar', length: 25, nullable: true })
+  baileys_id: string | null;
 
   @Column({ type: 'uuid' })
   session_id: string;
 
-  @Column({ type: 'varchar', length: 25, nullable: true })
+  @Column({ type: 'uuid', nullable: true })
   quoted_message_id: string | null;
 
   @Column({ type: 'varchar', length: 50 })
@@ -30,9 +34,6 @@ export class TypeOrmMessagesEntity {
 
   @Column({ type: 'varchar', length: 50 })
   message_type: string;
-
-  @Column({ type: 'varchar', length: 3 })
-  in_out: string;
 
   @Column({ type: 'timestamp' })
   created_at: Date;

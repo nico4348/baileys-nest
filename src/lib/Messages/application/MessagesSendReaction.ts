@@ -23,12 +23,11 @@ export class MessagesSendReaction {
         `${to}@s.whatsapp.net`,
         payload,
       );
-
       if (sentMessage) {
         // Save message to database
         await this.messagesCreate.run(
           messageId,
-          'out',
+          sentMessage.key?.id || null, // Baileys message ID
           'react',
           targetMessageId,
           sessionId,

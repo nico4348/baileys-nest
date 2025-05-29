@@ -3,7 +3,12 @@ import { MessagesCreate } from './MessagesCreate';
 import { TextMessagesCreate } from '../../TextMessages/application/TextMessagesCreate';
 import { MediaMessagesCreate } from '../../MediaMessages/application/MediaMessagesCreate';
 import { ReactionMessagesCreate } from '../../ReactionMessages/application/ReactionMessagesCreate';
-import { MessageSender, TextPayload, MediaPayload, ReactPayload } from '../domain/ports/MessageSender';
+import {
+  MessageSender,
+  TextPayload,
+  MediaPayload,
+  ReactPayload,
+} from '../domain/ports/MessageSender';
 import * as path from 'path';
 import { lookup } from 'mime-types';
 import * as crypto from 'crypto';
@@ -44,11 +49,12 @@ export class MessagesOrchestrator {
           'Failed to send text message through WhatsApp or invalid message key',
         );
       }
-
       const whatsappMessageId = sentMessage.key.id.toString();
+      const uuid = crypto.randomUUID();
+
       await this.messagesCreate.run(
-        whatsappMessageId,
-        'out',
+        uuid, // UUID como ID principal
+        whatsappMessageId, // ID de Baileys como baileys_id
         'txt',
         quotedMessageId || null,
         sessionId,
@@ -58,7 +64,7 @@ export class MessagesOrchestrator {
 
       await this.textMessagesCreate.run(
         crypto.randomUUID(),
-        whatsappMessageId,
+        uuid, // Usamos el UUID como message_id para la relación
         text,
       );
 
@@ -96,7 +102,6 @@ export class MessagesOrchestrator {
         payload,
         quotedMessageId,
       );
-
       if (!sentMessage || !sentMessage.key || !sentMessage.key.id) {
         throw new Error(
           'Failed to send media message through WhatsApp or invalid message key',
@@ -104,11 +109,11 @@ export class MessagesOrchestrator {
       }
 
       const whatsappMessageId = sentMessage.key.id.toString();
+      const uuid = crypto.randomUUID(); // 2. Create base message record first (parent record)
 
-      // 2. Create base message record first (parent record)
       await this.messagesCreate.run(
-        whatsappMessageId, // Use WhatsApp message ID
-        'out',
+        uuid, // UUID como ID principal
+        whatsappMessageId, // ID de Baileys como baileys_id
         'media',
         quotedMessageId || null,
         sessionId,
@@ -118,7 +123,7 @@ export class MessagesOrchestrator {
       // Use the file information extracted earlier
       await this.mediaMessagesCreate.run(
         crypto.randomUUID(),
-        whatsappMessageId,
+        uuid, // Usamos el UUID como message_id para la relación
         caption || null,
         mediaType,
         mimeType,
@@ -147,7 +152,6 @@ export class MessagesOrchestrator {
         to,
         payload,
       );
-
       if (!sentMessage || !sentMessage.key || !sentMessage.key.id) {
         throw new Error(
           'Failed to send reaction through WhatsApp or invalid message key',
@@ -155,11 +159,11 @@ export class MessagesOrchestrator {
       }
 
       const whatsappMessageId = sentMessage.key.id.toString();
+      const uuid = crypto.randomUUID(); // 2. Create base message record first (parent record)
 
-      // 2. Create base message record first (parent record)
       await this.messagesCreate.run(
-        whatsappMessageId, // Use WhatsApp message ID
-        'out',
+        uuid, // UUID como ID principal
+        whatsappMessageId, // ID de Baileys como baileys_id
         'react',
         targetMessageId,
         sessionId,
@@ -168,7 +172,7 @@ export class MessagesOrchestrator {
       ); // 3. Create reaction message record (child record)
       await this.reactionMessagesCreate.run(
         crypto.randomUUID(),
-        whatsappMessageId,
+        uuid, // Usamos el UUID como message_id para la relación
         emoji,
         targetMessageId,
       );

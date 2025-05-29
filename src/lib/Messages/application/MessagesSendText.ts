@@ -27,7 +27,7 @@ export class MessagesSendText {
         // Save message to database
         await this.messagesCreate.run(
           messageId,
-          'out',
+          sentMessage.key?.id || null, // Usamos el ID de Baileys si está disponible
           'txt',
           quotedMessageId || null,
           sessionId,

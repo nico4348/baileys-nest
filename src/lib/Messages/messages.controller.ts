@@ -42,7 +42,6 @@ export class MessagesController {
     @Inject('SendMessage')
     private readonly sendMessage: SendMessage,
   ) {}
-
   @Post()
   async create(
     @Body()
@@ -50,7 +49,6 @@ export class MessagesController {
       session_id: string;
       to: string;
       message_type: string;
-      in_out: string;
       quoted_message_id?: string;
     },
   ) {
@@ -59,7 +57,7 @@ export class MessagesController {
       const createdAt = new Date();
       await this.messagesCreate.run(
         id,
-        createMessageDto.in_out as 'in' | 'out',
+        null, // No hay baileys_id para mensajes creados manualmente
         createMessageDto.message_type as 'txt' | 'media' | 'react',
         createMessageDto.quoted_message_id || null,
         createMessageDto.session_id,
@@ -73,7 +71,6 @@ export class MessagesController {
           session_id: createMessageDto.session_id,
           to: createMessageDto.to,
           message_type: createMessageDto.message_type,
-          in_out: createMessageDto.in_out,
           quoted_message_id: createMessageDto.quoted_message_id,
           created_at: createdAt,
         },
@@ -153,7 +150,6 @@ export class MessagesController {
       session_id?: string;
       to?: string;
       message_type?: string;
-      in_out?: string;
       quoted_message_id?: string;
     },
   ) {
@@ -169,11 +165,9 @@ export class MessagesController {
           HttpStatus.NOT_FOUND,
         );
       }
-
       await this.messagesUpdate.run(
         id,
-        (updateMessageDto.in_out as 'in' | 'out') ||
-          existingMessage.in_out.value,
+        existingMessage.baileys_id?.value || null,
         (updateMessageDto.message_type as 'txt' | 'media' | 'react') ||
           existingMessage.message_type.value,
         updateMessageDto.quoted_message_id ||
@@ -220,7 +214,7 @@ export class MessagesController {
   }
 
   // Unified WhatsApp Message Sending Endpoint
-  
+
   @Post('send')
   @UsePipes(new ValidationPipe({ transform: true }))
   async send(
