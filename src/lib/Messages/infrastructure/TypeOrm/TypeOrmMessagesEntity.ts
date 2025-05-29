@@ -9,9 +9,9 @@ import {
 } from 'typeorm';
 import { TypeOrmSessionsEntity } from '../../../Sessions/infrastructure/TypeOrm/TypeOrmSessionsEntity';
 import { MessageStatus } from '../../../MessageStatus/MessageEstatusEntity';
-import { TextMessage } from '../../../TextMessages/TextMessagesEntity';
-import { MediaMessage } from '../../../MediaMessages/MediaMessagesEntity';
-import { ReactionMessage } from '../../../ReactionMessages/ReactionMessagesEntity';
+import { TypeOrmTextMessagesEntity } from '../../../TextMessages/infrastructure/TypeOrm/TypeOrmTextMessagesEntity';
+import { TypeOrmMediaMessagesEntity } from '../../../MediaMessages/infrastructure/TypeOrm/TypeOrmMediaMessagesEntity';
+import { TypeOrmReactionMessagesEntity } from '../../../ReactionMessages/infrastructure/TypeOrm/TypeOrmReactionMessagesEntity';
 
 @Entity('messages')
 export class TypeOrmMessagesEntity {
@@ -40,23 +40,23 @@ export class TypeOrmMessagesEntity {
   @JoinColumn({ name: 'session_id' })
   session: TypeOrmSessionsEntity;
 
-  @OneToOne(() => TextMessage, (textMessage) => textMessage.message)
-  textMessage: TextMessage;
+  @OneToOne(
+    () => TypeOrmTextMessagesEntity,
+    (textMessage) => textMessage.message,
+  )
+  textMessage: TypeOrmTextMessagesEntity;
 
-  @OneToOne(() => MediaMessage, (mediaMessage) => mediaMessage.message)
-  mediaMessage: MediaMessage;
+  @OneToOne(
+    () => TypeOrmMediaMessagesEntity,
+    (mediaMessage) => mediaMessage.message,
+  )
+  mediaMessage: TypeOrmMediaMessagesEntity;
 
   @OneToMany(
-    () => ReactionMessage,
+    () => TypeOrmReactionMessagesEntity,
     (reactionMessage) => reactionMessage.message,
   )
-  reactions: ReactionMessage[];
-
-  @OneToMany(
-    () => ReactionMessage,
-    (reactionMessage) => reactionMessage.targetMessage,
-  )
-  targetReactions: ReactionMessage[];
+  reactions: TypeOrmReactionMessagesEntity[];
 
   @ManyToOne(() => TypeOrmMessagesEntity, (message) => message.quotedMessages)
   @JoinColumn({ name: 'quoted_message_id' })

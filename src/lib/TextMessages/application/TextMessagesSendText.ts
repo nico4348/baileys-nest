@@ -1,22 +1,21 @@
 import { TextMessagesCreate } from './TextMessagesCreate';
-import { BaileysMessageSender, TextPayload } from '../../Messages/infrastructure/BaileysMessageSender';
-import { v4 as uuidv4 } from 'uuid';
+import {
+  BaileysMessageSender,
+  TextPayload,
+} from '../../Messages/infrastructure/BaileysMessageSender';
 
 export class TextMessagesSendText {
   constructor(
     private readonly textMessagesCreate: TextMessagesCreate,
     private readonly messageSender: BaileysMessageSender,
   ) {}
-
   async run(
     sessionId: string,
-    messageId: string,
     to: string,
     text: string,
     quotedMessageId?: string,
   ): Promise<{ textMessageId: string; success: boolean }> {
     try {
-      const textMessageId = uuidv4();
       const payload: TextPayload = { text };
 
       // Send message through Baileys
@@ -26,17 +25,21 @@ export class TextMessagesSendText {
         payload,
       );
 
-      if (sentMessage) {
+      if (sentMessage && sentMessage.key && sentMessage.key.id) {
+        // Use WhatsApp returned id as text message id
+        const textMessageId = sentMessage.key.id.toString();
         // Save text message to database
         await this.textMessagesCreate.run(
           textMessageId,
-          messageId,
+          textMessageId, // Use same ID for both message and text message
           text,
         );
 
         return { textMessageId, success: true };
       } else {
-        throw new Error('Failed to send text message through WhatsApp');
+        throw new Error(
+          'Failed to send text message through WhatsApp or invalid message key',
+        );
       }
     } catch (error) {
       console.error('Error sending text message:', error);

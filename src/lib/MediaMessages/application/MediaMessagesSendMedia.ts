@@ -1,6 +1,9 @@
 import { MediaMessagesCreate } from './MediaMessagesCreate';
-import { BaileysMessageSender, MediaPayload } from '../../Messages/infrastructure/BaileysMessageSender';
-import { v4 as uuidv4 } from 'uuid';
+import {
+  BaileysMessageSender,
+  MediaPayload,
+} from '../../Messages/infrastructure/BaileysMessageSender';
+
 import * as path from 'path';
 import { lookup } from 'mime-types';
 
@@ -9,10 +12,8 @@ export class MediaMessagesSendMedia {
     private readonly mediaMessagesCreate: MediaMessagesCreate,
     private readonly messageSender: BaileysMessageSender,
   ) {}
-
   async run(
     sessionId: string,
-    messageId: string,
     to: string,
     mediaType: string,
     mediaUrl: string,
@@ -20,26 +21,33 @@ export class MediaMessagesSendMedia {
     quotedMessageId?: string,
   ): Promise<{ mediaMessageId: string; success: boolean }> {
     try {
-      const mediaMessageId = uuidv4();
-      const payload: MediaPayload = { url: mediaUrl, caption };
+      // Extract file information first
+      const fileName = path.basename(mediaUrl);
+      const mimeType = lookup(mediaUrl) || 'application/octet-stream';
 
-      // Send message through Baileys
+      const payload: MediaPayload = {
+        url: mediaUrl,
+        caption,
+        media_type: mediaType,
+        mime_type: mimeType,
+        file_name: fileName,
+        file_path: mediaUrl,
+      }; // Send message through Baileys
       const sentMessage = await this.messageSender.sendMediaMessage(
         sessionId,
-        to,
+        `${to}@s.whatsapp.net`,
         mediaType,
         payload,
+        quotedMessageId,
       );
+      if (sentMessage && sentMessage.key && sentMessage.key.id) {
+        // Use WhatsApp returned id as message id
+        const mediaMessageId = sentMessage.key.id.toString();
 
-      if (sentMessage) {
-        // Extract file information
-        const fileName = path.basename(mediaUrl);
-        const mimeType = lookup(mediaUrl) || 'application/octet-stream';
-
-        // Save media message to database
+        // Save media message to database using WhatsApp id
         await this.mediaMessagesCreate.run(
           mediaMessageId,
-          messageId,
+          mediaMessageId, // Use the same WhatsApp ID as both message ID and media message ID
           caption || null,
           mediaType,
           mimeType,
@@ -49,7 +57,9 @@ export class MediaMessagesSendMedia {
 
         return { mediaMessageId, success: true };
       } else {
-        throw new Error('Failed to send media message through WhatsApp');
+        throw new Error(
+          'Failed to send media message through WhatsApp or invalid message key',
+        );
       }
     } catch (error) {
       console.error('Error sending media message:', error);

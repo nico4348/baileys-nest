@@ -1,6 +1,11 @@
 import { MessagesCreate } from './MessagesCreate';
-import { BaileysMessageSender, MediaPayload } from '../infrastructure/BaileysMessageSender';
+import {
+  BaileysMessageSender,
+  MediaPayload,
+} from '../infrastructure/BaileysMessageSender';
 import { v4 as uuidv4 } from 'uuid';
+import * as path from 'path';
+import { lookup } from 'mime-types';
 
 export class MessagesSendMedia {
   constructor(
@@ -18,14 +23,25 @@ export class MessagesSendMedia {
   ): Promise<{ messageId: string; success: boolean }> {
     try {
       const messageId = uuidv4();
-      const payload: MediaPayload = { url: mediaUrl, caption };
 
-      // Send message through Baileys
+      // Extract file information first
+      const fileName = path.basename(mediaUrl);
+      const mimeType = lookup(mediaUrl) || 'application/octet-stream';
+
+      const payload: MediaPayload = {
+        url: mediaUrl,
+        caption,
+        media_type: mediaType,
+        mime_type: mimeType,
+        file_name: fileName,
+        file_path: mediaUrl,
+      }; // Send message through Baileys
       const sentMessage = await this.messageSender.sendMediaMessage(
         sessionId,
-        to,
+        `${to}@s.whatsapp.net`,
         mediaType,
         payload,
+        quotedMessageId,
       );
 
       if (sentMessage) {

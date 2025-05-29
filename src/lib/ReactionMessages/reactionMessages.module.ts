@@ -12,14 +12,9 @@ import { ReactionMessagesGetBySessionId } from './application/ReactionMessagesGe
 import { ReactionMessagesGetByEmoji } from './application/ReactionMessagesGetByEmoji';
 import { ReactionMessagesUpdate } from './application/ReactionMessagesUpdate';
 import { ReactionMessagesDelete } from './application/ReactionMessagesDelete';
-import { ReactionMessagesSendReaction } from './application/ReactionMessagesSendReaction';
-import { MessagesModule } from '../Messages/messages.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([TypeOrmReactionMessagesEntity]),
-    MessagesModule,
-  ],
+  imports: [TypeOrmModule.forFeature([TypeOrmReactionMessagesEntity])],
   controllers: [ReactionMessagesController],
   providers: [
     {
@@ -79,14 +74,6 @@ import { MessagesModule } from '../Messages/messages.module';
       useFactory: (repository: TypeOrmReactionMessagesRepository) =>
         new ReactionMessagesDelete(repository),
       inject: ['ReactionMessageRepository'],
-    },
-    {
-      provide: 'ReactionMessagesSendReaction',
-      useFactory: (
-        reactionMessagesCreate: ReactionMessagesCreate,
-        messageSender: any,
-      ) => new ReactionMessagesSendReaction(reactionMessagesCreate, messageSender),
-      inject: ['ReactionMessagesCreate', 'BaileysMessageSender'],
     },
   ],
   exports: ['ReactionMessageRepository', 'ReactionMessagesCreate'],

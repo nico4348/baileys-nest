@@ -20,7 +20,6 @@ import { ReactionMessagesGetBySessionId } from './application/ReactionMessagesGe
 import { ReactionMessagesGetByEmoji } from './application/ReactionMessagesGetByEmoji';
 import { ReactionMessagesUpdate } from './application/ReactionMessagesUpdate';
 import { ReactionMessagesDelete } from './application/ReactionMessagesDelete';
-import { ReactionMessagesSendReaction } from './application/ReactionMessagesSendReaction';
 import { v4 as uuidv4 } from 'uuid';
 
 @Controller('reaction-messages')
@@ -44,8 +43,6 @@ export class ReactionMessagesController {
     private readonly reactionMessagesUpdate: ReactionMessagesUpdate,
     @Inject('ReactionMessagesDelete')
     private readonly reactionMessagesDelete: ReactionMessagesDelete,
-    @Inject('ReactionMessagesSendReaction')
-    private readonly reactionMessagesSendReaction: ReactionMessagesSendReaction,
   ) {}
 
   @Post()
@@ -96,11 +93,14 @@ export class ReactionMessagesController {
     try {
       let reactionMessages;
       if (messageId) {
-        reactionMessages = await this.reactionMessagesGetByMessageId.run(messageId);
+        reactionMessages =
+          await this.reactionMessagesGetByMessageId.run(messageId);
       } else if (targetMessageId) {
-        reactionMessages = await this.reactionMessagesGetByTargetMessageId.run(targetMessageId);
+        reactionMessages =
+          await this.reactionMessagesGetByTargetMessageId.run(targetMessageId);
       } else if (sessionId) {
-        reactionMessages = await this.reactionMessagesGetBySessionId.run(sessionId);
+        reactionMessages =
+          await this.reactionMessagesGetBySessionId.run(sessionId);
       } else if (emoji) {
         reactionMessages = await this.reactionMessagesGetByEmoji.run(emoji);
       } else {
@@ -164,7 +164,8 @@ export class ReactionMessagesController {
   ) {
     try {
       // First get the existing reaction message
-      const existingReactionMessage = await this.reactionMessagesGetOneById.run(id);
+      const existingReactionMessage =
+        await this.reactionMessagesGetOneById.run(id);
       if (!existingReactionMessage) {
         throw new HttpException(
           {
@@ -177,12 +178,15 @@ export class ReactionMessagesController {
 
       await this.reactionMessagesUpdate.run(
         id,
-        updateReactionMessageDto.message_id || existingReactionMessage.message_id.value,
+        updateReactionMessageDto.message_id ||
+          existingReactionMessage.message_id.value,
         updateReactionMessageDto.emoji || existingReactionMessage.emoji.value,
-        updateReactionMessageDto.target_msg_id || existingReactionMessage.target_msg_id.value,
+        updateReactionMessageDto.target_msg_id ||
+          existingReactionMessage.target_msg_id.value,
       );
 
-      const updatedReactionMessage = await this.reactionMessagesGetOneById.run(id);
+      const updatedReactionMessage =
+        await this.reactionMessagesGetOneById.run(id);
       return {
         success: true,
         data: updatedReactionMessage,
@@ -206,44 +210,6 @@ export class ReactionMessagesController {
       return {
         success: true,
         message: 'Reaction message deleted successfully',
-      };
-    } catch (error) {
-      throw new HttpException(
-        {
-          success: false,
-          message: error.message,
-        },
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-  }
-
-  @Post('send')
-  async sendReaction(
-    @Body()
-    sendReactionDto: {
-      session_id: string;
-      message_id: string;
-      to: string;
-      message_key: any;
-      emoji: string;
-      target_message_id: string;
-    },
-  ) {
-    try {
-      const result = await this.reactionMessagesSendReaction.run(
-        sendReactionDto.session_id,
-        sendReactionDto.message_id,
-        sendReactionDto.to,
-        sendReactionDto.message_key,
-        sendReactionDto.emoji,
-        sendReactionDto.target_message_id,
-      );
-
-      return {
-        success: true,
-        data: result,
-        message: 'Reaction sent successfully',
       };
     } catch (error) {
       throw new HttpException(

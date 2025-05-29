@@ -290,5 +290,6 @@ import { EventSeeder } from '../Events/infrastructure/EventSeeder';
       inject: [WhatsAppSessionManager, 'SessionsRepository', SessionLogger],
     },
   ],
+  exports: [WhatsAppSessionManager],
 })
 export class SessionsModule {}

@@ -10,14 +10,9 @@ import { TextMessagesGetByMessageId } from './application/TextMessagesGetByMessa
 import { TextMessagesGetBySessionId } from './application/TextMessagesGetBySessionId';
 import { TextMessagesUpdate } from './application/TextMessagesUpdate';
 import { TextMessagesDelete } from './application/TextMessagesDelete';
-import { TextMessagesSendText } from './application/TextMessagesSendText';
-import { MessagesModule } from '../Messages/messages.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([TypeOrmTextMessagesEntity]),
-    MessagesModule,
-  ],
+  imports: [TypeOrmModule.forFeature([TypeOrmTextMessagesEntity])],
   controllers: [TextMessagesController],
   providers: [
     {
@@ -65,14 +60,6 @@ import { MessagesModule } from '../Messages/messages.module';
       useFactory: (repository: TypeOrmTextMessagesRepository) =>
         new TextMessagesDelete(repository),
       inject: ['TextMessageRepository'],
-    },
-    {
-      provide: 'TextMessagesSendText',
-      useFactory: (
-        textMessagesCreate: TextMessagesCreate,
-        messageSender: any,
-      ) => new TextMessagesSendText(textMessagesCreate, messageSender),
-      inject: ['TextMessagesCreate', 'BaileysMessageSender'],
     },
   ],
   exports: ['TextMessageRepository', 'TextMessagesCreate'],

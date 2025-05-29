@@ -1,5 +1,8 @@
 import { MessagesCreate } from './MessagesCreate';
-import { BaileysMessageSender, ReactPayload } from '../infrastructure/BaileysMessageSender';
+import {
+  BaileysMessageSender,
+  ReactPayload,
+} from '../infrastructure/BaileysMessageSender';
 import { v4 as uuidv4 } from 'uuid';
 
 export class MessagesSendReaction {
@@ -17,12 +20,10 @@ export class MessagesSendReaction {
   ): Promise<{ messageId: string; success: boolean }> {
     try {
       const messageId = uuidv4();
-      const payload: ReactPayload = { key: messageKey, emoji };
-
-      // Send reaction through Baileys
+      const payload: ReactPayload = { key: messageKey, emoji }; // Send reaction through Baileys
       const sentMessage = await this.messageSender.sendReactMessage(
         sessionId,
-        to,
+        `${to}@s.whatsapp.net`,
         payload,
       );
 

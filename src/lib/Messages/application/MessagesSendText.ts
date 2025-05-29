@@ -1,5 +1,8 @@
 import { MessagesCreate } from './MessagesCreate';
-import { BaileysMessageSender, TextPayload } from '../infrastructure/BaileysMessageSender';
+import {
+  BaileysMessageSender,
+  TextPayload,
+} from '../infrastructure/BaileysMessageSender';
 import { v4 as uuidv4 } from 'uuid';
 
 export class MessagesSendText {
@@ -16,12 +19,10 @@ export class MessagesSendText {
   ): Promise<{ messageId: string; success: boolean }> {
     try {
       const messageId = uuidv4();
-      const payload: TextPayload = { text };
-
-      // Send message through Baileys
+      const payload: TextPayload = { text }; // Send message through Baileys
       const sentMessage = await this.messageSender.sendTextMessage(
         sessionId,
-        to,
+        `${to}@s.whatsapp.net`,
         payload,
       );
 

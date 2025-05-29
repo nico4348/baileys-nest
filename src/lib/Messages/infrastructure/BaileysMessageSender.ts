@@ -12,7 +12,10 @@ export interface TextPayload {
 export interface MediaPayload {
   url: string;
   caption?: string;
-  quoted?: any;
+  media_type?: string;
+  mime_type: string;
+  file_name?: string;
+  file_path?: string;
 }
 
 export interface ReactPayload {
@@ -22,9 +25,7 @@ export interface ReactPayload {
 
 @Injectable()
 export class BaileysMessageSender {
-  constructor(
-    private readonly sessionManager: WhatsAppSessionManager,
-  ) {}
+  constructor(private readonly sessionManager: WhatsAppSessionManager) {}
 
   private getSocket(sessionId: string): WASocket | null {
     return this.sessionManager.getSocket(sessionId);
@@ -34,20 +35,33 @@ export class BaileysMessageSender {
     sessionId: string,
     jid: string,
     payload: TextPayload,
+    quoted?: any,
   ): Promise<proto.WebMessageInfo | null> {
+    quoted = {
+      key: {
+        remoteJid: jid,
+        fromMe: true,
+        id: quoted,
+        participant: undefined,
+      },
+      message: {
+        conversation: 'This is a quoted message',
+      },
+    };
+    const opts = { quoted };
     try {
       const sock = this.getSocket(sessionId);
       if (!sock) {
         throw new Error(`Session ${sessionId} not found or not connected`);
       }
 
-      const { text, quoted } = payload;
-      
+      const { text } = payload;
+
       if (!text || text.trim().length === 0) {
         throw new Error('Text message cannot be empty');
       }
 
-      const msg = await sock.sendMessage(jid, { text }, { quoted });
+      const msg = await sock.sendMessage(jid, { text }, opts);
       return msg || null;
     } catch (error) {
       console.error(`Error sending text message to ${jid}:`, error);
@@ -60,70 +74,75 @@ export class BaileysMessageSender {
     jid: string,
     mediaType: string,
     payload: MediaPayload,
+    quoted?: any,
   ): Promise<proto.WebMessageInfo | null> {
+    quoted = {
+      key: {
+        remoteJid: jid,
+        fromMe: true,
+        id: quoted,
+        participant: undefined,
+      },
+      message: {
+        conversation: 'This is a quoted message',
+      },
+    };
     try {
       const sock = this.getSocket(sessionId);
-      if (!sock) {
-        throw new Error(`Session ${sessionId} not found or not connected`);
-      }
+      if (!sock) throw new Error(`Session ${sessionId} not found`);
 
-      const { url, caption, quoted } = payload;
+      const { url, caption } = payload;
+      if (!url) throw new Error('Media URL is required');
 
-      if (!url) {
-        throw new Error('Media URL is required');
-      }
+      let msg: proto.WebMessageInfo | null;
+      const opts = { quoted };
 
-      let msg: proto.WebMessageInfo | null = null;
-      
       switch (mediaType) {
         case 'voiceNote':
-          msg = (await sock.sendMessage(
-            jid,
-            { audio: { url }, ptt: true },
-            { quoted },
-          )) || null;
+          msg =
+            (await sock.sendMessage(
+              jid,
+              { audio: payload, ptt: true },
+              opts,
+            )) || null;
           break;
         case 'audio':
-          msg = (await sock.sendMessage(jid, { audio: { url } }, { quoted })) || null;
+          msg = (await sock.sendMessage(jid, { audio: payload }, opts)) || null;
           break;
         case 'video':
-          msg = (await sock.sendMessage(
-            jid,
-            { video: { url }, caption },
-            { quoted },
-          )) || null;
+          msg =
+            (await sock.sendMessage(jid, { video: payload, caption }, opts)) ||
+            null;
           break;
         case 'image':
-          msg = (await sock.sendMessage(
-            jid,
-            { image: { url }, caption },
-            { quoted },
-          )) || null;
+          msg =
+            (await sock.sendMessage(jid, { image: payload, caption }, opts)) ||
+            null;
           break;
         case 'sticker':
-          msg = (await sock.sendMessage(jid, { sticker: { url } }, { quoted })) || null;
+          msg =
+            (await sock.sendMessage(jid, { sticker: payload }, opts)) || null;
           break;
         case 'document':
-          const fileName = path.basename(url);
-          const mimetype = lookup(url) || 'application/octet-stream';
-          msg = (await sock.sendMessage(
-            jid,
-            {
-              document: { url },
-              caption,
-              fileName,
-              mimetype,
-            },
-            { quoted },
-          )) || null;
+          msg =
+            (await sock.sendMessage(
+              jid,
+              {
+                document: payload,
+                mimetype: payload.mime_type,
+                fileName: payload.file_name,
+                caption,
+              },
+              opts,
+            )) || null;
           break;
         default:
-          throw new Error(`Unsupported media type: ${mediaType}`);
+          throw new Error(`Unsupported media type '${mediaType}'`);
       }
 
       return msg;
     } catch (error) {
-      console.error(`Error sending ${mediaType} message to ${jid}:`, error);
+      console.error(`Error sending ${mediaType} to ${jid}:`, error);
       throw error;
     }
   }
@@ -140,7 +159,7 @@ export class BaileysMessageSender {
       }
 
       const { key, emoji } = payload;
-      
+
       if (!key || !emoji) {
         throw new Error('Message key and emoji are required for reactions');
       }
@@ -148,7 +167,7 @@ export class BaileysMessageSender {
       const msg = await sock.sendMessage(jid, {
         react: { key: key, text: emoji },
       });
-      
+
       return msg || null;
     } catch (error) {
       console.error(`Error sending reaction to ${jid}:`, error);

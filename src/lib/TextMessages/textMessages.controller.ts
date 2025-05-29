@@ -18,7 +18,6 @@ import { TextMessagesGetByMessageId } from './application/TextMessagesGetByMessa
 import { TextMessagesGetBySessionId } from './application/TextMessagesGetBySessionId';
 import { TextMessagesUpdate } from './application/TextMessagesUpdate';
 import { TextMessagesDelete } from './application/TextMessagesDelete';
-import { TextMessagesSendText } from './application/TextMessagesSendText';
 import { v4 as uuidv4 } from 'uuid';
 
 @Controller('text-messages')
@@ -38,8 +37,6 @@ export class TextMessagesController {
     private readonly textMessagesUpdate: TextMessagesUpdate,
     @Inject('TextMessagesDelete')
     private readonly textMessagesDelete: TextMessagesDelete,
-    @Inject('TextMessagesSendText')
-    private readonly textMessagesSendText: TextMessagesSendText,
   ) {}
 
   @Post()
@@ -85,7 +82,8 @@ export class TextMessagesController {
     try {
       let textMessages;
       if (messageId) {
-        const textMessage = await this.textMessagesGetByMessageId.run(messageId);
+        const textMessage =
+          await this.textMessagesGetByMessageId.run(messageId);
         textMessages = textMessage ? [textMessage] : [];
       } else if (sessionId) {
         textMessages = await this.textMessagesGetBySessionId.run(sessionId);
@@ -190,42 +188,6 @@ export class TextMessagesController {
       return {
         success: true,
         message: 'Text message deleted successfully',
-      };
-    } catch (error) {
-      throw new HttpException(
-        {
-          success: false,
-          message: error.message,
-        },
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-  }
-
-  @Post('send')
-  async sendTextMessage(
-    @Body()
-    sendTextDto: {
-      session_id: string;
-      message_id: string;
-      to: string;
-      text: string;
-      quoted_message_id?: string;
-    },
-  ) {
-    try {
-      const result = await this.textMessagesSendText.run(
-        sendTextDto.session_id,
-        sendTextDto.message_id,
-        sendTextDto.to,
-        sendTextDto.text,
-        sendTextDto.quoted_message_id,
-      );
-
-      return {
-        success: true,
-        data: result,
-        message: 'Text message sent successfully',
       };
     } catch (error) {
       throw new HttpException(

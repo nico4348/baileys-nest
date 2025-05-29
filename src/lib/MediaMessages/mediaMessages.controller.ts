@@ -19,7 +19,6 @@ import { MediaMessagesGetBySessionId } from './application/MediaMessagesGetBySes
 import { MediaMessagesGetByMediaType } from './application/MediaMessagesGetByMediaType';
 import { MediaMessagesUpdate } from './application/MediaMessagesUpdate';
 import { MediaMessagesDelete } from './application/MediaMessagesDelete';
-import { MediaMessagesSendMedia } from './application/MediaMessagesSendMedia';
 import { DownloadMediaMessage } from './application/DownloadMediaMessage';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -42,8 +41,6 @@ export class MediaMessagesController {
     private readonly mediaMessagesUpdate: MediaMessagesUpdate,
     @Inject('MediaMessagesDelete')
     private readonly mediaMessagesDelete: MediaMessagesDelete,
-    @Inject('MediaMessagesSendMedia')
-    private readonly mediaMessagesSendMedia: MediaMessagesSendMedia,
     @Inject('DownloadMediaMessage')
     private readonly downloadMediaMessage: DownloadMediaMessage,
   ) {}
@@ -104,7 +101,8 @@ export class MediaMessagesController {
     try {
       let mediaMessages;
       if (messageId) {
-        const mediaMessage = await this.mediaMessagesGetByMessageId.run(messageId);
+        const mediaMessage =
+          await this.mediaMessagesGetByMessageId.run(messageId);
         mediaMessages = mediaMessage ? [mediaMessage] : [];
       } else if (sessionId) {
         mediaMessages = await this.mediaMessagesGetBySessionId.run(sessionId);
@@ -187,9 +185,13 @@ export class MediaMessagesController {
 
       await this.mediaMessagesUpdate.run(
         id,
-        updateMediaMessageDto.message_id || existingMediaMessage.message_id.value,
-        updateMediaMessageDto.caption !== undefined ? updateMediaMessageDto.caption : existingMediaMessage.caption.value,
-        updateMediaMessageDto.media_type || existingMediaMessage.media_type.value,
+        updateMediaMessageDto.message_id ||
+          existingMediaMessage.message_id.value,
+        updateMediaMessageDto.caption !== undefined
+          ? updateMediaMessageDto.caption
+          : existingMediaMessage.caption.value,
+        updateMediaMessageDto.media_type ||
+          existingMediaMessage.media_type.value,
         updateMediaMessageDto.mime_type || existingMediaMessage.mime_type.value,
         updateMediaMessageDto.file_name || existingMediaMessage.file_name.value,
         updateMediaMessageDto.file_path || existingMediaMessage.file_path.value,
@@ -219,46 +221,6 @@ export class MediaMessagesController {
       return {
         success: true,
         message: 'Media message deleted successfully',
-      };
-    } catch (error) {
-      throw new HttpException(
-        {
-          success: false,
-          message: error.message,
-        },
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-  }
-
-  @Post('send')
-  async sendMediaMessage(
-    @Body()
-    sendMediaDto: {
-      session_id: string;
-      message_id: string;
-      to: string;
-      media_type: string;
-      media_url: string;
-      caption?: string;
-      quoted_message_id?: string;
-    },
-  ) {
-    try {
-      const result = await this.mediaMessagesSendMedia.run(
-        sendMediaDto.session_id,
-        sendMediaDto.message_id,
-        sendMediaDto.to,
-        sendMediaDto.media_type,
-        sendMediaDto.media_url,
-        sendMediaDto.caption,
-        sendMediaDto.quoted_message_id,
-      );
-
-      return {
-        success: true,
-        data: result,
-        message: 'Media message sent successfully',
       };
     } catch (error) {
       throw new HttpException(

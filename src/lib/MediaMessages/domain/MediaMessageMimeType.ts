@@ -17,6 +17,15 @@ export class MediaMessageMimeType {
       'audio/wav',
       'audio/ogg',
       'audio/ogg; codecs=opus',
+      'application/octet-stream',
+      'application/pdf',
+      'text/plain',
+      'application/zip',
+      'application/x-zip-compressed',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     ];
 
     if (!validMimeTypes.includes(this.value)) {

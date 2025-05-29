@@ -11,15 +11,10 @@ import { MediaMessagesGetBySessionId } from './application/MediaMessagesGetBySes
 import { MediaMessagesGetByMediaType } from './application/MediaMessagesGetByMediaType';
 import { MediaMessagesUpdate } from './application/MediaMessagesUpdate';
 import { MediaMessagesDelete } from './application/MediaMessagesDelete';
-import { MediaMessagesSendMedia } from './application/MediaMessagesSendMedia';
 import { DownloadMediaMessage } from './application/DownloadMediaMessage';
-import { MessagesModule } from '../Messages/messages.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([TypeOrmMediaMessagesEntity]),
-    MessagesModule,
-  ],
+  imports: [TypeOrmModule.forFeature([TypeOrmMediaMessagesEntity])],
   controllers: [MediaMessagesController],
   providers: [
     {
@@ -75,18 +70,9 @@ import { MessagesModule } from '../Messages/messages.module';
       inject: ['MediaMessageRepository'],
     },
     {
-      provide: 'MediaMessagesSendMedia',
-      useFactory: (
-        mediaMessagesCreate: MediaMessagesCreate,
-        messageSender: any,
-      ) => new MediaMessagesSendMedia(mediaMessagesCreate, messageSender),
-      inject: ['MediaMessagesCreate', 'BaileysMessageSender'],
-    },
-    {
       provide: 'DownloadMediaMessage',
-      useFactory: (
-        mediaMessagesGetOneById: MediaMessagesGetOneById,
-      ) => new DownloadMediaMessage(mediaMessagesGetOneById),
+      useFactory: (mediaMessagesGetOneById: MediaMessagesGetOneById) =>
+        new DownloadMediaMessage(mediaMessagesGetOneById),
       inject: ['MediaMessagesGetOneById'],
     },
   ],

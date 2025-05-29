@@ -18,8 +18,4 @@ export class TypeOrmReactionMessagesEntity {
   @ManyToOne(() => TypeOrmMessagesEntity, (message) => message.reactions)
   @JoinColumn({ name: 'message_id' })
   message: TypeOrmMessagesEntity;
-
-  @ManyToOne(() => TypeOrmMessagesEntity, (message) => message.targetReactions)
-  @JoinColumn({ name: 'target_msg_id', referencedColumnName: 'id' })
-  targetMessage: TypeOrmMessagesEntity;
 }

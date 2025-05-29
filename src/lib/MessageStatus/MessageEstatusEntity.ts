@@ -1,5 +1,5 @@
 import { Entity, PrimaryColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
-import { Message } from '../Messages/MessagesEntity';
+import { TypeOrmMessagesEntity } from '../Messages/infrastructure/TypeOrm/TypeOrmMessagesEntity';
 import { Status } from '../Status/StatusEntity';
 
 @Entity('message_status')
@@ -15,11 +15,10 @@ export class MessageStatus {
 
   @Column({ type: 'timestamp' })
   updated_at: Date;
-
   // Relación Many-to-One con Message
-  @ManyToOne(() => Message, (message) => message.messageStatuses)
+  @ManyToOne(() => TypeOrmMessagesEntity, (message) => message.messageStatuses)
   @JoinColumn({ name: 'message_id' })
-  message: Message;
+  message: TypeOrmMessagesEntity;
 
   // Relación Many-to-One con Status
   @ManyToOne(() => Status, (status) => status.messageStatuses)
