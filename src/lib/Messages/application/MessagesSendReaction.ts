@@ -1,14 +1,11 @@
 import { MessagesCreate } from './MessagesCreate';
-import {
-  BaileysMessageSender,
-  ReactPayload,
-} from '../infrastructure/BaileysMessageSender';
+import { MessageSender, ReactPayload } from '../domain/ports/MessageSender';
 import { v4 as uuidv4 } from 'uuid';
 
 export class MessagesSendReaction {
   constructor(
     private readonly messagesCreate: MessagesCreate,
-    private readonly messageSender: BaileysMessageSender,
+    private readonly messageSender: MessageSender,
   ) {}
 
   async run(

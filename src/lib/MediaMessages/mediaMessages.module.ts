@@ -12,6 +12,7 @@ import { MediaMessagesGetByMediaType } from './application/MediaMessagesGetByMed
 import { MediaMessagesUpdate } from './application/MediaMessagesUpdate';
 import { MediaMessagesDelete } from './application/MediaMessagesDelete';
 import { DownloadMediaMessage } from './application/DownloadMediaMessage';
+import { MediaMessageHandler } from './infrastructure/MediaMessageHandler';
 
 @Module({
   imports: [TypeOrmModule.forFeature([TypeOrmMediaMessagesEntity])],
@@ -75,7 +76,12 @@ import { DownloadMediaMessage } from './application/DownloadMediaMessage';
         new DownloadMediaMessage(mediaMessagesGetOneById),
       inject: ['MediaMessagesGetOneById'],
     },
+    {
+      provide: 'MediaMessageHandler',
+      useFactory: (mediaMessagesCreate) => new MediaMessageHandler(mediaMessagesCreate),
+      inject: ['MediaMessagesCreate'],
+    },
   ],
-  exports: ['MediaMessageRepository', 'MediaMessagesCreate'],
+  exports: ['MediaMessageRepository', 'MediaMessagesCreate', 'MediaMessageHandler'],
 })
 export class MediaMessagesModule {}

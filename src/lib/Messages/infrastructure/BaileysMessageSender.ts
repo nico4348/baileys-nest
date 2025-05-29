@@ -1,30 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { proto, type WASocket } from 'baileys';
-import * as path from 'path';
-import { lookup } from 'mime-types';
 import { WhatsAppSessionManager } from '../../Sessions/infrastructure/WhatsAppSessionManager';
-
-export interface TextPayload {
-  text: string;
-  quoted?: any;
-}
-
-export interface MediaPayload {
-  url: string;
-  caption?: string;
-  media_type?: string;
-  mime_type: string;
-  file_name?: string;
-  file_path?: string;
-}
-
-export interface ReactPayload {
-  key: any;
-  emoji: string;
-}
+import {
+  MessageSender,
+  TextPayload,
+  MediaPayload,
+  ReactPayload,
+} from '../domain/ports/MessageSender';
 
 @Injectable()
-export class BaileysMessageSender {
+export class BaileysMessageSender implements MessageSender {
   constructor(private readonly sessionManager: WhatsAppSessionManager) {}
 
   private getSocket(sessionId: string): WASocket | null {

@@ -10,6 +10,7 @@ import { TextMessagesGetByMessageId } from './application/TextMessagesGetByMessa
 import { TextMessagesGetBySessionId } from './application/TextMessagesGetBySessionId';
 import { TextMessagesUpdate } from './application/TextMessagesUpdate';
 import { TextMessagesDelete } from './application/TextMessagesDelete';
+import { TextMessageHandler } from './infrastructure/TextMessageHandler';
 
 @Module({
   imports: [TypeOrmModule.forFeature([TypeOrmTextMessagesEntity])],
@@ -61,7 +62,16 @@ import { TextMessagesDelete } from './application/TextMessagesDelete';
         new TextMessagesDelete(repository),
       inject: ['TextMessageRepository'],
     },
+    {
+      provide: 'TextMessageHandler',
+      useFactory: (textMessagesCreate) => new TextMessageHandler(textMessagesCreate),
+      inject: ['TextMessagesCreate'],
+    },
   ],
-  exports: ['TextMessageRepository', 'TextMessagesCreate'],
+  exports: [
+    'TextMessageRepository',
+    'TextMessagesCreate',
+    'TextMessageHandler',
+  ],
 })
 export class TextMessagesModule {}

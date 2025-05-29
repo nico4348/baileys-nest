@@ -12,6 +12,7 @@ import { ReactionMessagesGetBySessionId } from './application/ReactionMessagesGe
 import { ReactionMessagesGetByEmoji } from './application/ReactionMessagesGetByEmoji';
 import { ReactionMessagesUpdate } from './application/ReactionMessagesUpdate';
 import { ReactionMessagesDelete } from './application/ReactionMessagesDelete';
+import { ReactionMessageHandler } from './infrastructure/ReactionMessageHandler';
 
 @Module({
   imports: [TypeOrmModule.forFeature([TypeOrmReactionMessagesEntity])],
@@ -75,7 +76,12 @@ import { ReactionMessagesDelete } from './application/ReactionMessagesDelete';
         new ReactionMessagesDelete(repository),
       inject: ['ReactionMessageRepository'],
     },
+    {
+      provide: 'ReactionMessageHandler',
+      useFactory: (reactionMessagesCreate) => new ReactionMessageHandler(reactionMessagesCreate),
+      inject: ['ReactionMessagesCreate'],
+    },
   ],
-  exports: ['ReactionMessageRepository', 'ReactionMessagesCreate'],
+  exports: ['ReactionMessageRepository', 'ReactionMessagesCreate', 'ReactionMessageHandler'],
 })
 export class ReactionMessagesModule {}

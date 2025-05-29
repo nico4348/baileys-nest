@@ -10,6 +10,8 @@ import {
   Inject,
   HttpStatus,
   HttpException,
+  ValidationPipe,
+  UsePipes,
 } from '@nestjs/common';
 import { MessagesCreate } from './application/MessagesCreate';
 import { MessagesGetAll } from './application/MessagesGetAll';
@@ -17,7 +19,9 @@ import { MessagesGetOneById } from './application/MessagesGetOneById';
 import { MessagesGetBySessionId } from './application/MessagesGetBySessionId';
 import { MessagesUpdate } from './application/MessagesUpdate';
 import { MessagesDelete } from './application/MessagesDelete';
-import { MessagesOrchestrator } from './application/MessagesOrchestrator';
+import { SendMessage } from './application/SendMessage';
+import { SendMessageRequest } from './application/dto/SendMessageRequest.dto';
+import { SendMessageResponse } from './application/dto/SendMessageResponse.dto';
 import { v4 as uuidv4 } from 'uuid';
 
 @Controller('messages')
@@ -35,8 +39,8 @@ export class MessagesController {
     private readonly messagesUpdate: MessagesUpdate,
     @Inject('MessagesDelete')
     private readonly messagesDelete: MessagesDelete,
-    @Inject('MessagesOrchestrator')
-    private readonly messagesOrchestrator: MessagesOrchestrator,
+    @Inject('SendMessage')
+    private readonly sendMessage: SendMessage,
   ) {}
 
   @Post()
@@ -215,110 +219,22 @@ export class MessagesController {
     }
   }
 
-  // WhatsApp Message Sending Endpoints
-
-  @Post('send/text')
-  async sendTextMessage(
-    @Body()
-    sendTextDto: {
-      session_id: string;
-      to: string;
-      text: string;
-      quoted_message_id?: string;
-    },
-  ) {
+  // Unified WhatsApp Message Sending Endpoint
+  
+  @Post('send')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async send(
+    @Body() request: SendMessageRequest,
+  ): Promise<SendMessageResponse> {
     try {
-      const result = await this.messagesOrchestrator.sendTextMessage(
-        sendTextDto.session_id,
-        sendTextDto.to,
-        sendTextDto.text,
-        sendTextDto.quoted_message_id,
-      );
-
-      return {
-        success: true,
-        data: result,
-        message: 'Text message sent successfully',
-      };
+      const result = await this.sendMessage.run(request);
+      return result;
     } catch (error) {
       throw new HttpException(
         {
           success: false,
           message: error.message,
-        },
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-  }
-
-  @Post('send/media')
-  async sendMediaMessage(
-    @Body()
-    sendMediaDto: {
-      session_id: string;
-      to: string;
-      media_type: string;
-      media_url: string;
-      caption?: string;
-      quoted_message_id?: string;
-    },
-  ) {
-    try {
-      const result = await this.messagesOrchestrator.sendMediaMessage(
-        sendMediaDto.session_id,
-        sendMediaDto.to,
-        sendMediaDto.media_type,
-        sendMediaDto.media_url,
-        sendMediaDto.caption,
-        sendMediaDto.quoted_message_id,
-      );
-
-      return {
-        success: true,
-        data: result,
-        message: 'Media message sent successfully',
-      };
-    } catch (error) {
-      throw new HttpException(
-        {
-          success: false,
-          message: error.message,
-        },
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-  }
-
-  @Post('send/reaction')
-  async sendReaction(
-    @Body()
-    sendReactionDto: {
-      session_id: string;
-      to: string;
-      message_key: any;
-      emoji: string;
-      target_message_id: string;
-    },
-  ) {
-    try {
-      const result = await this.messagesOrchestrator.sendReaction(
-        sendReactionDto.session_id,
-        sendReactionDto.to,
-        sendReactionDto.message_key,
-        sendReactionDto.emoji,
-        sendReactionDto.target_message_id,
-      );
-
-      return {
-        success: true,
-        data: result,
-        message: 'Reaction sent successfully',
-      };
-    } catch (error) {
-      throw new HttpException(
-        {
-          success: false,
-          message: error.message,
+          messageType: request?.messageType || 'unknown',
         },
         HttpStatus.BAD_REQUEST,
       );

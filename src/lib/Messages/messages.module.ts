@@ -10,17 +10,13 @@ import { MessagesGetBySessionId } from './application/MessagesGetBySessionId';
 import { MessagesUpdate } from './application/MessagesUpdate';
 import { MessagesDelete } from './application/MessagesDelete';
 import { MessagesOrchestrator } from './application/MessagesOrchestrator';
+import { SendMessage } from './application/SendMessage';
 import { BaileysMessageSender } from './infrastructure/BaileysMessageSender';
-import { WhatsAppSessionManager } from '../Sessions/infrastructure/WhatsAppSessionManager';
+import { MessageHandlerFactory } from './infrastructure/MessageHandlerFactory';
 import { SessionsModule } from '../Sessions/sessions.module';
 import { TextMessagesModule } from '../TextMessages/textMessages.module';
 import { MediaMessagesModule } from '../MediaMessages/mediaMessages.module';
 import { ReactionMessagesModule } from '../ReactionMessages/reactionMessages.module';
-
-// Import Send services
-import { TextMessagesSendText } from '../TextMessages/application/TextMessagesSendText';
-import { MediaMessagesSendMedia } from '../MediaMessages/application/MediaMessagesSendMedia';
-import { ReactionMessagesSendReaction } from '../ReactionMessages/application/ReactionMessagesSendReaction';
 
 @Module({
   imports: [
@@ -73,54 +69,20 @@ import { ReactionMessagesSendReaction } from '../ReactionMessages/application/Re
       inject: ['MessageRepository'],
     },
     {
-      provide: BaileysMessageSender,
-      useFactory: (sessionManager: any) =>
-        new BaileysMessageSender(sessionManager),
-      inject: [WhatsAppSessionManager],
-    },
-    // Send Services
-    {
-      provide: 'TextMessagesSendText',
-      useFactory: (
-        textMessagesCreate: any,
-        messageSender: BaileysMessageSender,
-      ) => new TextMessagesSendText(textMessagesCreate, messageSender),
-      inject: ['TextMessagesCreate', BaileysMessageSender],
-    },
-    {
-      provide: 'MediaMessagesSendMedia',
-      useFactory: (
-        mediaMessagesCreate: any,
-        messageSender: BaileysMessageSender,
-      ) => new MediaMessagesSendMedia(mediaMessagesCreate, messageSender),
-      inject: ['MediaMessagesCreate', BaileysMessageSender],
-    },
-    {
-      provide: 'ReactionMessagesSendReaction',
-      useFactory: (
-        reactionMessagesCreate: any,
-        messageSender: BaileysMessageSender,
-      ) =>
-        new ReactionMessagesSendReaction(reactionMessagesCreate, messageSender),
-      inject: ['ReactionMessagesCreate', BaileysMessageSender],
+      provide: 'MessageSender',
+      useClass: BaileysMessageSender,
     },
     {
       provide: 'MessagesOrchestrator',
       useFactory: (
-        messagesCreate: MessagesCreate,
-        textMessagesSendText: any,
-        mediaMessagesSendMedia: any,
-        reactionMessagesSendReaction: any,
-        textMessagesCreate: any,
-        mediaMessagesCreate: any,
-        reactionMessagesCreate: any,
-        messageSender: BaileysMessageSender,
+        messagesCreate,
+        textMessagesCreate,
+        mediaMessagesCreate,
+        reactionMessagesCreate,
+        messageSender,
       ) =>
         new MessagesOrchestrator(
           messagesCreate,
-          textMessagesSendText,
-          mediaMessagesSendMedia,
-          reactionMessagesSendReaction,
           textMessagesCreate,
           mediaMessagesCreate,
           reactionMessagesCreate,
@@ -128,21 +90,30 @@ import { ReactionMessagesSendReaction } from '../ReactionMessages/application/Re
         ),
       inject: [
         'MessagesCreate',
-        'TextMessagesSendText',
-        'MediaMessagesSendMedia',
-        'ReactionMessagesSendReaction',
         'TextMessagesCreate',
         'MediaMessagesCreate',
         'ReactionMessagesCreate',
-        BaileysMessageSender,
+        'MessageSender',
       ],
+    },
+    {
+      provide: 'SendMessage',
+      useFactory: (messagesOrchestrator) => new SendMessage(messagesOrchestrator),
+      inject: ['MessagesOrchestrator'],
+    },
+    {
+      provide: 'MessageHandlerFactory',
+      useFactory: (textHandler, mediaHandler, reactionHandler) =>
+        new MessageHandlerFactory(textHandler, mediaHandler, reactionHandler),
+      inject: ['TextMessageHandler', 'MediaMessageHandler', 'ReactionMessageHandler'],
     },
   ],
   exports: [
     'MessageRepository',
     'MessagesCreate',
-    BaileysMessageSender,
+    'MessageSender',
     'MessagesOrchestrator',
+    'SendMessage',
   ],
 })
 export class MessagesModule {}

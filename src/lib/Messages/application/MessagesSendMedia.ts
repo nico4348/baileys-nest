@@ -1,8 +1,5 @@
 import { MessagesCreate } from './MessagesCreate';
-import {
-  BaileysMessageSender,
-  MediaPayload,
-} from '../infrastructure/BaileysMessageSender';
+import { MessageSender, MediaPayload } from '../domain/ports/MessageSender';
 import { v4 as uuidv4 } from 'uuid';
 import * as path from 'path';
 import { lookup } from 'mime-types';
@@ -10,7 +7,7 @@ import { lookup } from 'mime-types';
 export class MessagesSendMedia {
   constructor(
     private readonly messagesCreate: MessagesCreate,
-    private readonly messageSender: BaileysMessageSender,
+    private readonly messageSender: MessageSender,
   ) {}
 
   async run(

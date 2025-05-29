@@ -24,11 +24,10 @@ export class TypeOrmMessagesRepository implements MessageRepository {
     const savedEntity = await this.repository.save(messageEntity);
     return this.toDomain(savedEntity);
   }
-
   async getAll(): Promise<Message[]> {
     const messageEntities = await this.repository.find({
       order: { created_at: 'DESC' },
-      relations: ['session', 'quotedMessage', 'textMessage', 'mediaMessage'],
+      relations: ['session', 'quotedMessage'],
     });
 
     return messageEntities.map((entity) => this.toDomain(entity));
@@ -37,7 +36,7 @@ export class TypeOrmMessagesRepository implements MessageRepository {
   async getOneById(id: MessageId): Promise<Message | null> {
     const messageEntity = await this.repository.findOne({
       where: { id: id.value },
-      relations: ['session', 'quotedMessage', 'textMessage', 'mediaMessage'],
+      relations: ['session', 'quotedMessage'],
     });
 
     if (!messageEntity) {
@@ -46,12 +45,11 @@ export class TypeOrmMessagesRepository implements MessageRepository {
 
     return this.toDomain(messageEntity);
   }
-
   async getBySessionId(sessionId: string): Promise<Message[]> {
     const messageEntities = await this.repository.find({
       where: { session_id: sessionId },
       order: { created_at: 'DESC' },
-      relations: ['session', 'quotedMessage', 'textMessage', 'mediaMessage'],
+      relations: ['session', 'quotedMessage'],
     });
 
     return messageEntities.map((entity) => this.toDomain(entity));
@@ -60,14 +58,16 @@ export class TypeOrmMessagesRepository implements MessageRepository {
   async update(message: Message): Promise<Message> {
     const messageEntity = this.toEntity(message);
     await this.repository.update(message.id.value, messageEntity);
-    
+
     const updatedEntity = await this.repository.findOne({
       where: { id: message.id.value },
-      relations: ['session', 'quotedMessage', 'textMessage', 'mediaMessage'],
+      relations: ['session', 'quotedMessage'],
     });
 
     if (!updatedEntity) {
-      throw new Error(`Message with id ${message.id.value} not found after update`);
+      throw new Error(
+        `Message with id ${message.id.value} not found after update`,
+      );
     }
 
     return this.toDomain(updatedEntity);

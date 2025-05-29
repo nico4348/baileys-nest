@@ -3,7 +3,11 @@
     "allow": [
       "Bash(npm run build:*)",
       "Bash(grep:*)",
-      "Bash(npm start)"
+      "Bash(npm start)",
+      "Bash(npm install class-validator class-transformer)",
+      "Bash(find:*)",
+      "Bash(timeout 10s npm start)",
+      "Bash(chmod:*)"
     ],
     "deny": []
   }

@@ -1,37 +1,33 @@
+import { Injectable, Inject } from '@nestjs/common';
 import { MessagesCreate } from './MessagesCreate';
-import { TextMessagesSendText } from '../../TextMessages/application/TextMessagesSendText';
-import { MediaMessagesSendMedia } from '../../MediaMessages/application/MediaMessagesSendMedia';
-import { ReactionMessagesSendReaction } from '../../ReactionMessages/application/ReactionMessagesSendReaction';
 import { TextMessagesCreate } from '../../TextMessages/application/TextMessagesCreate';
 import { MediaMessagesCreate } from '../../MediaMessages/application/MediaMessagesCreate';
 import { ReactionMessagesCreate } from '../../ReactionMessages/application/ReactionMessagesCreate';
-import {
-  BaileysMessageSender,
-  TextPayload,
-  MediaPayload,
-  ReactPayload,
-} from '../infrastructure/BaileysMessageSender';
+import { MessageSender, TextPayload, MediaPayload, ReactPayload } from '../domain/ports/MessageSender';
 import * as path from 'path';
 import { lookup } from 'mime-types';
 import * as crypto from 'crypto';
 
+@Injectable()
 export class MessagesOrchestrator {
   constructor(
+    @Inject('MessagesCreate')
     private readonly messagesCreate: MessagesCreate,
-    private readonly textMessagesSendText: TextMessagesSendText,
-    private readonly mediaMessagesSendMedia: MediaMessagesSendMedia,
-    private readonly reactionMessagesSendReaction: ReactionMessagesSendReaction,
+    @Inject('TextMessagesCreate')
     private readonly textMessagesCreate: TextMessagesCreate,
+    @Inject('MediaMessagesCreate')
     private readonly mediaMessagesCreate: MediaMessagesCreate,
+    @Inject('ReactionMessagesCreate')
     private readonly reactionMessagesCreate: ReactionMessagesCreate,
-    private readonly messageSender: BaileysMessageSender,
+    @Inject('MessageSender')
+    private readonly messageSender: MessageSender,
   ) {}
   async sendTextMessage(
     sessionId: string,
     to: string,
     text: string,
     quotedMessageId?: string,
-  ): Promise<{ messageId: string; textMessageId: string; success: boolean }> {
+  ): Promise<any> {
     try {
       const payload: TextPayload = {
         text,
@@ -66,11 +62,7 @@ export class MessagesOrchestrator {
         text,
       );
 
-      return {
-        messageId: whatsappMessageId,
-        textMessageId: whatsappMessageId,
-        success: true,
-      };
+      return sentMessage;
     } catch (error) {
       console.error('Error in sendTextMessage orchestration:', error);
       throw error;
@@ -83,7 +75,7 @@ export class MessagesOrchestrator {
     mediaUrl: string,
     caption?: string,
     quotedMessageId?: string,
-  ): Promise<{ messageId: string; mediaMessageId: string; success: boolean }> {
+  ): Promise<any> {
     try {
       // Extract file information first
       const fileName = path.basename(mediaUrl);
@@ -134,11 +126,7 @@ export class MessagesOrchestrator {
         mediaUrl,
       );
 
-      return {
-        messageId: whatsappMessageId,
-        mediaMessageId: whatsappMessageId,
-        success: true,
-      };
+      return sentMessage;
     } catch (error) {
       console.error('Error in sendMediaMessage orchestration:', error);
       throw error;
@@ -150,11 +138,7 @@ export class MessagesOrchestrator {
     messageKey: any,
     emoji: string,
     targetMessageId: string,
-  ): Promise<{
-    messageId: string;
-    reactionMessageId: string;
-    success: boolean;
-  }> {
+  ): Promise<any> {
     try {
       // 1. Send reaction through Baileys first to get WhatsApp message ID
       const payload: ReactPayload = { key: messageKey, emoji };
@@ -189,11 +173,7 @@ export class MessagesOrchestrator {
         targetMessageId,
       );
 
-      return {
-        messageId: whatsappMessageId,
-        reactionMessageId: whatsappMessageId,
-        success: true,
-      };
+      return sentMessage;
     } catch (error) {
       console.error('Error in sendReaction orchestration:', error);
       throw error;
