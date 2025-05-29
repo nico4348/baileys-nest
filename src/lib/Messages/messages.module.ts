@@ -98,14 +98,19 @@ import { ReactionMessagesModule } from '../ReactionMessages/reactionMessages.mod
     },
     {
       provide: 'SendMessage',
-      useFactory: (messagesOrchestrator) => new SendMessage(messagesOrchestrator),
+      useFactory: (messagesOrchestrator) =>
+        new SendMessage(messagesOrchestrator),
       inject: ['MessagesOrchestrator'],
     },
     {
       provide: 'MessageHandlerFactory',
       useFactory: (textHandler, mediaHandler, reactionHandler) =>
         new MessageHandlerFactory(textHandler, mediaHandler, reactionHandler),
-      inject: ['TextMessageHandler', 'MediaMessageHandler', 'ReactionMessageHandler'],
+      inject: [
+        'TextMessageHandler',
+        'MediaMessageHandler',
+        'ReactionMessageHandler',
+      ],
     },
   ],
   exports: [

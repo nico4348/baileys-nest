@@ -8,9 +8,9 @@ export class TypeOrmReactionMessagesEntity {
 
   @Column({ type: 'uuid' })
   message_id: string;
-
   @Column({ type: 'varchar', length: 5 })
   emoji: string;
+
   @Column({ type: 'uuid' })
   target_msg_id: string;
 

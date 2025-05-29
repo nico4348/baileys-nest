@@ -64,9 +64,8 @@ export class ReactionMessageData {
   @IsNotEmpty()
   emoji: string;
 
-  @IsString()
-  @IsNotEmpty()
-  targetMessageId: string;
+  @IsOptional()
+  targetMessageId?: any; // Acepta objeto JSON completo o string
 
   @IsOptional()
   messageKey?: any;

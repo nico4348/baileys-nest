@@ -23,12 +23,11 @@ export class MessagesSendText {
         payload,
         quotedMessageId ? quotedMessageId : undefined,
       );
-
       if (sentMessage) {
         // Save message to database
         await this.messagesCreate.run(
           messageId,
-          sentMessage.key?.id || null, // Usamos el ID de Baileys si está disponible
+          sentMessage, // Complete Baileys message object as JSON
           'txt',
           quotedMessageId ? JSON.stringify(quotedMessageId) : null,
           sessionId,

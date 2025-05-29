@@ -27,7 +27,7 @@ export class MessagesSendReaction {
         // Save message to database
         await this.messagesCreate.run(
           messageId,
-          sentMessage.key?.id || null, // Baileys message ID
+          sentMessage, // Complete Baileys message object as JSON
           'react',
           targetMessageId,
           sessionId,

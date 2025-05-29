@@ -57,7 +57,7 @@ export class MessagesController {
       const createdAt = new Date();
       await this.messagesCreate.run(
         id,
-        null, // No hay baileys_id para mensajes creados manualmente
+        null, // No hay baileys_json para mensajes creados manualmente
         createMessageDto.message_type as 'txt' | 'media' | 'react',
         createMessageDto.quoted_message_id || null,
         createMessageDto.session_id,

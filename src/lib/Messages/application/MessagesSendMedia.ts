@@ -41,7 +41,7 @@ export class MessagesSendMedia {
       if (sentMessage) {
         await this.messagesCreate.run(
           messageId,
-          sentMessage.key?.id || null,
+          sentMessage, // Complete Baileys message object as JSON
           'media',
           quotedMessageId ? JSON.stringify(quotedMessageId) : null,
           sessionId,

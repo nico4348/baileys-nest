@@ -147,7 +147,7 @@ export class MessagesOrchestrator {
       const payload: ReactPayload = { key: messageKey, emoji };
       const sentMessage = await this.messageSender.sendReactMessage(
         sessionId,
-        to,
+        `${to}@s.whatsapp.net`,
         payload,
       );
       if (!sentMessage || !sentMessage.key || !sentMessage.key.id) {
