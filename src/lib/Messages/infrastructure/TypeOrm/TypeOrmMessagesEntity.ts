@@ -44,19 +44,27 @@ export class TypeOrmMessagesEntity {
   @ManyToOne(() => TypeOrmMessagesEntity, (message) => message.quotedMessages)
   @JoinColumn({ name: 'quoted_message_id' })
   quotedMessage: TypeOrmMessagesEntity;
-
   @OneToMany(() => TypeOrmMessagesEntity, (message) => message.quotedMessage)
   quotedMessages: TypeOrmMessagesEntity[];
 
   @OneToMany(() => MessageStatus, (messageStatus) => messageStatus.message)
   messageStatuses: MessageStatus[];
 
-  @OneToOne(() => TypeOrmTextMessagesEntity, (textMessage) => textMessage.message)
+  @OneToOne(
+    () => TypeOrmTextMessagesEntity,
+    (textMessage) => textMessage.message,
+  )
   textMessage: TypeOrmTextMessagesEntity;
 
-  @OneToOne(() => TypeOrmMediaMessagesEntity, (mediaMessage) => mediaMessage.message)
+  @OneToOne(
+    () => TypeOrmMediaMessagesEntity,
+    (mediaMessage) => mediaMessage.message,
+  )
   mediaMessage: TypeOrmMediaMessagesEntity;
 
-  @OneToMany(() => TypeOrmReactionMessagesEntity, (reaction) => reaction.message)
+  @OneToMany(
+    () => TypeOrmReactionMessagesEntity,
+    (reactionMessage) => reactionMessage.message,
+  )
   reactions: TypeOrmReactionMessagesEntity[];
 }

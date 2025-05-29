@@ -64,8 +64,7 @@ import { TextMessageHandler } from './infrastructure/TextMessageHandler';
     },
     {
       provide: 'TextMessageHandler',
-      useFactory: (textMessagesCreate) => new TextMessageHandler(textMessagesCreate),
-      inject: ['TextMessagesCreate'],
+      useClass: TextMessageHandler,
     },
   ],
   exports: [
