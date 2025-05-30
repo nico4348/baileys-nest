@@ -11,7 +11,7 @@ export class TypeOrmReactionMessagesEntity {
   @Column({ type: 'varchar', length: 5 })
   emoji: string;
 
-  @Column({ type: 'varchar', length: 25 })
+  @Column({ type: 'uuid' })
   target_msg_id: string;
 
   @ManyToOne(() => TypeOrmMessagesEntity, (message) => message.reactions)

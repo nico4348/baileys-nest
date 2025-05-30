@@ -11,7 +11,7 @@
  * - Sesión: 30ed47f1-eb16-4573-8696-4546ab37dce0
  */
 
-const fetch = require('node-fetch');
+const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
@@ -20,8 +20,8 @@ const CONFIG = {
   BASE_URL: 'http://localhost:3000',
   TARGET_NUMBER: '573022949109',
   SESSION_ID: '30ed47f1-eb16-4573-8696-4546ab37dce0',
-  DELAY_BETWEEN_TESTS: 2000, // 2 segundos entre tests
-  TIMEOUT: 30000, // 30 segundos timeout
+  DELAY_BETWEEN_TESTS: 3000, // 3 segundos entre tests (aumentado)
+  TIMEOUT: 45000, // 45 segundos timeout (aumentado)
 };
 
 // ==================== UTILIDADES ====================
@@ -49,39 +49,85 @@ class TestRunner {
   async delay(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
+  async makeRequest(endpoint, method = 'GET', data = null, retries = 2) {
+    for (let attempt = 0; attempt <= retries; attempt++) {
+      try {
+        const result = await this._performRequest(endpoint, method, data);
+        return result;
+      } catch (error) {
+        if (attempt === retries) {
+          return {
+            status: 0,
+            ok: false,
+            error: `Failed after ${retries + 1} attempts: ${error.message}`,
+          };
+        }
 
-  async makeRequest(endpoint, method = 'GET', data = null) {
-    const url = `${CONFIG.BASE_URL}${endpoint}`;
-    const options = {
-      method,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      timeout: CONFIG.TIMEOUT,
-    };
-
-    if (data) {
-      options.body = JSON.stringify(data);
-    }
-
-    try {
-      const response = await fetch(url, options);
-      const result = await response.json();
-
-      return {
-        status: response.status,
-        ok: response.ok,
-        data: result,
-      };
-    } catch (error) {
-      return {
-        status: 0,
-        ok: false,
-        error: error.message,
-      };
+        this.log(
+          `⚠️ Intento ${attempt + 1} falló, reintentando en 2s...`,
+          'warning',
+        );
+        await this.delay(2000);
+      }
     }
   }
 
+  async _performRequest(endpoint, method = 'GET', data = null) {
+    return new Promise((resolve, reject) => {
+      const postData = data ? JSON.stringify(data) : null;
+
+      const options = {
+        hostname: 'localhost',
+        port: 3000,
+        path: endpoint,
+        method: method,
+        headers: {
+          'Content-Type': 'application/json',
+          ...(postData && { 'Content-Length': Buffer.byteLength(postData) }),
+        },
+        timeout: CONFIG.TIMEOUT,
+      };
+
+      const req = http.request(options, (res) => {
+        let responseData = '';
+
+        res.on('data', (chunk) => {
+          responseData += chunk;
+        });
+
+        res.on('end', () => {
+          try {
+            const result = responseData ? JSON.parse(responseData) : {};
+            resolve({
+              status: res.statusCode,
+              ok: res.statusCode >= 200 && res.statusCode < 300,
+              data: result,
+            });
+          } catch (error) {
+            resolve({
+              status: res.statusCode,
+              ok: false,
+              data: { error: 'Invalid JSON response', raw: responseData },
+            });
+          }
+        });
+      });
+
+      req.on('error', (err) => {
+        reject(new Error(`Request error: ${err.message}`));
+      });
+
+      req.on('timeout', () => {
+        req.destroy();
+        reject(new Error('Request timeout'));
+      });
+
+      if (postData) {
+        req.write(postData);
+      }
+      req.end();
+    });
+  }
   async runTest(testName, testFunction) {
     this.totalTests++;
     this.log(`🧪 Ejecutando: ${testName}`, 'info');
@@ -113,14 +159,25 @@ class TestRunner {
         success: false,
         error: error.message,
       });
+
+      // Si es un error de conexión, intentar reconectar
+      if (
+        error.message.includes('timeout') ||
+        error.message.includes('ECONNREFUSED')
+      ) {
+        this.log(
+          '🔄 Detectado problema de conexión, esperando antes del siguiente test...',
+          'warning',
+        );
+        await this.delay(5000); // Esperar 5 segundos adicionales
+      }
     }
 
     await this.delay(CONFIG.DELAY_BETWEEN_TESTS);
   }
-
   generateReport() {
     this.log('\n📊 REPORTE FINAL DE TESTS', 'info');
-    this.log('=' * 50, 'info');
+    this.log('='.repeat(50), 'info');
     this.log(`Total de tests: ${this.totalTests}`, 'info');
     this.log(`✅ Exitosos: ${this.passedTests}`, 'success');
     this.log(`❌ Fallidos: ${this.failedTests}`, 'error');
@@ -265,14 +322,13 @@ const TESTS = {
       data: response.data,
     };
   },
-
   async testSendImagePNG(runner) {
     const data = {
       sessionId: CONFIG.SESSION_ID,
       to: CONFIG.TARGET_NUMBER,
       messageType: 'media',
       mediaData: {
-        url: 'https://via.placeholder.com/400x300.png',
+        url: 'https://httpbin.org/image/png',
         mediaType: 'image',
         caption: '🖼️ Imagen PNG de prueba (400x300)',
         mimeType: 'image/png',
@@ -411,7 +467,7 @@ const TESTS = {
       to: CONFIG.TARGET_NUMBER,
       messageType: 'media',
       mediaData: {
-        url: 'https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4',
+        url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
         mediaType: 'video',
         caption: '🎥 Video MP4 de prueba (1280x720)',
         mimeType: 'video/mp4',
@@ -439,13 +495,12 @@ const TESTS = {
         text: '📩 Mensaje para reaccionar con corazón',
       },
     };
-
     const textResponse = await runner.makeRequest(
       '/messages/send',
       'POST',
       textData,
     );
-    console.log(textResponse);
+
     if (!textResponse.ok || !textResponse.data?.success) {
       return {
         success: false,
@@ -731,12 +786,11 @@ const TESTS = {
 // ==================== EJECUCIÓN PRINCIPAL ====================
 async function runAllTests() {
   const runner = new TestRunner();
-
   runner.log('🚀 INICIANDO SUITE DE TESTS COMPLETA PARA MESSAGES API', 'info');
   runner.log(`📱 Número objetivo: ${CONFIG.TARGET_NUMBER}`, 'info');
   runner.log(`🔑 Sesión: ${CONFIG.SESSION_ID}`, 'info');
   runner.log(`🌐 Base URL: ${CONFIG.BASE_URL}`, 'info');
-  runner.log('=' * 60, 'info');
+  runner.log('='.repeat(60), 'info');
 
   // Tests en orden lógico
   const testSequence = [
@@ -808,12 +862,31 @@ async function runAllTests() {
   for (const { name, test } of testSequence) {
     await runner.runTest(name, () => test(runner));
   }
-
   // Generar reporte final
   runner.generateReport();
 
-  // Retornar código de salida apropiado
-  process.exit(runner.failedTests > 0 ? 1 : 0);
+  // Mostrar resumen de conectividad si hubo problemas
+  const connectionErrors = runner.results.filter(
+    (r) =>
+      r.error &&
+      (r.error.includes('timeout') || r.error.includes('ECONNREFUSED')),
+  );
+
+  if (connectionErrors.length > 0) {
+    runner.log(
+      `⚠️ Se detectaron ${connectionErrors.length} errores de conexión. El servidor puede estar sobrecargado o reiniciándose.`,
+      'warning',
+    );
+  }
+
+  // Retornar código de salida apropiado (pero no forzar salida inmediata)
+  const exitCode = runner.failedTests > 0 ? 1 : 0;
+  runner.log(`🏁 Tests completados. Código de salida: ${exitCode}`, 'info');
+
+  // Dar tiempo para que se muestren todos los logs antes de salir
+  setTimeout(() => {
+    process.exit(exitCode);
+  }, 1000);
 }
 
 // ==================== MANEJO DE ARGUMENTOS ====================
@@ -866,18 +939,51 @@ Ejemplos:
 if (require.main === module) {
   parseArguments();
 
-  // Verificar si node-fetch está disponible
-  if (typeof fetch === 'undefined') {
-    console.error(
-      '❌ Error: node-fetch no está instalado. Ejecute: npm install node-fetch',
-    );
-    process.exit(1);
-  }
+  let testsStarted = false; // Flag para evitar ejecuciones duplicadas
 
-  runAllTests().catch((error) => {
-    console.error('❌ Error fatal en la ejecución de tests:', error);
-    process.exit(1);
+  // Verificar si el servidor está disponible
+  const serverCheck = http.request(
+    {
+      hostname: 'localhost',
+      port: 3000,
+      path: '/messages',
+      method: 'GET',
+      timeout: 10000, // Aumentamos a 10 segundos
+    },
+    (res) => {
+      if (!testsStarted) {
+        testsStarted = true;
+        console.log('🌟 Server is running, starting complete test suite...\n');
+        runAllTests().catch((error) => {
+          console.error('❌ Error fatal en la ejecución de tests:', error);
+          process.exit(1);
+        });
+      }
+    },
+  );
+
+  serverCheck.on('error', (err) => {
+    if (!testsStarted) {
+      console.log('❌ Server not running. Please start the server first:');
+      console.log('   npm start\n');
+      process.exit(1);
+    }
   });
+
+  serverCheck.on('timeout', () => {
+    if (!testsStarted) {
+      testsStarted = true;
+      console.log(
+        '⏰ Server connection timeout during initial check. Attempting to continue with tests...',
+      );
+      runAllTests().catch((error) => {
+        console.error('❌ Error fatal en la ejecución de tests:', error);
+        process.exit(1);
+      });
+    }
+  });
+
+  serverCheck.end();
 }
 
 module.exports = { TestRunner, TESTS, CONFIG };

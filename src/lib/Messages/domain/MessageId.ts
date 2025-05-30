@@ -7,8 +7,11 @@ export class MessageId {
   }
 
   private ensureIsValid() {
-    if (this.value.length < 36) {
-      throw new Error('MessageId must be a valid UUID');
+    if (!this.value || this.value.trim().length === 0) {
+      throw new Error('MessageId cannot be empty');
+    }
+    if (this.value.length < 5) {
+      throw new Error('MessageId must be at least 5 characters long');
     }
   }
 }

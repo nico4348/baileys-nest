@@ -76,12 +76,14 @@ export class SendMessage {
       request.quotedMessageId,
     );
 
-    const messageId = result?.key?.id;
-    if (!messageId) {
+    const baileysMessageId = result?.baileysMessage?.key?.id;
+    const uuid = result?.uuid;
+    
+    if (!baileysMessageId || !uuid) {
       throw new Error('Failed to send text message');
     }
 
-    return SendMessageResponse.success(messageId, MessageType.TEXT, messageId);
+    return SendMessageResponse.success(uuid, MessageType.TEXT, baileysMessageId);
   }
 
   private async sendMediaMessage(
@@ -96,12 +98,14 @@ export class SendMessage {
       request.quotedMessageId,
     );
 
-    const messageId = result?.key?.id;
-    if (!messageId) {
+    const baileysMessageId = result?.baileysMessage?.key?.id;
+    const uuid = result?.uuid;
+    
+    if (!baileysMessageId || !uuid) {
       throw new Error('Failed to send media message');
     }
 
-    return SendMessageResponse.success(messageId, MessageType.MEDIA, messageId);
+    return SendMessageResponse.success(uuid, MessageType.MEDIA, baileysMessageId);
   }
   private async sendReactionMessage(
     request: SendMessageRequest,
@@ -136,15 +140,17 @@ export class SendMessage {
       targetMessageId,
     );
 
-    const messageId = result?.key?.id;
-    if (!messageId) {
+    const baileysMessageId = result?.baileysMessage?.key?.id;
+    const uuid = result?.uuid;
+    
+    if (!baileysMessageId || !uuid) {
       throw new Error('Failed to send reaction');
     }
 
     return SendMessageResponse.success(
-      messageId,
+      uuid,
       MessageType.REACTION,
-      messageId,
+      baileysMessageId,
     );
   }
 }

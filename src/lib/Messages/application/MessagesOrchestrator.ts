@@ -97,7 +97,10 @@ export class MessagesOrchestrator {
         text,
       );
 
-      return sentMessage;
+      return { 
+        baileysMessage: sentMessage, 
+        uuid: uuid 
+      };
     } catch (error) {
       console.error('Error in sendTextMessage orchestration:', error);
       throw error;
@@ -162,7 +165,10 @@ export class MessagesOrchestrator {
         mediaUrl,
       );
 
-      return sentMessage;
+      return { 
+        baileysMessage: sentMessage, 
+        uuid: uuid 
+      };
     } catch (error) {
       console.error('Error in sendMediaMessage orchestration:', error);
       throw error;
@@ -195,7 +201,7 @@ export class MessagesOrchestrator {
         uuid, // UUID como ID principal
         sentMessage, // Complete Baileys message object as JSON
         'react',
-        sentMessage.id,
+        targetMessageId, // Use the actual target message ID (UUID)
         sessionId,
         to,
         new Date(),
@@ -204,10 +210,13 @@ export class MessagesOrchestrator {
         this.cryptoService.generateUUID(),
         uuid, // Usamos el UUID como message_id para la relación
         emoji,
-        sentMessage.id,
+        targetMessageId, // Use the target message ID (should be UUID)
       );
 
-      return sentMessage;
+      return { 
+        baileysMessage: sentMessage, 
+        uuid: uuid 
+      };
     } catch (error) {
       console.error('Error in sendReaction orchestration:', error);
       throw error;

@@ -1,16 +1,35 @@
 {
-  "timestamp": "2025-05-30T14:46:44.447Z",
+  "timestamp": "2025-05-30T16:06:07.938Z",
   "summary": {
     "total": 24,
-    "passed": 18,
-    "failed": 6,
-    "successRate": 75
+    "passed": 22,
+    "failed": 2,
+    "successRate": 91.66666666666666
   },
   "results": [
     {
       "test": "Verificar Estado de Sesión",
-      "success": false,
-      "error": "Sesión no disponible: Error desconocido"
+      "success": true,
+      "data": {
+        "success": true,
+        "message": "Estado de sesión obtenido exitosamente.",
+        "data": {
+          "sessionId": "30ed47f1-eb16-4573-8696-4546ab37dce0",
+          "connected": false,
+          "status": "disconnected",
+          "isPaused": false,
+          "isRestarting": false,
+          "isDeleting": false,
+          "sessionInfo": {
+            "id": "30ed47f1-eb16-4573-8696-4546ab37dce0",
+            "sessionName": "test-immediate-qr",
+            "phone": "573022949109",
+            "status": true,
+            "createdAt": "2025-05-26T22:17:31.332Z",
+            "updatedAt": "2025-05-30T16:01:55.302Z"
+          }
+        }
+      }
     },
     {
       "test": "Enviar Mensaje de Texto Simple",
@@ -18,9 +37,9 @@
       "error": "HTTP 201",
       "data": {
         "success": true,
-        "messageId": "3EB0BC9A4081B1B416909A",
-        "childMessageId": "3EB0BC9A4081B1B416909A",
-        "timestamp": "2025-05-30T14:44:39.201Z",
+        "messageId": "6a20a6e3-53f1-442f-b278-a1f97caae149",
+        "childMessageId": "3EB0CFDB3E518A61E7C06E",
+        "timestamp": "2025-05-30T16:02:19.065Z",
         "messageType": "text"
       }
     },
@@ -30,9 +49,9 @@
       "error": "HTTP 201",
       "data": {
         "success": true,
-        "messageId": "3EB03E12FB6559AE2A68CB",
-        "childMessageId": "3EB03E12FB6559AE2A68CB",
-        "timestamp": "2025-05-30T14:44:41.248Z",
+        "messageId": "05b20487-2ef0-4053-939f-db99e3878f6b",
+        "childMessageId": "3EB0DE9F50D5B1F4D27FD4",
+        "timestamp": "2025-05-30T16:02:22.098Z",
         "messageType": "text"
       }
     },
@@ -42,9 +61,9 @@
       "error": "HTTP 201",
       "data": {
         "success": true,
-        "messageId": "3EB0F496D450D3BE34314D",
-        "childMessageId": "3EB0F496D450D3BE34314D",
-        "timestamp": "2025-05-30T14:44:43.279Z",
+        "messageId": "f7e6df74-ace4-47a4-8fc3-d02951a48ea1",
+        "childMessageId": "3EB0F0173CE9DC7BDA8EFD",
+        "timestamp": "2025-05-30T16:02:25.134Z",
         "messageType": "text"
       }
     },
@@ -54,22 +73,22 @@
       "error": "HTTP 201",
       "data": {
         "success": true,
-        "messageId": "3EB035A8F5D38A13BACBCF",
-        "childMessageId": "3EB035A8F5D38A13BACBCF",
-        "timestamp": "2025-05-30T14:44:46.476Z",
+        "messageId": "c64cdf7c-c902-4c56-83f3-567ac8c058be",
+        "childMessageId": "3EB099FF06FFB255E3A246",
+        "timestamp": "2025-05-30T16:02:29.313Z",
         "messageType": "media"
       }
     },
     {
       "test": "Enviar Imagen PNG",
       "success": false,
-      "error": "Request failed with status code 400",
+      "error": "getaddrinfo ENOTFOUND via.placeholder.com",
       "data": {
         "success": false,
         "messageId": "",
-        "timestamp": "2025-05-30T14:44:48.917Z",
+        "timestamp": "2025-05-30T16:02:32.353Z",
         "messageType": "media",
-        "error": "Request failed with status code 400"
+        "error": "getaddrinfo ENOTFOUND via.placeholder.com"
       }
     },
     {
@@ -78,9 +97,9 @@
       "error": "HTTP 201",
       "data": {
         "success": true,
-        "messageId": "3EB0F2A7D0765F8CAE8C71",
-        "childMessageId": "3EB0F2A7D0765F8CAE8C71",
-        "timestamp": "2025-05-30T14:44:51.617Z",
+        "messageId": "cd6486b1-df03-4a2f-bb74-2c01339c0656",
+        "childMessageId": "3EB07BBC82C4866AF9428E",
+        "timestamp": "2025-05-30T16:02:36.150Z",
         "messageType": "media"
       }
     },
@@ -90,9 +109,9 @@
       "error": "HTTP 201",
       "data": {
         "success": true,
-        "messageId": "3EB01F3EE31DCC86A76E95",
-        "childMessageId": "3EB01F3EE31DCC86A76E95",
-        "timestamp": "2025-05-30T14:44:54.177Z",
+        "messageId": "803a5fe7-d371-40b1-b113-6cda93715915",
+        "childMessageId": "3EB0EB1C6A09F5C58B4368",
+        "timestamp": "2025-05-30T16:02:39.643Z",
         "messageType": "media"
       }
     },
@@ -102,9 +121,9 @@
       "error": "HTTP 201",
       "data": {
         "success": true,
-        "messageId": "3EB0F6381154617A74BC3E",
-        "childMessageId": "3EB0F6381154617A74BC3E",
-        "timestamp": "2025-05-30T14:44:57.423Z",
+        "messageId": "d4844597-8746-49bf-964c-a55095b45e78",
+        "childMessageId": "3EB07064A517DC07859E08",
+        "timestamp": "2025-05-30T16:02:43.479Z",
         "messageType": "media"
       }
     },
@@ -114,9 +133,9 @@
       "error": "HTTP 201",
       "data": {
         "success": true,
-        "messageId": "3EB08E68745E6CF1C12675",
-        "childMessageId": "3EB08E68745E6CF1C12675",
-        "timestamp": "2025-05-30T14:45:01.800Z",
+        "messageId": "dcb5b81c-4a9b-4466-b78c-424457dc5694",
+        "childMessageId": "3EB06599960AB7FA4977F2",
+        "timestamp": "2025-05-30T16:02:50.246Z",
         "messageType": "media"
       }
     },
@@ -126,9 +145,9 @@
       "error": "HTTP 201",
       "data": {
         "success": true,
-        "messageId": "3EB089B09885A4538C3EEE",
-        "childMessageId": "3EB089B09885A4538C3EEE",
-        "timestamp": "2025-05-30T14:45:05.942Z",
+        "messageId": "989cb3f7-16ac-47f6-a4f0-949916bb0f06",
+        "childMessageId": "3EB071FDC3295717C11A62",
+        "timestamp": "2025-05-30T16:02:55.964Z",
         "messageType": "media"
       }
     },
@@ -139,86 +158,86 @@
       "data": {
         "success": false,
         "messageId": "",
-        "timestamp": "2025-05-30T14:45:09.098Z",
+        "timestamp": "2025-05-30T16:03:00.490Z",
         "messageType": "media",
         "error": "Request failed with status code 404"
       }
     },
     {
       "test": "Enviar Reacción con Corazón",
-      "success": false,
-      "error": "MessageId must be a valid UUID",
+      "success": true,
+      "error": "HTTP 201",
       "data": {
         "originalMessage": {
           "success": true,
-          "messageId": "3EB04408CC775BC993A5BA",
-          "childMessageId": "3EB04408CC775BC993A5BA",
-          "timestamp": "2025-05-30T14:45:11.119Z",
+          "messageId": "15909a89-f9d7-4d54-b8d0-0e10f1761258",
+          "childMessageId": "3EB04195546BC84361083A",
+          "timestamp": "2025-05-30T16:03:03.531Z",
           "messageType": "text"
         },
         "reaction": {
-          "success": false,
-          "messageId": "",
-          "timestamp": "2025-05-30T14:45:14.114Z",
-          "messageType": "reaction",
-          "error": "MessageId must be a valid UUID"
+          "success": true,
+          "messageId": "f2f09007-5e6b-442c-9cce-108cb185d8ec",
+          "childMessageId": "3EB05BF6E2FF55B11FFB7D",
+          "timestamp": "2025-05-30T16:03:06.555Z",
+          "messageType": "reaction"
         }
       }
     },
     {
       "test": "Enviar Múltiples Reacciones",
-      "success": false,
+      "success": true,
       "data": {
         "originalMessage": {
           "success": true,
-          "messageId": "3EB03B3EE8ED18CBEFC698",
-          "childMessageId": "3EB03B3EE8ED18CBEFC698",
-          "timestamp": "2025-05-30T14:45:16.125Z",
+          "messageId": "33433a6f-822d-4fd9-b317-85e2e8dae027",
+          "childMessageId": "3EB0EB75AF99CA970684AD",
+          "timestamp": "2025-05-30T16:03:09.572Z",
           "messageType": "text"
         },
         "reactions": [
           {
             "emoji": "👍",
-            "success": false,
+            "success": true,
             "data": {
-              "success": false,
-              "messageId": "",
-              "timestamp": "2025-05-30T14:45:18.129Z",
-              "messageType": "reaction",
-              "error": "MessageId must be a valid UUID"
+              "success": true,
+              "messageId": "2eefe1b5-a82d-4bd1-8379-432918edb41b",
+              "childMessageId": "3EB0CF70D74AB321952F7B",
+              "timestamp": "2025-05-30T16:03:11.585Z",
+              "messageType": "reaction"
             }
           },
           {
             "emoji": "😂",
-            "success": false,
+            "success": true,
             "data": {
-              "success": false,
-              "messageId": "",
-              "timestamp": "2025-05-30T14:45:19.128Z",
-              "messageType": "reaction",
-              "error": "MessageId must be a valid UUID"
+              "success": true,
+              "messageId": "37f23605-44ed-4223-b429-3f5ca955edfd",
+              "childMessageId": "3EB07962699BB3043C42AB",
+              "timestamp": "2025-05-30T16:03:12.603Z",
+              "messageType": "reaction"
             }
           },
           {
             "emoji": "😮",
-            "success": false,
+            "success": true,
             "data": {
-              "success": false,
-              "messageId": "",
-              "timestamp": "2025-05-30T14:45:20.135Z",
-              "messageType": "reaction",
-              "error": "MessageId must be a valid UUID"
+              "success": true,
+              "messageId": "aeb20be1-fa1f-4d60-9d69-c123529282dd",
+              "childMessageId": "3EB0B7EB3BCC191946564E",
+              "timestamp": "2025-05-30T16:03:13.611Z",
+              "messageType": "reaction"
             }
           },
           {
             "emoji": "👎",
-            "success": false,
+            "success": true,
             "data": {
-              "success": false,
-              "messageId": "",
-              "timestamp": "2025-05-30T14:45:21.136Z",
-              "messageType": "reaction",
-              "error": "MessageId must be a valid UUID"
+              "success": true,
+              "messageId": "122c5f50-8462-4b2b-ac20-8c2ac4db0b27",
+              "childMessageId": "3EB0522301251F3219BA6A",
+              "timestamp": "2025-05-30T16:03:14.642Z",
+              "messageType": "reaction"
             }
           }
         ]
@@ -231,7 +250,7 @@
       "data": {
         "success": false,
         "messageId": "",
-        "timestamp": "2025-05-30T14:45:24.167Z",
+        "timestamp": "2025-05-30T16:03:18.663Z",
         "messageType": "text",
         "error": "Session invalid-session-id not found or not connected"
       }
@@ -239,14 +258,7 @@
     {
       "test": "Test Número Inválido",
       "success": true,
-      "error": null,
-      "data": {
-        "success": false,
-        "messageId": "",
-        "timestamp": "2025-05-30T14:46:26.184Z",
-        "messageType": "text",
-        "error": "Timed Out"
-      }
+      "error": null
     },
     {
       "test": "Test Texto Vacío",
@@ -267,7 +279,7 @@
       "data": {
         "success": false,
         "messageId": "",
-        "timestamp": "2025-05-30T14:46:30.222Z",
+        "timestamp": "2025-05-30T16:05:46.784Z",
         "messageType": "media",
         "error": "ENOENT: no such file or directory, open 'C:\\Users\\Usuario\\Desktop\\baileys-nest\\invalid-url'"
       }
@@ -279,7 +291,7 @@
       "data": {
         "success": false,
         "messageId": "",
-        "timestamp": "2025-05-30T14:46:32.247Z",
+        "timestamp": "2025-05-30T16:05:49.809Z",
         "messageType": "media",
         "error": "Unsupported media type 'unsupported'"
       }
@@ -289,25 +301,31 @@
       "success": true,
       "error": "HTTP 200",
       "data": {
-        "count": 112,
+        "count": 74,
         "sample": [
           {
             "id": {
-              "value": "9a7ad73c-4bc5-433c-a828-7139156204e7"
+              "value": "b599d571-68ad-436c-a494-95db693fc166"
             },
             "baileys_json": {
               "value": {
                 "key": {
                   "remoteJid": "573022949109@s.whatsapp.net",
                   "fromMe": true,
-                  "id": "3EB03B3EE8ED18CBEFC698"
+                  "id": "3EB018F50CB93BB0FECC8A"
                 },
                 "message": {
-                  "extendedTextMessage": {
-                    "text": "🎭 Mensaje para múltiples reacciones"
+                  "reactionMessage": {
+                    "key": {
+                      "remoteJid": "573022949109@s.whatsapp.net",
+                      "fromMe": true,
+                      "id": "3EB0B18257751E1C07069B"
+                    },
+                    "text": "👎",
+                    "senderTimestampMs": "1748621002511"
                   }
                 },
-                "messageTimestamp": "1748616316",
+                "messageTimestamp": "1748621002",
                 "status": "PENDING"
               }
             },
@@ -315,35 +333,41 @@
               "value": "30ed47f1-eb16-4573-8696-4546ab37dce0"
             },
             "quoted_message_id": {
-              "value": null
+              "value": "aedd619d-15d4-4189-a72c-79b0f65a497a"
             },
             "to": {
               "value": "573022949109"
             },
             "message_type": {
-              "value": "txt"
+              "value": "react"
             },
             "created_at": {
-              "value": "2025-05-30T14:45:16.121Z"
+              "value": "2025-05-30T16:03:22.515Z"
             }
           },
           {
             "id": {
-              "value": "4145ad23-c59a-4433-b48e-bcc2eb5e607f"
+              "value": "59b4c8b8-ea12-4727-bcca-842b4f9d971d"
             },
             "baileys_json": {
               "value": {
                 "key": {
                   "remoteJid": "573022949109@s.whatsapp.net",
                   "fromMe": true,
-                  "id": "3EB04408CC775BC993A5BA"
+                  "id": "3EB0A233D756FAED613B87"
                 },
                 "message": {
-                  "extendedTextMessage": {
-                    "text": "📩 Mensaje para reaccionar con corazón"
+                  "reactionMessage": {
+                    "key": {
+                      "remoteJid": "573022949109@s.whatsapp.net",
+                      "fromMe": true,
+                      "id": "3EB0B18257751E1C07069B"
+                    },
+                    "text": "😮",
+                    "senderTimestampMs": "1748621001492"
                   }
                 },
-                "messageTimestamp": "1748616311",
+                "messageTimestamp": "1748621001",
                 "status": "PENDING"
               }
             },
@@ -351,44 +375,41 @@
               "value": "30ed47f1-eb16-4573-8696-4546ab37dce0"
             },
             "quoted_message_id": {
-              "value": null
+              "value": "aedd619d-15d4-4189-a72c-79b0f65a497a"
             },
             "to": {
               "value": "573022949109"
             },
             "message_type": {
-              "value": "txt"
+              "value": "react"
             },
             "created_at": {
-              "value": "2025-05-30T14:45:11.115Z"
+              "value": "2025-05-30T16:03:21.499Z"
             }
           },
           {
             "id": {
-              "value": "d39d853c-13cf-4473-9ab5-0081c387f5cc"
+              "value": "f47ba40f-2652-4c10-8037-03acd2284036"
             },
             "baileys_json": {
               "value": {
                 "key": {
                   "remoteJid": "573022949109@s.whatsapp.net",
                   "fromMe": true,
-                  "id": "3EB089B09885A4538C3EEE"
+                  "id": "3EB00070D28270DAB859FD"
                 },
                 "message": {
-                  "audioMessage": {
-                    "url": "https://mmg.whatsapp.net/v/t62.7114-24/14738049_1222079535648024_8577464477836156056_n.enc?ccb=11-4&oh=01_Q5Aa1gGtZAAVylwwjHW8TZMW-8IPZlWifuSz9NXJfybKoFrAuA&oe=68612F40&_nc_sid=5e03e0&mms3=true",
-                    "mimetype": "audio/ogg; codecs=opus",
-                    "fileSha256": "Znlp+NKZzl9j9RuwDdl1503GdjhR0D9cjfeAPP0/PUc=",
-                    "fileLength": "670852",
-                    "seconds": 2,
-                    "ptt": true,
-                    "mediaKey": "RsAhKkO29v18KKGuhXmP/yWbSZyXx9PEzFvCu/ezrbc=",
-                    "fileEncSha256": "eg+KTeQf5umH0kgd7LmKEAluDOd9maQ0P7XimlBnXq0=",
-                    "directPath": "/v/t62.7114-24/14738049_1222079535648024_8577464477836156056_n.enc?ccb=11-4&oh=01_Q5Aa1gGtZAAVylwwjHW8TZMW-8IPZlWifuSz9NXJfybKoFrAuA&oe=68612F40&_nc_sid=5e03e0",
-                    "mediaKeyTimestamp": "1748616305"
+                  "reactionMessage": {
+                    "key": {
+                      "remoteJid": "573022949109@s.whatsapp.net",
+                      "fromMe": true,
+                      "id": "3EB0B18257751E1C07069B"
+                    },
+                    "text": "😂",
+                    "senderTimestampMs": "1748621000466"
                   }
                 },
-                "messageTimestamp": "1748616305",
+                "messageTimestamp": "1748621000",
                 "status": "PENDING"
               }
             },
@@ -396,16 +417,16 @@
               "value": "30ed47f1-eb16-4573-8696-4546ab37dce0"
             },
             "quoted_message_id": {
-              "value": null
+              "value": "aedd619d-15d4-4189-a72c-79b0f65a497a"
             },
             "to": {
               "value": "573022949109"
             },
             "message_type": {
-              "value": "media"
+              "value": "react"
             },
             "created_at": {
-              "value": "2025-05-30T14:45:05.936Z"
+              "value": "2025-05-30T16:03:20.471Z"
             }
           }
         ]
@@ -416,25 +437,31 @@
       "success": true,
       "error": "HTTP 200",
       "data": {
-        "count": 112,
+        "count": 74,
         "sample": [
           {
             "id": {
-              "value": "9a7ad73c-4bc5-433c-a828-7139156204e7"
+              "value": "b599d571-68ad-436c-a494-95db693fc166"
             },
             "baileys_json": {
               "value": {
                 "key": {
                   "remoteJid": "573022949109@s.whatsapp.net",
                   "fromMe": true,
-                  "id": "3EB03B3EE8ED18CBEFC698"
+                  "id": "3EB018F50CB93BB0FECC8A"
                 },
                 "message": {
-                  "extendedTextMessage": {
-                    "text": "🎭 Mensaje para múltiples reacciones"
+                  "reactionMessage": {
+                    "key": {
+                      "remoteJid": "573022949109@s.whatsapp.net",
+                      "fromMe": true,
+                      "id": "3EB0B18257751E1C07069B"
+                    },
+                    "text": "👎",
+                    "senderTimestampMs": "1748621002511"
                   }
                 },
-                "messageTimestamp": "1748616316",
+                "messageTimestamp": "1748621002",
                 "status": "PENDING"
               }
             },
@@ -442,35 +469,41 @@
               "value": "30ed47f1-eb16-4573-8696-4546ab37dce0"
             },
             "quoted_message_id": {
-              "value": null
+              "value": "aedd619d-15d4-4189-a72c-79b0f65a497a"
             },
             "to": {
               "value": "573022949109"
             },
             "message_type": {
-              "value": "txt"
+              "value": "react"
             },
             "created_at": {
-              "value": "2025-05-30T14:45:16.121Z"
+              "value": "2025-05-30T16:03:22.515Z"
             }
           },
           {
             "id": {
-              "value": "4145ad23-c59a-4433-b48e-bcc2eb5e607f"
+              "value": "59b4c8b8-ea12-4727-bcca-842b4f9d971d"
             },
             "baileys_json": {
               "value": {
                 "key": {
                   "remoteJid": "573022949109@s.whatsapp.net",
                   "fromMe": true,
-                  "id": "3EB04408CC775BC993A5BA"
+                  "id": "3EB0A233D756FAED613B87"
                 },
                 "message": {
-                  "extendedTextMessage": {
-                    "text": "📩 Mensaje para reaccionar con corazón"
+                  "reactionMessage": {
+                    "key": {
+                      "remoteJid": "573022949109@s.whatsapp.net",
+                      "fromMe": true,
+                      "id": "3EB0B18257751E1C07069B"
+                    },
+                    "text": "😮",
+                    "senderTimestampMs": "1748621001492"
                   }
                 },
-                "messageTimestamp": "1748616311",
+                "messageTimestamp": "1748621001",
                 "status": "PENDING"
               }
             },
@@ -478,44 +511,41 @@
               "value": "30ed47f1-eb16-4573-8696-4546ab37dce0"
             },
             "quoted_message_id": {
-              "value": null
+              "value": "aedd619d-15d4-4189-a72c-79b0f65a497a"
             },
             "to": {
               "value": "573022949109"
             },
             "message_type": {
-              "value": "txt"
+              "value": "react"
             },
             "created_at": {
-              "value": "2025-05-30T14:45:11.115Z"
+              "value": "2025-05-30T16:03:21.499Z"
             }
           },
           {
             "id": {
-              "value": "d39d853c-13cf-4473-9ab5-0081c387f5cc"
+              "value": "f47ba40f-2652-4c10-8037-03acd2284036"
             },
             "baileys_json": {
               "value": {
                 "key": {
                   "remoteJid": "573022949109@s.whatsapp.net",
                   "fromMe": true,
-                  "id": "3EB089B09885A4538C3EEE"
+                  "id": "3EB00070D28270DAB859FD"
                 },
                 "message": {
-                  "audioMessage": {
-                    "url": "https://mmg.whatsapp.net/v/t62.7114-24/14738049_1222079535648024_8577464477836156056_n.enc?ccb=11-4&oh=01_Q5Aa1gGtZAAVylwwjHW8TZMW-8IPZlWifuSz9NXJfybKoFrAuA&oe=68612F40&_nc_sid=5e03e0&mms3=true",
-                    "mimetype": "audio/ogg; codecs=opus",
-                    "fileSha256": "Znlp+NKZzl9j9RuwDdl1503GdjhR0D9cjfeAPP0/PUc=",
-                    "fileLength": "670852",
-                    "seconds": 2,
-                    "ptt": true,
-                    "mediaKey": "RsAhKkO29v18KKGuhXmP/yWbSZyXx9PEzFvCu/ezrbc=",
-                    "fileEncSha256": "eg+KTeQf5umH0kgd7LmKEAluDOd9maQ0P7XimlBnXq0=",
-                    "directPath": "/v/t62.7114-24/14738049_1222079535648024_8577464477836156056_n.enc?ccb=11-4&oh=01_Q5Aa1gGtZAAVylwwjHW8TZMW-8IPZlWifuSz9NXJfybKoFrAuA&oe=68612F40&_nc_sid=5e03e0",
-                    "mediaKeyTimestamp": "1748616305"
+                  "reactionMessage": {
+                    "key": {
+                      "remoteJid": "573022949109@s.whatsapp.net",
+                      "fromMe": true,
+                      "id": "3EB0B18257751E1C07069B"
+                    },
+                    "text": "😂",
+                    "senderTimestampMs": "1748621000466"
                   }
                 },
-                "messageTimestamp": "1748616305",
+                "messageTimestamp": "1748621000",
                 "status": "PENDING"
               }
             },
@@ -523,16 +553,16 @@
               "value": "30ed47f1-eb16-4573-8696-4546ab37dce0"
             },
             "quoted_message_id": {
-              "value": null
+              "value": "aedd619d-15d4-4189-a72c-79b0f65a497a"
             },
             "to": {
               "value": "573022949109"
             },
             "message_type": {
-              "value": "media"
+              "value": "react"
             },
             "created_at": {
-              "value": "2025-05-30T14:45:05.936Z"
+              "value": "2025-05-30T16:03:20.471Z"
             }
           }
         ]
@@ -543,7 +573,7 @@
       "success": true,
       "error": "HTTP 200",
       "data": {
-        "count": 34
+        "count": 25
       }
     },
     {
@@ -551,15 +581,15 @@
       "success": true,
       "error": "HTTP 200",
       "data": {
-        "count": 50
+        "count": 25
       }
     },
     {
       "test": "Obtener Mensajes de Reacción",
-      "success": false,
-      "error": "HTTP 500",
+      "success": true,
+      "error": "HTTP 200",
       "data": {
-        "count": 0
+        "count": 21
       }
     }
   ]

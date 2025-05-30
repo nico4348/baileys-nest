@@ -10,7 +10,9 @@ import { ReactionMessageEmoji } from '../../domain/ReactionMessageEmoji';
 import { ReactionMessageTargetMsgId } from '../../domain/ReactionMessageTargetMsgId';
 
 @Injectable()
-export class TypeOrmReactionMessagesRepository implements ReactionMessageRepository {
+export class TypeOrmReactionMessagesRepository
+  implements ReactionMessageRepository
+{
   constructor(
     @InjectRepository(TypeOrmReactionMessagesEntity)
     private readonly repository: Repository<TypeOrmReactionMessagesEntity>,
@@ -20,20 +22,18 @@ export class TypeOrmReactionMessagesRepository implements ReactionMessageReposit
     const reactionMessageEntity = this.toEntity(reactionMessage);
     await this.repository.save(reactionMessageEntity);
   }
-
   async getAll(): Promise<ReactionMessage[]> {
     const reactionMessageEntities = await this.repository.find({
-      relations: ['message', 'targetMessage'],
+      relations: ['message'],
       order: { message: { created_at: 'DESC' } },
     });
 
     return reactionMessageEntities.map((entity) => this.toDomain(entity));
   }
-
   async getOneById(id: ReactionMessageId): Promise<ReactionMessage | null> {
     const reactionMessageEntity = await this.repository.findOne({
       where: { id: id.value },
-      relations: ['message', 'targetMessage'],
+      relations: ['message'],
     });
 
     if (!reactionMessageEntity) {
@@ -42,41 +42,39 @@ export class TypeOrmReactionMessagesRepository implements ReactionMessageReposit
 
     return this.toDomain(reactionMessageEntity);
   }
-
   async getByMessageId(messageId: string): Promise<ReactionMessage[]> {
     const reactionMessageEntities = await this.repository.find({
       where: { message_id: messageId },
-      relations: ['message', 'targetMessage'],
+      relations: ['message'],
       order: { message: { created_at: 'DESC' } },
     });
 
     return reactionMessageEntities.map((entity) => this.toDomain(entity));
   }
-
-  async getByTargetMessageId(targetMessageId: string): Promise<ReactionMessage[]> {
+  async getByTargetMessageId(
+    targetMessageId: string,
+  ): Promise<ReactionMessage[]> {
     const reactionMessageEntities = await this.repository.find({
       where: { target_msg_id: targetMessageId },
-      relations: ['message', 'targetMessage'],
+      relations: ['message'],
       order: { message: { created_at: 'DESC' } },
     });
 
     return reactionMessageEntities.map((entity) => this.toDomain(entity));
   }
-
   async getBySessionId(sessionId: string): Promise<ReactionMessage[]> {
     const reactionMessageEntities = await this.repository.find({
       where: { message: { session_id: sessionId } },
-      relations: ['message', 'targetMessage'],
+      relations: ['message'],
       order: { message: { created_at: 'DESC' } },
     });
 
     return reactionMessageEntities.map((entity) => this.toDomain(entity));
   }
-
   async getByEmoji(emoji: string): Promise<ReactionMessage[]> {
     const reactionMessageEntities = await this.repository.find({
       where: { emoji },
-      relations: ['message', 'targetMessage'],
+      relations: ['message'],
       order: { message: { created_at: 'DESC' } },
     });
 
@@ -85,7 +83,10 @@ export class TypeOrmReactionMessagesRepository implements ReactionMessageReposit
 
   async update(reactionMessage: ReactionMessage): Promise<void> {
     const reactionMessageEntity = this.toEntity(reactionMessage);
-    await this.repository.update(reactionMessage.id.value, reactionMessageEntity);
+    await this.repository.update(
+      reactionMessage.id.value,
+      reactionMessageEntity,
+    );
   }
 
   async delete(id: ReactionMessageId): Promise<void> {
@@ -96,7 +97,9 @@ export class TypeOrmReactionMessagesRepository implements ReactionMessageReposit
     await this.repository.delete({ message_id: messageId });
   }
 
-  private toEntity(reactionMessage: ReactionMessage): TypeOrmReactionMessagesEntity {
+  private toEntity(
+    reactionMessage: ReactionMessage,
+  ): TypeOrmReactionMessagesEntity {
     const entity = new TypeOrmReactionMessagesEntity();
     entity.id = reactionMessage.id.value;
     entity.message_id = reactionMessage.message_id.value;

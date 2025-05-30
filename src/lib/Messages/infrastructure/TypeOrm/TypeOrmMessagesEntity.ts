@@ -26,7 +26,7 @@ export class TypeOrmMessagesEntity {
   @Column({ type: 'uuid' })
   session_id: string;
 
-  @Column({ type: 'varchar', length: 25, nullable: true })
+  @Column({ type: 'uuid', nullable: true })
   quoted_message_id: string | null;
 
   @Column({ type: 'varchar', length: 50 })

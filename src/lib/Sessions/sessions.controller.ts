@@ -50,7 +50,6 @@ export class SessionsController {
     private readonly sessionsHardDelete: SessionsHardDelete,
     private readonly whatsAppSessionManager: WhatsAppSessionManager,
   ) {}
-
   @Get()
   async getAllSessions() {
     try {
@@ -63,6 +62,58 @@ export class SessionsController {
     } catch (error) {
       throw new InternalServerErrorException(
         'Error al obtener sesiones: ' + error.message,
+      );
+    }
+  }
+  @Get(':sessionId/status')
+  async getSessionStatus(@Param('sessionId') sessionId: string) {
+    try {
+      // Verificar que la sesión existe
+      const session = await this.sessionsGetOneById.run(sessionId);
+      if (!session) {
+        throw new NotFoundException('Sesión no encontrada');
+      }
+
+      // Obtener el estado de conexión de WhatsApp usando SessionLifecycleManager
+      const socket = this.whatsAppSessionManager.getSocket(sessionId);
+      const isConnected = socket !== null && socket.readyState === 1;
+      const isPaused =
+        await this.whatsAppSessionManager.isSessionPaused(sessionId);
+      const isRestarting =
+        this.whatsAppSessionManager.isSessionRestarting(sessionId);
+      const isDeleting =
+        this.whatsAppSessionManager.isSessionDeleting(sessionId);
+
+      let status = 'disconnected';
+      if (isDeleting) {
+        status = 'deleting';
+      } else if (isRestarting) {
+        status = 'restarting';
+      } else if (isPaused) {
+        status = 'paused';
+      } else if (isConnected) {
+        status = 'connected';
+      }
+
+      return {
+        success: true,
+        message: 'Estado de sesión obtenido exitosamente.',
+        data: {
+          sessionId,
+          connected: isConnected,
+          status: status,
+          isPaused,
+          isRestarting,
+          isDeleting,
+          sessionInfo: session.toPlainObject(),
+        },
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        'Error al obtener estado de sesión: ' + error.message,
       );
     }
   }
