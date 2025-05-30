@@ -106,10 +106,10 @@ export class SendMessage {
   private async sendReactionMessage(
     request: SendMessageRequest,
   ): Promise<SendMessageResponse> {
-    let messageKey;
-    let targetMessageId;
+    let messageKey: any;
+    let targetMessageId: string;
 
-    // Si targetMessageId es un objeto con estructura completa, extraer la info
+    // Si targetMessageId es un objeto completo con clave de Baileys
     if (
       typeof request.reactionData!.targetMessageId === 'object' &&
       request.reactionData!.targetMessageId.key
@@ -118,14 +118,12 @@ export class SendMessage {
       messageKey = targetData.key;
       targetMessageId = targetData.key.id;
     } else if (typeof request.reactionData!.targetMessageId === 'string') {
-      // Si es solo el ID como string, crear el messageKey
-      targetMessageId = request.reactionData!.targetMessageId;
-      messageKey = request.reactionData!.messageKey || {
-        remoteJid: `${request.to}@s.whatsapp.net`,
-        fromMe: false,
-        id: targetMessageId,
-        participant: undefined,
-      };
+      // Si recibe UUID de mensaje, obtener la clave de Baileys guardada
+      const uuid = request.reactionData!.targetMessageId;
+      targetMessageId = uuid;
+      messageKey = request.reactionData!.messageKey
+        ? request.reactionData!.messageKey
+        : await this.messagesOrchestrator.getMessageBaileysKey(uuid);
     } else {
       throw new Error('Invalid targetMessageId format');
     }

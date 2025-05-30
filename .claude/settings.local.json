@@ -8,7 +8,9 @@
       "Bash(find:*)",
       "Bash(timeout 10s npm start)",
       "Bash(chmod:*)",
-      "Bash(mv:*)"
+      "Bash(mv:*)",
+      "Bash(npm run lint)",
+      "Bash(npx tsc:*)"
     ],
     "deny": []
   }

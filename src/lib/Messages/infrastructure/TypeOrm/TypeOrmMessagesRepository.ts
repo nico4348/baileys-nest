@@ -27,16 +27,15 @@ export class TypeOrmMessagesRepository implements MessageRepository {
   async getAll(): Promise<Message[]> {
     const messageEntities = await this.repository.find({
       order: { created_at: 'DESC' },
-      relations: ['session', 'quotedMessage'],
+      relations: ['session'],
     });
 
     return messageEntities.map((entity) => this.toDomain(entity));
   }
-
   async getOneById(id: MessageId): Promise<Message | null> {
     const messageEntity = await this.repository.findOne({
       where: { id: id.value },
-      relations: ['session', 'quotedMessage'],
+      relations: ['session'],
     });
 
     if (!messageEntity) {
@@ -49,7 +48,7 @@ export class TypeOrmMessagesRepository implements MessageRepository {
     const messageEntities = await this.repository.find({
       where: { session_id: sessionId },
       order: { created_at: 'DESC' },
-      relations: ['session', 'quotedMessage'],
+      relations: ['session'],
     });
 
     return messageEntities.map((entity) => this.toDomain(entity));
@@ -58,10 +57,9 @@ export class TypeOrmMessagesRepository implements MessageRepository {
   async update(message: Message): Promise<Message> {
     const messageEntity = this.toEntity(message);
     await this.repository.update(message.id.value, messageEntity);
-
     const updatedEntity = await this.repository.findOne({
       where: { id: message.id.value },
-      relations: ['session', 'quotedMessage'],
+      relations: ['session'],
     });
 
     if (!updatedEntity) {

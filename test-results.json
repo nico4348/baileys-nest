@@ -1,0 +1,566 @@
+{
+  "timestamp": "2025-05-30T14:46:44.447Z",
+  "summary": {
+    "total": 24,
+    "passed": 18,
+    "failed": 6,
+    "successRate": 75
+  },
+  "results": [
+    {
+      "test": "Verificar Estado de Sesión",
+      "success": false,
+      "error": "Sesión no disponible: Error desconocido"
+    },
+    {
+      "test": "Enviar Mensaje de Texto Simple",
+      "success": true,
+      "error": "HTTP 201",
+      "data": {
+        "success": true,
+        "messageId": "3EB0BC9A4081B1B416909A",
+        "childMessageId": "3EB0BC9A4081B1B416909A",
+        "timestamp": "2025-05-30T14:44:39.201Z",
+        "messageType": "text"
+      }
+    },
+    {
+      "test": "Enviar Mensaje con Emojis",
+      "success": true,
+      "error": "HTTP 201",
+      "data": {
+        "success": true,
+        "messageId": "3EB03E12FB6559AE2A68CB",
+        "childMessageId": "3EB03E12FB6559AE2A68CB",
+        "timestamp": "2025-05-30T14:44:41.248Z",
+        "messageType": "text"
+      }
+    },
+    {
+      "test": "Enviar Mensaje de Texto Largo",
+      "success": true,
+      "error": "HTTP 201",
+      "data": {
+        "success": true,
+        "messageId": "3EB0F496D450D3BE34314D",
+        "childMessageId": "3EB0F496D450D3BE34314D",
+        "timestamp": "2025-05-30T14:44:43.279Z",
+        "messageType": "text"
+      }
+    },
+    {
+      "test": "Enviar Imagen JPG",
+      "success": true,
+      "error": "HTTP 201",
+      "data": {
+        "success": true,
+        "messageId": "3EB035A8F5D38A13BACBCF",
+        "childMessageId": "3EB035A8F5D38A13BACBCF",
+        "timestamp": "2025-05-30T14:44:46.476Z",
+        "messageType": "media"
+      }
+    },
+    {
+      "test": "Enviar Imagen PNG",
+      "success": false,
+      "error": "Request failed with status code 400",
+      "data": {
+        "success": false,
+        "messageId": "",
+        "timestamp": "2025-05-30T14:44:48.917Z",
+        "messageType": "media",
+        "error": "Request failed with status code 400"
+      }
+    },
+    {
+      "test": "Enviar Imagen sin Caption",
+      "success": true,
+      "error": "HTTP 201",
+      "data": {
+        "success": true,
+        "messageId": "3EB0F2A7D0765F8CAE8C71",
+        "childMessageId": "3EB0F2A7D0765F8CAE8C71",
+        "timestamp": "2025-05-30T14:44:51.617Z",
+        "messageType": "media"
+      }
+    },
+    {
+      "test": "Enviar Documento PDF",
+      "success": true,
+      "error": "HTTP 201",
+      "data": {
+        "success": true,
+        "messageId": "3EB01F3EE31DCC86A76E95",
+        "childMessageId": "3EB01F3EE31DCC86A76E95",
+        "timestamp": "2025-05-30T14:44:54.177Z",
+        "messageType": "media"
+      }
+    },
+    {
+      "test": "Enviar Archivo de Texto",
+      "success": true,
+      "error": "HTTP 201",
+      "data": {
+        "success": true,
+        "messageId": "3EB0F6381154617A74BC3E",
+        "childMessageId": "3EB0F6381154617A74BC3E",
+        "timestamp": "2025-05-30T14:44:57.423Z",
+        "messageType": "media"
+      }
+    },
+    {
+      "test": "Enviar Audio MP3",
+      "success": true,
+      "error": "HTTP 201",
+      "data": {
+        "success": true,
+        "messageId": "3EB08E68745E6CF1C12675",
+        "childMessageId": "3EB08E68745E6CF1C12675",
+        "timestamp": "2025-05-30T14:45:01.800Z",
+        "messageType": "media"
+      }
+    },
+    {
+      "test": "Enviar Nota de Voz",
+      "success": true,
+      "error": "HTTP 201",
+      "data": {
+        "success": true,
+        "messageId": "3EB089B09885A4538C3EEE",
+        "childMessageId": "3EB089B09885A4538C3EEE",
+        "timestamp": "2025-05-30T14:45:05.942Z",
+        "messageType": "media"
+      }
+    },
+    {
+      "test": "Enviar Video MP4",
+      "success": false,
+      "error": "Request failed with status code 404",
+      "data": {
+        "success": false,
+        "messageId": "",
+        "timestamp": "2025-05-30T14:45:09.098Z",
+        "messageType": "media",
+        "error": "Request failed with status code 404"
+      }
+    },
+    {
+      "test": "Enviar Reacción con Corazón",
+      "success": false,
+      "error": "MessageId must be a valid UUID",
+      "data": {
+        "originalMessage": {
+          "success": true,
+          "messageId": "3EB04408CC775BC993A5BA",
+          "childMessageId": "3EB04408CC775BC993A5BA",
+          "timestamp": "2025-05-30T14:45:11.119Z",
+          "messageType": "text"
+        },
+        "reaction": {
+          "success": false,
+          "messageId": "",
+          "timestamp": "2025-05-30T14:45:14.114Z",
+          "messageType": "reaction",
+          "error": "MessageId must be a valid UUID"
+        }
+      }
+    },
+    {
+      "test": "Enviar Múltiples Reacciones",
+      "success": false,
+      "data": {
+        "originalMessage": {
+          "success": true,
+          "messageId": "3EB03B3EE8ED18CBEFC698",
+          "childMessageId": "3EB03B3EE8ED18CBEFC698",
+          "timestamp": "2025-05-30T14:45:16.125Z",
+          "messageType": "text"
+        },
+        "reactions": [
+          {
+            "emoji": "👍",
+            "success": false,
+            "data": {
+              "success": false,
+              "messageId": "",
+              "timestamp": "2025-05-30T14:45:18.129Z",
+              "messageType": "reaction",
+              "error": "MessageId must be a valid UUID"
+            }
+          },
+          {
+            "emoji": "😂",
+            "success": false,
+            "data": {
+              "success": false,
+              "messageId": "",
+              "timestamp": "2025-05-30T14:45:19.128Z",
+              "messageType": "reaction",
+              "error": "MessageId must be a valid UUID"
+            }
+          },
+          {
+            "emoji": "😮",
+            "success": false,
+            "data": {
+              "success": false,
+              "messageId": "",
+              "timestamp": "2025-05-30T14:45:20.135Z",
+              "messageType": "reaction",
+              "error": "MessageId must be a valid UUID"
+            }
+          },
+          {
+            "emoji": "👎",
+            "success": false,
+            "data": {
+              "success": false,
+              "messageId": "",
+              "timestamp": "2025-05-30T14:45:21.136Z",
+              "messageType": "reaction",
+              "error": "MessageId must be a valid UUID"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "test": "Test Sesión Inválida",
+      "success": true,
+      "error": null,
+      "data": {
+        "success": false,
+        "messageId": "",
+        "timestamp": "2025-05-30T14:45:24.167Z",
+        "messageType": "text",
+        "error": "Session invalid-session-id not found or not connected"
+      }
+    },
+    {
+      "test": "Test Número Inválido",
+      "success": true,
+      "error": null,
+      "data": {
+        "success": false,
+        "messageId": "",
+        "timestamp": "2025-05-30T14:46:26.184Z",
+        "messageType": "text",
+        "error": "Timed Out"
+      }
+    },
+    {
+      "test": "Test Texto Vacío",
+      "success": true,
+      "error": null,
+      "data": {
+        "message": [
+          "textData.text should not be empty"
+        ],
+        "error": "Bad Request",
+        "statusCode": 400
+      }
+    },
+    {
+      "test": "Test URL Media Inválida",
+      "success": true,
+      "error": null,
+      "data": {
+        "success": false,
+        "messageId": "",
+        "timestamp": "2025-05-30T14:46:30.222Z",
+        "messageType": "media",
+        "error": "ENOENT: no such file or directory, open 'C:\\Users\\Usuario\\Desktop\\baileys-nest\\invalid-url'"
+      }
+    },
+    {
+      "test": "Test Tipo Media No Soportado",
+      "success": true,
+      "error": null,
+      "data": {
+        "success": false,
+        "messageId": "",
+        "timestamp": "2025-05-30T14:46:32.247Z",
+        "messageType": "media",
+        "error": "Unsupported media type 'unsupported'"
+      }
+    },
+    {
+      "test": "Obtener Todos los Mensajes",
+      "success": true,
+      "error": "HTTP 200",
+      "data": {
+        "count": 112,
+        "sample": [
+          {
+            "id": {
+              "value": "9a7ad73c-4bc5-433c-a828-7139156204e7"
+            },
+            "baileys_json": {
+              "value": {
+                "key": {
+                  "remoteJid": "573022949109@s.whatsapp.net",
+                  "fromMe": true,
+                  "id": "3EB03B3EE8ED18CBEFC698"
+                },
+                "message": {
+                  "extendedTextMessage": {
+                    "text": "🎭 Mensaje para múltiples reacciones"
+                  }
+                },
+                "messageTimestamp": "1748616316",
+                "status": "PENDING"
+              }
+            },
+            "session_id": {
+              "value": "30ed47f1-eb16-4573-8696-4546ab37dce0"
+            },
+            "quoted_message_id": {
+              "value": null
+            },
+            "to": {
+              "value": "573022949109"
+            },
+            "message_type": {
+              "value": "txt"
+            },
+            "created_at": {
+              "value": "2025-05-30T14:45:16.121Z"
+            }
+          },
+          {
+            "id": {
+              "value": "4145ad23-c59a-4433-b48e-bcc2eb5e607f"
+            },
+            "baileys_json": {
+              "value": {
+                "key": {
+                  "remoteJid": "573022949109@s.whatsapp.net",
+                  "fromMe": true,
+                  "id": "3EB04408CC775BC993A5BA"
+                },
+                "message": {
+                  "extendedTextMessage": {
+                    "text": "📩 Mensaje para reaccionar con corazón"
+                  }
+                },
+                "messageTimestamp": "1748616311",
+                "status": "PENDING"
+              }
+            },
+            "session_id": {
+              "value": "30ed47f1-eb16-4573-8696-4546ab37dce0"
+            },
+            "quoted_message_id": {
+              "value": null
+            },
+            "to": {
+              "value": "573022949109"
+            },
+            "message_type": {
+              "value": "txt"
+            },
+            "created_at": {
+              "value": "2025-05-30T14:45:11.115Z"
+            }
+          },
+          {
+            "id": {
+              "value": "d39d853c-13cf-4473-9ab5-0081c387f5cc"
+            },
+            "baileys_json": {
+              "value": {
+                "key": {
+                  "remoteJid": "573022949109@s.whatsapp.net",
+                  "fromMe": true,
+                  "id": "3EB089B09885A4538C3EEE"
+                },
+                "message": {
+                  "audioMessage": {
+                    "url": "https://mmg.whatsapp.net/v/t62.7114-24/14738049_1222079535648024_8577464477836156056_n.enc?ccb=11-4&oh=01_Q5Aa1gGtZAAVylwwjHW8TZMW-8IPZlWifuSz9NXJfybKoFrAuA&oe=68612F40&_nc_sid=5e03e0&mms3=true",
+                    "mimetype": "audio/ogg; codecs=opus",
+                    "fileSha256": "Znlp+NKZzl9j9RuwDdl1503GdjhR0D9cjfeAPP0/PUc=",
+                    "fileLength": "670852",
+                    "seconds": 2,
+                    "ptt": true,
+                    "mediaKey": "RsAhKkO29v18KKGuhXmP/yWbSZyXx9PEzFvCu/ezrbc=",
+                    "fileEncSha256": "eg+KTeQf5umH0kgd7LmKEAluDOd9maQ0P7XimlBnXq0=",
+                    "directPath": "/v/t62.7114-24/14738049_1222079535648024_8577464477836156056_n.enc?ccb=11-4&oh=01_Q5Aa1gGtZAAVylwwjHW8TZMW-8IPZlWifuSz9NXJfybKoFrAuA&oe=68612F40&_nc_sid=5e03e0",
+                    "mediaKeyTimestamp": "1748616305"
+                  }
+                },
+                "messageTimestamp": "1748616305",
+                "status": "PENDING"
+              }
+            },
+            "session_id": {
+              "value": "30ed47f1-eb16-4573-8696-4546ab37dce0"
+            },
+            "quoted_message_id": {
+              "value": null
+            },
+            "to": {
+              "value": "573022949109"
+            },
+            "message_type": {
+              "value": "media"
+            },
+            "created_at": {
+              "value": "2025-05-30T14:45:05.936Z"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "test": "Obtener Mensajes por Sesión",
+      "success": true,
+      "error": "HTTP 200",
+      "data": {
+        "count": 112,
+        "sample": [
+          {
+            "id": {
+              "value": "9a7ad73c-4bc5-433c-a828-7139156204e7"
+            },
+            "baileys_json": {
+              "value": {
+                "key": {
+                  "remoteJid": "573022949109@s.whatsapp.net",
+                  "fromMe": true,
+                  "id": "3EB03B3EE8ED18CBEFC698"
+                },
+                "message": {
+                  "extendedTextMessage": {
+                    "text": "🎭 Mensaje para múltiples reacciones"
+                  }
+                },
+                "messageTimestamp": "1748616316",
+                "status": "PENDING"
+              }
+            },
+            "session_id": {
+              "value": "30ed47f1-eb16-4573-8696-4546ab37dce0"
+            },
+            "quoted_message_id": {
+              "value": null
+            },
+            "to": {
+              "value": "573022949109"
+            },
+            "message_type": {
+              "value": "txt"
+            },
+            "created_at": {
+              "value": "2025-05-30T14:45:16.121Z"
+            }
+          },
+          {
+            "id": {
+              "value": "4145ad23-c59a-4433-b48e-bcc2eb5e607f"
+            },
+            "baileys_json": {
+              "value": {
+                "key": {
+                  "remoteJid": "573022949109@s.whatsapp.net",
+                  "fromMe": true,
+                  "id": "3EB04408CC775BC993A5BA"
+                },
+                "message": {
+                  "extendedTextMessage": {
+                    "text": "📩 Mensaje para reaccionar con corazón"
+                  }
+                },
+                "messageTimestamp": "1748616311",
+                "status": "PENDING"
+              }
+            },
+            "session_id": {
+              "value": "30ed47f1-eb16-4573-8696-4546ab37dce0"
+            },
+            "quoted_message_id": {
+              "value": null
+            },
+            "to": {
+              "value": "573022949109"
+            },
+            "message_type": {
+              "value": "txt"
+            },
+            "created_at": {
+              "value": "2025-05-30T14:45:11.115Z"
+            }
+          },
+          {
+            "id": {
+              "value": "d39d853c-13cf-4473-9ab5-0081c387f5cc"
+            },
+            "baileys_json": {
+              "value": {
+                "key": {
+                  "remoteJid": "573022949109@s.whatsapp.net",
+                  "fromMe": true,
+                  "id": "3EB089B09885A4538C3EEE"
+                },
+                "message": {
+                  "audioMessage": {
+                    "url": "https://mmg.whatsapp.net/v/t62.7114-24/14738049_1222079535648024_8577464477836156056_n.enc?ccb=11-4&oh=01_Q5Aa1gGtZAAVylwwjHW8TZMW-8IPZlWifuSz9NXJfybKoFrAuA&oe=68612F40&_nc_sid=5e03e0&mms3=true",
+                    "mimetype": "audio/ogg; codecs=opus",
+                    "fileSha256": "Znlp+NKZzl9j9RuwDdl1503GdjhR0D9cjfeAPP0/PUc=",
+                    "fileLength": "670852",
+                    "seconds": 2,
+                    "ptt": true,
+                    "mediaKey": "RsAhKkO29v18KKGuhXmP/yWbSZyXx9PEzFvCu/ezrbc=",
+                    "fileEncSha256": "eg+KTeQf5umH0kgd7LmKEAluDOd9maQ0P7XimlBnXq0=",
+                    "directPath": "/v/t62.7114-24/14738049_1222079535648024_8577464477836156056_n.enc?ccb=11-4&oh=01_Q5Aa1gGtZAAVylwwjHW8TZMW-8IPZlWifuSz9NXJfybKoFrAuA&oe=68612F40&_nc_sid=5e03e0",
+                    "mediaKeyTimestamp": "1748616305"
+                  }
+                },
+                "messageTimestamp": "1748616305",
+                "status": "PENDING"
+              }
+            },
+            "session_id": {
+              "value": "30ed47f1-eb16-4573-8696-4546ab37dce0"
+            },
+            "quoted_message_id": {
+              "value": null
+            },
+            "to": {
+              "value": "573022949109"
+            },
+            "message_type": {
+              "value": "media"
+            },
+            "created_at": {
+              "value": "2025-05-30T14:45:05.936Z"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "test": "Obtener Mensajes de Texto",
+      "success": true,
+      "error": "HTTP 200",
+      "data": {
+        "count": 34
+      }
+    },
+    {
+      "test": "Obtener Mensajes de Media",
+      "success": true,
+      "error": "HTTP 200",
+      "data": {
+        "count": 50
+      }
+    },
+    {
+      "test": "Obtener Mensajes de Reacción",
+      "success": false,
+      "error": "HTTP 500",
+      "data": {
+        "count": 0
+      }
+    }
+  ]
+}

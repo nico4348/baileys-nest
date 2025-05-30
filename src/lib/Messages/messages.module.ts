@@ -13,6 +13,8 @@ import { MessagesOrchestrator } from './application/MessagesOrchestrator';
 import { SendMessage } from './application/SendMessage';
 import { BaileysMessageSender } from './infrastructure/BaileysMessageSender';
 import { MessageHandlerFactory } from './infrastructure/MessageHandlerFactory';
+import { NodeFileService } from './infrastructure/NodeFileService';
+import { NodeCryptoService } from './infrastructure/NodeCryptoService';
 import { SessionsModule } from '../Sessions/sessions.module';
 import { TextMessagesModule } from '../TextMessages/textMessages.module';
 import { MediaMessagesModule } from '../MediaMessages/mediaMessages.module';
@@ -73,27 +75,44 @@ import { ReactionMessagesModule } from '../ReactionMessages/reactionMessages.mod
       useClass: BaileysMessageSender,
     },
     {
+      provide: 'FileService',
+      useClass: NodeFileService,
+    },
+    {
+      provide: 'CryptoService',
+      useClass: NodeCryptoService,
+    },
+    {
       provide: 'MessagesOrchestrator',
       useFactory: (
         messagesCreate,
+        messagesGetOneById,
         textMessagesCreate,
         mediaMessagesCreate,
         reactionMessagesCreate,
         messageSender,
+        fileService,
+        cryptoService,
       ) =>
         new MessagesOrchestrator(
           messagesCreate,
+          messagesGetOneById,
           textMessagesCreate,
           mediaMessagesCreate,
           reactionMessagesCreate,
           messageSender,
+          fileService,
+          cryptoService,
         ),
       inject: [
         'MessagesCreate',
+        'MessagesGetOneById',
         'TextMessagesCreate',
         'MediaMessagesCreate',
         'ReactionMessagesCreate',
         'MessageSender',
+        'FileService',
+        'CryptoService',
       ],
     },
     {

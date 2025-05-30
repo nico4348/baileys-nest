@@ -22,7 +22,7 @@ const testRequests = [
       textData: {
         text: '¡Hola! Este es un mensaje de prueba desde el endpoint unificado.'
       },
-      quotedMessageId: null
+      quotedMessageId: 'f47ac10b-58cc-4372-a567-0e02b2c3d479'
     }
   },
   {
@@ -39,7 +39,8 @@ const testRequests = [
         caption: 'Imagen de prueba desde endpoint unificado',
         mimeType: 'image/jpeg',
         fileName: 'test-image.jpg'
-      }
+      },
+      quotedMessageId: 'f47ac10b-58cc-4372-a567-0e02b2c3d479'
     }
   },
   {

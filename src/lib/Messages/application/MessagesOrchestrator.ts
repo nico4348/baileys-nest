@@ -1,5 +1,6 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { MessagesCreate } from './MessagesCreate';
+import { MessagesGetOneById } from './MessagesGetOneById';
 import { TextMessagesCreate } from '../../TextMessages/application/TextMessagesCreate';
 import { MediaMessagesCreate } from '../../MediaMessages/application/MediaMessagesCreate';
 import { ReactionMessagesCreate } from '../../ReactionMessages/application/ReactionMessagesCreate';
@@ -9,15 +10,16 @@ import {
   MediaPayload,
   ReactPayload,
 } from '../domain/ports/MessageSender';
-import * as path from 'path';
-import { lookup } from 'mime-types';
-import * as crypto from 'crypto';
+import { FileService } from '../domain/ports/FileService';
+import { CryptoService } from '../domain/ports/CryptoService';
 
 @Injectable()
 export class MessagesOrchestrator {
   constructor(
     @Inject('MessagesCreate')
     private readonly messagesCreate: MessagesCreate,
+    @Inject('MessagesGetOneById')
+    private readonly messagesGetOneById: MessagesGetOneById,
     @Inject('TextMessagesCreate')
     private readonly textMessagesCreate: TextMessagesCreate,
     @Inject('MediaMessagesCreate')
@@ -26,14 +28,42 @@ export class MessagesOrchestrator {
     private readonly reactionMessagesCreate: ReactionMessagesCreate,
     @Inject('MessageSender')
     private readonly messageSender: MessageSender,
+    @Inject('FileService')
+    private readonly fileService: FileService,
+    @Inject('CryptoService')
+    private readonly cryptoService: CryptoService,
   ) {}
+
+  private async getQuotedMessageData(
+    quotedMessageId?: string,
+  ): Promise<Record<string, any> | undefined> {
+    if (!quotedMessageId) {
+      return undefined;
+    }
+
+    try {
+      const message = await this.messagesGetOneById.run(quotedMessageId);
+      if (!message || !message.baileys_json) {
+        return undefined;
+      }
+
+      return message.baileys_json.value;
+    } catch (error) {
+      console.error('Error fetching quoted message:', error);
+      return undefined;
+    }
+  }
+
   async sendTextMessage(
     sessionId: string,
     to: string,
     text: string,
-    quotedMessageId?: Record<string, any>,
+    quotedMessageId?: string,
   ): Promise<any> {
     try {
+      const quotedMessageData =
+        await this.getQuotedMessageData(quotedMessageId);
+
       const payload: TextPayload = {
         text,
       };
@@ -41,7 +71,7 @@ export class MessagesOrchestrator {
         sessionId,
         `${to}@s.whatsapp.net`,
         payload,
-        quotedMessageId ? quotedMessageId : undefined,
+        quotedMessageData,
       );
 
       if (!sentMessage || !sentMessage.key || !sentMessage.key.id) {
@@ -49,20 +79,20 @@ export class MessagesOrchestrator {
           'Failed to send text message through WhatsApp or invalid message key',
         );
       }
-      const uuid = crypto.randomUUID();
+      const uuid = this.cryptoService.generateUUID();
 
       await this.messagesCreate.run(
         uuid, // UUID como ID principal
         sentMessage, // Complete Baileys message object as JSON
         'txt',
-        quotedMessageId ? JSON.stringify(quotedMessageId) : null,
+        quotedMessageId || null,
         sessionId,
         to,
         new Date(),
       );
 
       await this.textMessagesCreate.run(
-        crypto.randomUUID(),
+        this.cryptoService.generateUUID(),
         uuid, // Usamos el UUID como message_id para la relación
         text,
       );
@@ -79,12 +109,15 @@ export class MessagesOrchestrator {
     mediaType: string,
     mediaUrl: string,
     caption?: string,
-    quotedMessageId?: Record<string, any>,
+    quotedMessageId?: string,
   ): Promise<any> {
     try {
+      const quotedMessageData =
+        await this.getQuotedMessageData(quotedMessageId);
+
       // Extract file information first
-      const fileName = path.basename(mediaUrl);
-      const mimeType = lookup(mediaUrl) || 'application/octet-stream';
+      const fileName = this.fileService.getFileName(mediaUrl);
+      const mimeType = this.fileService.getMimeType(mediaUrl);
 
       // 1. Send message through Baileys first to get WhatsApp message ID
       const payload: MediaPayload = {
@@ -99,7 +132,7 @@ export class MessagesOrchestrator {
         `${to}@s.whatsapp.net`,
         mediaType,
         payload,
-        quotedMessageId ? quotedMessageId : undefined,
+        quotedMessageData,
       );
       if (!sentMessage || !sentMessage.key || !sentMessage.key.id) {
         throw new Error(
@@ -107,20 +140,20 @@ export class MessagesOrchestrator {
         );
       }
 
-      const uuid = crypto.randomUUID(); // 2. Create base message record first (parent record)
+      const uuid = this.cryptoService.generateUUID(); // 2. Create base message record first (parent record)
 
       await this.messagesCreate.run(
         uuid, // UUID como ID principal
         sentMessage, // Complete Baileys message object as JSON
         'media',
-        quotedMessageId ? JSON.stringify(quotedMessageId) : null,
+        quotedMessageId || null,
         sessionId,
         to,
         new Date(),
       ); // 3. Create media message record (child record)
       // Use the file information extracted earlier
       await this.mediaMessagesCreate.run(
-        crypto.randomUUID(),
+        this.cryptoService.generateUUID(),
         uuid, // Usamos el UUID como message_id para la relación
         caption || null,
         mediaType,
@@ -156,22 +189,22 @@ export class MessagesOrchestrator {
         );
       }
 
-      const uuid = crypto.randomUUID(); // 2. Create base message record first (parent record)
+      const uuid = this.cryptoService.generateUUID(); // 2. Create base message record first (parent record)
 
       await this.messagesCreate.run(
         uuid, // UUID como ID principal
         sentMessage, // Complete Baileys message object as JSON
         'react',
-        targetMessageId,
+        sentMessage.id,
         sessionId,
         to,
         new Date(),
       ); // 3. Create reaction message record (child record)
       await this.reactionMessagesCreate.run(
-        crypto.randomUUID(),
+        this.cryptoService.generateUUID(),
         uuid, // Usamos el UUID como message_id para la relación
         emoji,
-        targetMessageId,
+        sentMessage.id,
       );
 
       return sentMessage;
@@ -179,5 +212,16 @@ export class MessagesOrchestrator {
       console.error('Error in sendReaction orchestration:', error);
       throw error;
     }
+  }
+
+  // Nuevo método: obtener messageKey de Baileys usando UUID de mensaje
+  async getMessageBaileysKey(messageUuid: string): Promise<any> {
+    const message = await this.messagesGetOneById.run(messageUuid);
+    if (!message || !message.baileys_json) {
+      throw new Error(
+        `Original message with id ${messageUuid} not found or missing baileys_json`,
+      );
+    }
+    return message.baileys_json.value.key;
   }
 }

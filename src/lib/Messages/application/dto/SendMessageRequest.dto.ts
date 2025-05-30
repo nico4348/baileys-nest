@@ -27,8 +27,8 @@ export class BaseMessageRequest {
   messageType: MessageType;
 
   @IsOptional()
-  // Ahora acepta un objeto JSON en vez de string
-  quotedMessageId?: Record<string, any>;
+  @IsString()
+  quotedMessageId?: string;
 }
 
 export class TextMessageData {
@@ -65,7 +65,7 @@ export class ReactionMessageData {
   emoji: string;
 
   @IsOptional()
-  targetMessageId?: any; // Acepta objeto JSON completo o string
+  targetMessageId?: any; // Acepta objeto JSON completo, UUID o string con clave de Baileys
 
   @IsOptional()
   messageKey?: any;

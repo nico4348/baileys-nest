@@ -1,5 +1,3 @@
-import { proto } from 'baileys';
-
 export interface TextPayload {
   text: string;
   quoted?: any;
@@ -25,7 +23,7 @@ export interface MessageSender {
     jid: string,
     payload: TextPayload,
     quoted?: any,
-  ): Promise<proto.WebMessageInfo | null>;
+  ): Promise<any>;
 
   sendMediaMessage(
     sessionId: string,
@@ -33,11 +31,11 @@ export interface MessageSender {
     mediaType: string,
     payload: MediaPayload,
     quoted?: any,
-  ): Promise<proto.WebMessageInfo | null>;
+  ): Promise<any>;
 
   sendReactMessage(
     sessionId: string,
     jid: string,
     payload: ReactPayload,
-  ): Promise<proto.WebMessageInfo | null>;
+  ): Promise<any>;
 }
