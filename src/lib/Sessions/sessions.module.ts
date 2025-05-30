@@ -33,7 +33,9 @@ import { AuthStateFactory } from '../AuthState/infrastructure/AuthStateFactory';
 import { SessionLogsModule } from '../SessionLogs/sessionLogs.module';
 import { EventsModule } from '../Events/events.module';
 import { EventLogsModule } from '../EventLogs/eventLogs.module';
+import { MessageStatusModule } from '../MessageStatus/messageStatus.module';
 import { BaileysEventLogger } from '../EventLogs/infrastructure/BaileysEventLogger';
+import { MessageStatusTracker } from '../MessageStatus/infrastructure/MessageStatusTracker';
 import { EventSeeder } from '../Events/infrastructure/EventSeeder';
 @Module({
   imports: [
@@ -42,6 +44,7 @@ import { EventSeeder } from '../Events/infrastructure/EventSeeder';
     SessionLogsModule,
     EventsModule,
     EventLogsModule,
+    MessageStatusModule,
   ],
   controllers: [SessionsController],
   providers: [
@@ -243,6 +246,7 @@ import { EventSeeder } from '../Events/infrastructure/EventSeeder';
         qrCounterManager: QrCounterManager,
         logger: SessionLogger,
         eventLogger: BaileysEventLogger,
+        messageStatusTracker: MessageStatusTracker,
       ) =>
         new WhatsAppSessionManager(
           authStateFactory,
@@ -256,6 +260,7 @@ import { EventSeeder } from '../Events/infrastructure/EventSeeder';
           qrCounterManager,
           logger,
           eventLogger,
+          messageStatusTracker,
         ),
       inject: [
         'AuthStateFactory',
@@ -269,6 +274,7 @@ import { EventSeeder } from '../Events/infrastructure/EventSeeder';
         QrCounterManager,
         SessionLogger,
         BaileysEventLogger,
+        MessageStatusTracker,
       ],
     },
     // Baileys Event Logger

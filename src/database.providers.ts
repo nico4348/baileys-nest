@@ -6,10 +6,9 @@ import { TypeOrmMessagesEntity } from './lib/Messages/infrastructure/TypeOrm/Typ
 import { TypeOrmTextMessagesEntity } from './lib/TextMessages/infrastructure/TypeOrm/TypeOrmTextMessagesEntity';
 import { TypeOrmMediaMessagesEntity } from './lib/MediaMessages/infrastructure/TypeOrm/TypeOrmMediaMessagesEntity';
 import { TypeOrmReactionMessagesEntity } from './lib/ReactionMessages/infrastructure/TypeOrm/TypeOrmReactionMessagesEntity';
-
-import { MessageStatus } from './lib/MessageStatus/MessageEstatusEntity';
+import { TypeOrmStatusEntity } from './lib/Status/infrastructure/TypeOrm/TypeOrmStatusEntity';
+import { TypeOrmMessageStatusEntity } from './lib/MessageStatus/infrastructure/TypeOrm/TypeOrmMessageStatusEntity';
 import { TypeOrmSessionLogsEntity } from './lib/SessionLogs/infrastructure/TypeOrm/TypeOrmSessionLogsEntity';
-import { Status } from './lib/Status/StatusEntity';
 import { AuthDataEntity } from './lib/AuthState/infrastructure/TypeOrm/AuthDataEntity';
 
 export const DatabaseProvider = TypeOrmModule.forRoot({
@@ -27,9 +26,9 @@ export const DatabaseProvider = TypeOrmModule.forRoot({
     TypeOrmTextMessagesEntity,
     TypeOrmMediaMessagesEntity,
     TypeOrmReactionMessagesEntity,
-    MessageStatus,
+    TypeOrmStatusEntity,
+    TypeOrmMessageStatusEntity,
     TypeOrmSessionLogsEntity,
-    Status,
     AuthDataEntity,
   ],
   synchronize: true,

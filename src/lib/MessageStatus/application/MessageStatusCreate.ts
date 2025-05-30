@@ -1,25 +1,30 @@
+import { Injectable, Inject } from '@nestjs/common';
 import { MessageStatusId } from '../domain/MessageStatusId';
 import { MessageStatusMessageId } from '../domain/MessageStatusMessageId';
 import { MessageStatusRepository } from '../domain/MessageStatusRepository';
 import { MessageStatus } from '../domain/MessageStatus';
 import { MessageStatusStatusId } from '../domain/MessageStatusStatusId';
-import { MessageStatusUpdatedAt } from '../domain/MessageStatusUpdatedAt';
+import { MessageStatusCreatedAt } from '../domain/MessageStatusCreatedAt';
 
+@Injectable()
 export class MessageStatusCreate {
-  constructor(private readonly repository: MessageStatusRepository) {}
+  constructor(
+    @Inject('MessageStatusRepository')
+    private readonly repository: MessageStatusRepository,
+  ) {}
   async run(
     id: string,
     messageId: string,
     statusId: string,
-    updatedAt: Date,
+    createdAt: Date,
   ): Promise<void> {
     const messageStatus = new MessageStatus(
       new MessageStatusId(id),
       new MessageStatusMessageId(messageId),
       new MessageStatusStatusId(statusId),
-      new MessageStatusUpdatedAt(updatedAt),
+      new MessageStatusCreatedAt(createdAt),
     );
 
-    await this.repository.create(messageStatus);
+    await this.repository.save(messageStatus);
   }
 }

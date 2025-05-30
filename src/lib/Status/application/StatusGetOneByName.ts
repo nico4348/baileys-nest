@@ -6,6 +6,6 @@ export class StatusGetOneByName {
   constructor(private readonly repository: StatusRepository) {}
 
   async run(name: string): Promise<Status | null> {
-    return this.repository.getOneByName(new StatusName(name));
+    return this.repository.findByName(new StatusName(name));
   }
 }

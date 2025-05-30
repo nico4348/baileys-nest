@@ -5,6 +5,6 @@ export class StatusGetAll {
   constructor(private readonly repository: StatusRepository) {}
 
   async run(): Promise<Status[]> {
-    return this.repository.getAll();
+    return this.repository.findAll();
   }
 }

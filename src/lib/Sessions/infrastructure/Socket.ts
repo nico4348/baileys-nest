@@ -11,6 +11,7 @@ import { IConnectionManager } from './interfaces/IConnectionManager';
 import { IQrManager } from './interfaces/IQrManager';
 import { ISessionStateManager } from './interfaces/ISessionStateManager';
 import { IBaileysEventLogger } from '../../EventLogs/infrastructure/BaileysEventLogger';
+import { MessageStatusTracker } from '../../MessageStatus/infrastructure/MessageStatusTracker';
 
 export class WhatsAppSocketFactory implements ISocketFactory {
   constructor(
@@ -19,6 +20,7 @@ export class WhatsAppSocketFactory implements ISocketFactory {
     private readonly connectionManager: IConnectionManager,
     private readonly sessionStateManager: ISessionStateManager,
     private readonly eventLogger: IBaileysEventLogger,
+    private readonly messageStatusTracker?: MessageStatusTracker,
     private readonly logger: any = pino({ level: 'silent' }),
     private readonly retryCache: any = undefined,
   ) {}
@@ -90,7 +92,10 @@ export class WhatsAppSocketFactory implements ISocketFactory {
       }
 
       if (events['messages.update']) {
-        // Additional message update handling logic can be added here
+        // Track message status updates
+        if (this.messageStatusTracker) {
+          await this.messageStatusTracker.handleMessagesUpdate(sessionId, events['messages.update']);
+        }
       }
 
       if (events['presence.update']) {

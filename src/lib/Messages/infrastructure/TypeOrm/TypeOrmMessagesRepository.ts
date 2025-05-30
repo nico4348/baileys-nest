@@ -54,6 +54,22 @@ export class TypeOrmMessagesRepository implements MessageRepository {
     return messageEntities.map((entity) => this.toDomain(entity));
   }
 
+  async findByBaileysId(baileysMessageId: string, sessionId: MessageSessionId): Promise<Message | null> {
+    // Buscar mensaje donde el baileys_json contenga el ID de Baileys
+    // El ID de Baileys generalmente está en baileys_json.key.id
+    const messageEntity = await this.repository
+      .createQueryBuilder('message')
+      .where('message.session_id = :sessionId', { sessionId: sessionId.value })
+      .andWhere("message.baileys_json->'key'->>'id' = :baileysId", { baileysId: baileysMessageId })
+      .getOne();
+
+    if (!messageEntity) {
+      return null;
+    }
+
+    return this.toDomain(messageEntity);
+  }
+
   async update(message: Message): Promise<Message> {
     const messageEntity = this.toEntity(message);
     await this.repository.update(message.id.value, messageEntity);

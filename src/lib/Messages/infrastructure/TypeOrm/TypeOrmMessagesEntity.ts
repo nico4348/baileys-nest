@@ -10,7 +10,7 @@ import {
   TableInheritance,
 } from 'typeorm';
 import { TypeOrmSessionsEntity } from '../../../Sessions/infrastructure/TypeOrm/TypeOrmSessionsEntity';
-import { MessageStatus } from '../../../MessageStatus/MessageEstatusEntity';
+import { TypeOrmMessageStatusEntity } from '../../../MessageStatus/infrastructure/TypeOrm/TypeOrmMessageStatusEntity';
 import { TypeOrmTextMessagesEntity } from '../../../TextMessages/infrastructure/TypeOrm/TypeOrmTextMessagesEntity';
 import { TypeOrmMediaMessagesEntity } from '../../../MediaMessages/infrastructure/TypeOrm/TypeOrmMediaMessagesEntity';
 import { TypeOrmReactionMessagesEntity } from '../../../ReactionMessages/infrastructure/TypeOrm/TypeOrmReactionMessagesEntity';
@@ -42,8 +42,8 @@ export class TypeOrmMessagesEntity {
   @JoinColumn({ name: 'session_id' })
   session: TypeOrmSessionsEntity;
 
-  @OneToMany(() => MessageStatus, (messageStatus) => messageStatus.message)
-  messageStatus: MessageStatus[];
+  @OneToMany(() => TypeOrmMessageStatusEntity, (messageStatus) => messageStatus.message)
+  messageStatus: TypeOrmMessageStatusEntity[];
 
   @OneToOne(
     () => TypeOrmTextMessagesEntity,

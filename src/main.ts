@@ -1,9 +1,14 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { StatusSeeder } from './lib/Status/infrastructure/StatusSeeder';
 import 'reflect-metadata';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // Ejecutar seeder de status
+  const statusSeeder = app.get(StatusSeeder);
+  await statusSeeder.seed();
 
   // Manejo global de errores no capturados
   process.on('unhandledRejection', (reason, promise) => {

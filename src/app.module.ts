@@ -9,8 +9,10 @@ import { MessagesModule } from './lib/Messages/messages.module';
 import { TextMessagesModule } from './lib/TextMessages/textMessages.module';
 import { MediaMessagesModule } from './lib/MediaMessages/mediaMessages.module';
 import { ReactionMessagesModule } from './lib/ReactionMessages/reactionMessages.module';
+import { StatusModule } from './lib/Status/status.module';
+import { MessageStatusModule } from './lib/MessageStatus/messageStatus.module';
 
 @Module({
-  imports: [DatabaseProvider, SessionsModule, AuthModule, SessionLogsModule, EventsModule, EventLogsModule, MessagesModule, TextMessagesModule, MediaMessagesModule, ReactionMessagesModule],
+  imports: [DatabaseProvider, SessionsModule, AuthModule, SessionLogsModule, EventsModule, EventLogsModule, MessagesModule, TextMessagesModule, MediaMessagesModule, ReactionMessagesModule, StatusModule, MessageStatusModule],
 })
 export class AppModule {}

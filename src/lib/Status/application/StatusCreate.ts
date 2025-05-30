@@ -20,6 +20,6 @@ export class StatusCreate {
       new StatusCreatedAt(createdAt),
     );
 
-    await this.repository.create(status);
+    await this.repository.save(status);
   }
 }

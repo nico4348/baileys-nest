@@ -12,6 +12,7 @@ import { QrCounterManager } from './QrCounterManager';
 import { ISessionStateManager } from './interfaces/ISessionStateManager';
 import { ISessionLogger } from './interfaces/ISessionLogger';
 import { BaileysEventLogger } from '../../EventLogs/infrastructure/BaileysEventLogger';
+import { MessageStatusTracker } from '../../MessageStatus/infrastructure/MessageStatusTracker';
 
 @Injectable()
 export class WhatsAppSessionManager
@@ -32,6 +33,7 @@ export class WhatsAppSessionManager
     private readonly qrCounterManager: QrCounterManager,
     private readonly logger: ISessionLogger,
     private readonly eventLogger: BaileysEventLogger,
+    private readonly messageStatusTracker: MessageStatusTracker,
   ) {}
 
   onModuleInit(): void {
@@ -51,6 +53,7 @@ export class WhatsAppSessionManager
       this.connectionManager,
       this,
       this.eventLogger,
+      this.messageStatusTracker,
     );
 
     this.sessionQrService.setSocketFactory(sessionId, socketFactory);
@@ -73,6 +76,7 @@ export class WhatsAppSessionManager
         this.connectionManager,
         this,
         this.eventLogger,
+        this.messageStatusTracker,
       );
 
       this.sessionQrService.setSocketFactory(sessionId, socketFactory);

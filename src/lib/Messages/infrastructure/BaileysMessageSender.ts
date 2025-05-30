@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { proto, type WASocket } from 'baileys';
 import { WhatsAppSessionManager } from '../../Sessions/infrastructure/WhatsAppSessionManager';
+import { MessageStatusTrackSentMessage } from '../../MessageStatus/application/MessageStatusTrackSentMessage';
 import {
   MessageSender,
   TextPayload,
@@ -10,7 +11,10 @@ import {
 
 @Injectable()
 export class BaileysMessageSender implements MessageSender {
-  constructor(private readonly sessionManager: WhatsAppSessionManager) {}
+  constructor(
+    private readonly sessionManager: WhatsAppSessionManager,
+    private readonly messageStatusTracker?: MessageStatusTrackSentMessage,
+  ) {}
 
   private getSocket(sessionId: string): WASocket | null {
     return this.sessionManager.getSocket(sessionId);
@@ -42,6 +46,12 @@ export class BaileysMessageSender implements MessageSender {
       }
 
       const msg = await sock.sendMessage(jid, { text }, opts);
+      
+      // Track message status if tracker is available and message was sent
+      // Note: BaileysMessageSender creates the initial 'pending' status
+      // The MessageStatusTracker will handle status updates from Baileys events
+      // We don't need to track here since the message isn't stored in DB yet
+      
       return msg || null;
     } catch (error) {
       console.error(`Error sending text message to ${jid}:`, error);
@@ -114,6 +124,9 @@ export class BaileysMessageSender implements MessageSender {
           throw new Error(`Unsupported media type '${mediaType}'`);
       }
 
+      // Track message status if tracker is available and message was sent
+      // Note: Status tracking happens after message is stored in DB via MessageStatusTracker
+
       return msg;
     } catch (error) {
       console.error(`Error sending ${mediaType} to ${jid}:`, error);
@@ -141,6 +154,9 @@ export class BaileysMessageSender implements MessageSender {
       const msg = await sock.sendMessage(jid, {
         react: { key: key, text: emoji },
       });
+
+      // Track message status if tracker is available and message was sent
+      // Note: Status tracking happens after message is stored in DB via MessageStatusTracker
 
       return msg || null;
     } catch (error) {

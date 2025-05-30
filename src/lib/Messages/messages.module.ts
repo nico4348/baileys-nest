@@ -7,6 +7,7 @@ import { MessagesCreate } from './application/MessagesCreate';
 import { MessagesGetAll } from './application/MessagesGetAll';
 import { MessagesGetOneById } from './application/MessagesGetOneById';
 import { MessagesGetBySessionId } from './application/MessagesGetBySessionId';
+import { MessagesGetByBaileysId } from './application/MessagesGetByBaileysId';
 import { MessagesUpdate } from './application/MessagesUpdate';
 import { MessagesDelete } from './application/MessagesDelete';
 import { MessagesOrchestrator } from './application/MessagesOrchestrator';
@@ -19,6 +20,7 @@ import { SessionsModule } from '../Sessions/sessions.module';
 import { TextMessagesModule } from '../TextMessages/textMessages.module';
 import { MediaMessagesModule } from '../MediaMessages/mediaMessages.module';
 import { ReactionMessagesModule } from '../ReactionMessages/reactionMessages.module';
+import { MessageStatusModule } from '../MessageStatus/messageStatus.module';
 
 @Module({
   imports: [
@@ -27,6 +29,7 @@ import { ReactionMessagesModule } from '../ReactionMessages/reactionMessages.mod
     TextMessagesModule,
     MediaMessagesModule,
     ReactionMessagesModule,
+    MessageStatusModule,
   ],
   controllers: [MessagesController],
   providers: [
@@ -56,6 +59,12 @@ import { ReactionMessagesModule } from '../ReactionMessages/reactionMessages.mod
       provide: 'MessagesGetBySessionId',
       useFactory: (repository: TypeOrmMessagesRepository) =>
         new MessagesGetBySessionId(repository),
+      inject: ['MessageRepository'],
+    },
+    {
+      provide: 'MessagesGetByBaileysId',
+      useFactory: (repository: TypeOrmMessagesRepository) =>
+        new MessagesGetByBaileysId(repository),
       inject: ['MessageRepository'],
     },
     {
@@ -135,6 +144,7 @@ import { ReactionMessagesModule } from '../ReactionMessages/reactionMessages.mod
   exports: [
     'MessageRepository',
     'MessagesCreate',
+    'MessagesGetByBaileysId',
     'MessageSender',
     'MessagesOrchestrator',
     'SendMessage',

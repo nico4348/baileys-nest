@@ -4,6 +4,7 @@ import { MessagesGetOneById } from './MessagesGetOneById';
 import { TextMessagesCreate } from '../../TextMessages/application/TextMessagesCreate';
 import { MediaMessagesCreate } from '../../MediaMessages/application/MediaMessagesCreate';
 import { ReactionMessagesCreate } from '../../ReactionMessages/application/ReactionMessagesCreate';
+import { MessageStatusTrackSentMessage } from '../../MessageStatus/application/MessageStatusTrackSentMessage';
 import {
   MessageSender,
   TextPayload,
@@ -32,6 +33,7 @@ export class MessagesOrchestrator {
     private readonly fileService: FileService,
     @Inject('CryptoService')
     private readonly cryptoService: CryptoService,
+    private readonly messageStatusTracker?: MessageStatusTrackSentMessage,
   ) {}
 
   private async getQuotedMessageData(
@@ -96,6 +98,11 @@ export class MessagesOrchestrator {
         uuid, // Usamos el UUID como message_id para la relación
         text,
       );
+
+      // Create initial message status
+      if (this.messageStatusTracker) {
+        await this.messageStatusTracker.run(uuid);
+      }
 
       return { 
         baileysMessage: sentMessage, 
@@ -165,6 +172,11 @@ export class MessagesOrchestrator {
         mediaUrl,
       );
 
+      // Create initial message status
+      if (this.messageStatusTracker) {
+        await this.messageStatusTracker.run(uuid);
+      }
+
       return { 
         baileysMessage: sentMessage, 
         uuid: uuid 
@@ -212,6 +224,11 @@ export class MessagesOrchestrator {
         emoji,
         targetMessageId, // Use the target message ID (should be UUID)
       );
+
+      // Create initial message status
+      if (this.messageStatusTracker) {
+        await this.messageStatusTracker.run(uuid);
+      }
 
       return { 
         baileysMessage: sentMessage, 
