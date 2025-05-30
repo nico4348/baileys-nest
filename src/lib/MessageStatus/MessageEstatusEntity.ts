@@ -16,7 +16,7 @@ export class MessageStatus {
   @Column({ type: 'timestamp' })
   updated_at: Date;
   // Relación Many-to-One con Message
-  @ManyToOne(() => TypeOrmMessagesEntity, (message) => message.messageStatuses)
+  @ManyToOne(() => TypeOrmMessagesEntity, (message) => message.messageStatus)
   @JoinColumn({ name: 'message_id' })
   message: TypeOrmMessagesEntity;
 

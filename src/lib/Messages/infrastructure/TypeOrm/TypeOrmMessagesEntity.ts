@@ -20,13 +20,13 @@ export class TypeOrmMessagesEntity {
   @PrimaryColumn({ type: 'uuid' })
   id: string;
 
-  @Column({ type: 'json', nullable: true })
+  @Column({ type: 'json' })
   baileys_json: any;
 
   @Column({ type: 'uuid' })
   session_id: string;
 
-  @Column({ type: 'uuid', nullable: true })
+  @Column({ type: 'varchar', length: 25, nullable: true })
   quoted_message_id: string | null;
 
   @Column({ type: 'varchar', length: 50 })
@@ -42,14 +42,8 @@ export class TypeOrmMessagesEntity {
   @JoinColumn({ name: 'session_id' })
   session: TypeOrmSessionsEntity;
 
-  @ManyToOne(() => TypeOrmMessagesEntity, (message) => message.quotedMessages)
-  @JoinColumn({ name: 'quoted_message_id' })
-  quotedMessage: TypeOrmMessagesEntity;
-  @OneToMany(() => TypeOrmMessagesEntity, (message) => message.quotedMessage)
-  quotedMessages: TypeOrmMessagesEntity[];
-
   @OneToMany(() => MessageStatus, (messageStatus) => messageStatus.message)
-  messageStatuses: MessageStatus[];
+  messageStatus: MessageStatus[];
 
   @OneToOne(
     () => TypeOrmTextMessagesEntity,
