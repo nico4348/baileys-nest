@@ -44,7 +44,6 @@ export class ReactionMessagesController {
     @Inject('ReactionMessagesDelete')
     private readonly reactionMessagesDelete: ReactionMessagesDelete,
   ) {}
-
   @Post()
   async create(
     @Body()
@@ -55,9 +54,7 @@ export class ReactionMessagesController {
     },
   ) {
     try {
-      const id = uuidv4();
       await this.reactionMessagesCreate.run(
-        id,
         createReactionMessageDto.message_id,
         createReactionMessageDto.emoji,
         createReactionMessageDto.target_msg_id,
@@ -65,7 +62,6 @@ export class ReactionMessagesController {
       return {
         success: true,
         data: {
-          id,
           message_id: createReactionMessageDto.message_id,
           emoji: createReactionMessageDto.emoji,
           target_msg_id: createReactionMessageDto.target_msg_id,
@@ -175,9 +171,7 @@ export class ReactionMessagesController {
           HttpStatus.NOT_FOUND,
         );
       }
-
       await this.reactionMessagesUpdate.run(
-        id,
         updateReactionMessageDto.message_id ||
           existingReactionMessage.message_id.value,
         updateReactionMessageDto.emoji || existingReactionMessage.emoji.value,

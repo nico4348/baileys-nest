@@ -8,15 +8,9 @@ export class ReactionMessageHandler implements IMessageHandler {
     @Inject('ReactionMessagesCreate')
     private readonly reactionMessagesCreate: ReactionMessagesCreate,
   ) {}
-
   async handle(messageId: string, sessionId: string, data: any): Promise<void> {
     const { emoji, targetMsgId } = data;
-    
-    await this.reactionMessagesCreate.run(
-      crypto.randomUUID(),
-      messageId,
-      emoji,
-      targetMsgId,
-    );
+
+    await this.reactionMessagesCreate.run(messageId, emoji, targetMsgId);
   }
 }

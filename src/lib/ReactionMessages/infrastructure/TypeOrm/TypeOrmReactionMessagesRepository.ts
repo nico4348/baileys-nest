@@ -32,7 +32,7 @@ export class TypeOrmReactionMessagesRepository
   }
   async getOneById(id: ReactionMessageId): Promise<ReactionMessage | null> {
     const reactionMessageEntity = await this.repository.findOne({
-      where: { id: id.value },
+      where: { message_id: id.value },
       relations: ['message'],
     });
 
@@ -80,11 +80,10 @@ export class TypeOrmReactionMessagesRepository
 
     return reactionMessageEntities.map((entity) => this.toDomain(entity));
   }
-
   async update(reactionMessage: ReactionMessage): Promise<void> {
     const reactionMessageEntity = this.toEntity(reactionMessage);
     await this.repository.update(
-      reactionMessage.id.value,
+      reactionMessage.message_id.value,
       reactionMessageEntity,
     );
   }
@@ -96,21 +95,17 @@ export class TypeOrmReactionMessagesRepository
   async deleteByMessageId(messageId: string): Promise<void> {
     await this.repository.delete({ message_id: messageId });
   }
-
   private toEntity(
     reactionMessage: ReactionMessage,
   ): TypeOrmReactionMessagesEntity {
     const entity = new TypeOrmReactionMessagesEntity();
-    entity.id = reactionMessage.id.value;
     entity.message_id = reactionMessage.message_id.value;
     entity.emoji = reactionMessage.emoji.value;
     entity.target_msg_id = reactionMessage.target_msg_id.value;
     return entity;
   }
-
   private toDomain(entity: TypeOrmReactionMessagesEntity): ReactionMessage {
     return new ReactionMessage(
-      new ReactionMessageId(entity.id),
       new ReactionMessageMessageId(entity.message_id),
       new ReactionMessageEmoji(entity.emoji),
       new ReactionMessageTargetMsgId(entity.target_msg_id),

@@ -11,14 +11,9 @@ export class TextMessageHandler implements IMessageHandler {
     @Inject('TextMessagesCreate')
     private readonly textMessagesCreate: TextMessagesCreate,
   ) {}
-
   async handle(messageId: string, sessionId: string, data: any): Promise<void> {
     const { text } = data;
-    
-    await this.textMessagesCreate.run(
-      crypto.randomUUID(),
-      messageId,
-      text,
-    );
+
+    await this.textMessagesCreate.run(messageId, text);
   }
 }

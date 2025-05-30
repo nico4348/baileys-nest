@@ -8,13 +8,11 @@ import { ReactionMessage } from '../domain/ReactionMessage';
 export class ReactionMessagesCreate {
   constructor(private readonly repository: ReactionMessageRepository) {}
   async run(
-    id: string,
     messageId: string,
     emoji: string,
     targetMsgId: string,
   ): Promise<void> {
     const reactionMessage = new ReactionMessage(
-      new ReactionMessageId(id),
       new ReactionMessageMessageId(messageId),
       new ReactionMessageEmoji(emoji),
       new ReactionMessageTargetMsgId(targetMsgId),

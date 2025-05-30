@@ -11,7 +11,6 @@ import { MediaMessageRepository } from '../domain/MediaMessageRepository';
 export class MediaMessagesUpdate {
   constructor(private readonly repository: MediaMessageRepository) {}
   async run(
-    id: string,
     messageId: string,
     caption: string | null,
     mediaType: string,
@@ -20,7 +19,6 @@ export class MediaMessagesUpdate {
     filePath: string,
   ): Promise<void> {
     const mediaMessage = new MediaMessage(
-      new MediaMessageId(id),
       new MediaMessageMessageId(messageId),
       new MediaMessageCaption(caption),
       new MediaMessageMediaType(mediaType),

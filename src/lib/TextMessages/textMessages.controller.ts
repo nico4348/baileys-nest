@@ -39,8 +39,7 @@ export class TextMessagesController {
     private readonly textMessagesDelete: TextMessagesDelete,
   ) {}
 
-  @Post()
-  async create(
+  @Post() async create(
     @Body()
     createTextMessageDto: {
       message_id: string;
@@ -48,16 +47,13 @@ export class TextMessagesController {
     },
   ) {
     try {
-      const id = uuidv4();
       await this.textMessagesCreate.run(
-        id,
         createTextMessageDto.message_id,
         createTextMessageDto.body,
       );
       return {
         success: true,
         data: {
-          id,
           message_id: createTextMessageDto.message_id,
           body: createTextMessageDto.body,
         },
@@ -157,10 +153,8 @@ export class TextMessagesController {
           HttpStatus.NOT_FOUND,
         );
       }
-
       await this.textMessagesUpdate.run(
-        id,
-        updateTextMessageDto.message_id || existingTextMessage.id_message.value,
+        updateTextMessageDto.message_id || existingTextMessage.message_id.value,
         updateTextMessageDto.body || existingTextMessage.body.value,
       );
 

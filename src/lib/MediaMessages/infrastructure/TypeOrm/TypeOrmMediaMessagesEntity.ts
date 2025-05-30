@@ -4,9 +4,6 @@ import { TypeOrmMessagesEntity } from '../../../Messages/infrastructure/TypeOrm/
 @Entity('media_messages')
 export class TypeOrmMediaMessagesEntity {
   @PrimaryColumn({ type: 'uuid' })
-  id: string;
-
-  @Column({ type: 'uuid' })
   message_id: string;
 
   @Column({ type: 'varchar', length: 4096, nullable: true })

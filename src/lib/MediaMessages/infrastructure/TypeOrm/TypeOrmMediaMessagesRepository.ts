@@ -32,10 +32,9 @@ export class TypeOrmMediaMessagesRepository implements MediaMessageRepository {
 
     return mediaMessageEntities.map((entity) => this.toDomain(entity));
   }
-
   async getOneById(id: MediaMessageId): Promise<MediaMessage | null> {
     const mediaMessageEntity = await this.repository.findOne({
-      where: { id: id.value },
+      where: { message_id: id.value },
       relations: ['message'],
     });
 
@@ -78,10 +77,12 @@ export class TypeOrmMediaMessagesRepository implements MediaMessageRepository {
 
     return mediaMessageEntities.map((entity) => this.toDomain(entity));
   }
-
   async update(mediaMessage: MediaMessage): Promise<void> {
     const mediaMessageEntity = this.toEntity(mediaMessage);
-    await this.repository.update(mediaMessage.id.value, mediaMessageEntity);
+    await this.repository.update(
+      mediaMessage.message_id.value,
+      mediaMessageEntity,
+    );
   }
 
   async delete(id: MediaMessageId): Promise<void> {
@@ -91,10 +92,8 @@ export class TypeOrmMediaMessagesRepository implements MediaMessageRepository {
   async deleteByMessageId(messageId: string): Promise<void> {
     await this.repository.delete({ message_id: messageId });
   }
-
   private toEntity(mediaMessage: MediaMessage): TypeOrmMediaMessagesEntity {
     const entity = new TypeOrmMediaMessagesEntity();
-    entity.id = mediaMessage.id.value;
     entity.message_id = mediaMessage.message_id.value;
     entity.caption = mediaMessage.caption.value;
     entity.media_type = mediaMessage.media_type.value;
@@ -103,10 +102,8 @@ export class TypeOrmMediaMessagesRepository implements MediaMessageRepository {
     entity.file_path = mediaMessage.file_path.value;
     return entity;
   }
-
   private toDomain(entity: TypeOrmMediaMessagesEntity): MediaMessage {
     return new MediaMessage(
-      new MediaMessageId(entity.id),
       new MediaMessageMessageId(entity.message_id),
       new MediaMessageCaption(entity.caption),
       new MediaMessageMediaType(entity.media_type),

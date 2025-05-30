@@ -92,10 +92,8 @@ export class MessagesOrchestrator {
         to,
         new Date(),
       );
-
       await this.textMessagesCreate.run(
-        this.cryptoService.generateUUID(),
-        uuid, // Usamos el UUID como message_id para la relación
+        uuid, // Use the UUID as message_id directly
         text,
       );
 
@@ -104,9 +102,9 @@ export class MessagesOrchestrator {
         await this.messageStatusTracker.run(uuid);
       }
 
-      return { 
-        baileysMessage: sentMessage, 
-        uuid: uuid 
+      return {
+        baileysMessage: sentMessage,
+        uuid: uuid,
       };
     } catch (error) {
       console.error('Error in sendTextMessage orchestration:', error);
@@ -160,11 +158,10 @@ export class MessagesOrchestrator {
         sessionId,
         to,
         new Date(),
-      ); // 3. Create media message record (child record)
+      ); // 3. Create media message record (child record)      // 3. Create media message record (child record)
       // Use the file information extracted earlier
       await this.mediaMessagesCreate.run(
-        this.cryptoService.generateUUID(),
-        uuid, // Usamos el UUID como message_id para la relación
+        uuid, // Use the UUID as message_id directly
         caption || null,
         mediaType,
         mimeType,
@@ -177,9 +174,9 @@ export class MessagesOrchestrator {
         await this.messageStatusTracker.run(uuid);
       }
 
-      return { 
-        baileysMessage: sentMessage, 
-        uuid: uuid 
+      return {
+        baileysMessage: sentMessage,
+        uuid: uuid,
       };
     } catch (error) {
       console.error('Error in sendMediaMessage orchestration:', error);
@@ -219,8 +216,7 @@ export class MessagesOrchestrator {
         new Date(),
       ); // 3. Create reaction message record (child record)
       await this.reactionMessagesCreate.run(
-        this.cryptoService.generateUUID(),
-        uuid, // Usamos el UUID como message_id para la relación
+        uuid, // Use the UUID as message_id directly
         emoji,
         targetMessageId, // Use the target message ID (should be UUID)
       );
@@ -230,9 +226,9 @@ export class MessagesOrchestrator {
         await this.messageStatusTracker.run(uuid);
       }
 
-      return { 
-        baileysMessage: sentMessage, 
-        uuid: uuid 
+      return {
+        baileysMessage: sentMessage,
+        uuid: uuid,
       };
     } catch (error) {
       console.error('Error in sendReaction orchestration:', error);

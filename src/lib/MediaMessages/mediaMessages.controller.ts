@@ -44,7 +44,6 @@ export class MediaMessagesController {
     @Inject('DownloadMediaMessage')
     private readonly downloadMediaMessage: DownloadMediaMessage,
   ) {}
-
   @Post()
   async create(
     @Body()
@@ -58,9 +57,7 @@ export class MediaMessagesController {
     },
   ) {
     try {
-      const id = uuidv4();
       await this.mediaMessagesCreate.run(
-        id,
         createMediaMessageDto.message_id,
         createMediaMessageDto.caption || null,
         createMediaMessageDto.media_type,
@@ -71,7 +68,6 @@ export class MediaMessagesController {
       return {
         success: true,
         data: {
-          id,
           message_id: createMediaMessageDto.message_id,
           caption: createMediaMessageDto.caption,
           media_type: createMediaMessageDto.media_type,
@@ -182,9 +178,7 @@ export class MediaMessagesController {
           HttpStatus.NOT_FOUND,
         );
       }
-
       await this.mediaMessagesUpdate.run(
-        id,
         updateMediaMessageDto.message_id ||
           existingMediaMessage.message_id.value,
         updateMediaMessageDto.caption !== undefined

@@ -8,12 +8,10 @@ export class MediaMessageHandler implements IMessageHandler {
     @Inject('MediaMessagesCreate')
     private readonly mediaMessagesCreate: MediaMessagesCreate,
   ) {}
-
   async handle(messageId: string, sessionId: string, data: any): Promise<void> {
     const { caption, mediaType, mimeType, fileName, filePath } = data;
-    
+
     await this.mediaMessagesCreate.run(
-      crypto.randomUUID(),
       messageId,
       caption || '',
       mediaType,

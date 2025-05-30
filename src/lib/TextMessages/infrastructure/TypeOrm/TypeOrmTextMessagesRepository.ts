@@ -28,10 +28,9 @@ export class TypeOrmTextMessagesRepository implements TextMessageRepository {
 
     return textMessageEntities.map((entity) => this.toDomain(entity));
   }
-
   async getOneById(id: TextMessageId): Promise<TextMessage | null> {
     const textMessageEntity = await this.repository.findOne({
-      where: { id: id.value },
+      where: { message_id: id.value },
       relations: ['message'],
     });
 
@@ -64,31 +63,28 @@ export class TypeOrmTextMessagesRepository implements TextMessageRepository {
 
     return textMessageEntities.map((entity) => this.toDomain(entity));
   }
-
   async update(textMessage: TextMessage): Promise<void> {
     const textMessageEntity = this.toEntity(textMessage);
-    await this.repository.update(textMessage.id.value, textMessageEntity);
+    await this.repository.update(
+      textMessage.message_id.value,
+      textMessageEntity,
+    );
   }
 
   async delete(id: TextMessageId): Promise<void> {
     await this.repository.delete(id.value);
   }
-
   async deleteByMessageId(messageId: string): Promise<void> {
     await this.repository.delete({ message_id: messageId });
   }
-
   private toEntity(textMessage: TextMessage): TypeOrmTextMessagesEntity {
     const entity = new TypeOrmTextMessagesEntity();
-    entity.id = textMessage.id.value;
-    entity.message_id = textMessage.id_message.value;
+    entity.message_id = textMessage.message_id.value;
     entity.body = textMessage.body.value;
     return entity;
   }
-
   private toDomain(entity: TypeOrmTextMessagesEntity): TextMessage {
     return new TextMessage(
-      new TextMessageId(entity.id),
       new TextMessageMessageId(entity.message_id),
       new TextMessageBody(entity.body),
     );
