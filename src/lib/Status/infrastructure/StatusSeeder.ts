@@ -10,13 +10,17 @@ export class StatusSeeder {
     @InjectRepository(TypeOrmStatusEntity)
     private readonly statusRepository: Repository<TypeOrmStatusEntity>,
   ) {}
-
   async seed(): Promise<void> {
     const statuses = [
       {
         id: uuidv4(),
-        name: 'pending',
-        description: 'Mensaje pendiente de envío',
+        name: 'message_receipt',
+        description: 'Solicitud de mensaje recibida',
+      },
+      {
+        id: uuidv4(),
+        name: 'validated',
+        description: 'Mensaje validado correctamente',
       },
       {
         id: uuidv4(),

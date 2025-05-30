@@ -21,6 +21,9 @@ import { TextMessagesModule } from '../TextMessages/textMessages.module';
 import { MediaMessagesModule } from '../MediaMessages/mediaMessages.module';
 import { ReactionMessagesModule } from '../ReactionMessages/reactionMessages.module';
 import { MessageStatusModule } from '../MessageStatus/messageStatus.module';
+import { MessageStatusTrackSentMessage } from '../MessageStatus/application/MessageStatusTrackSentMessage';
+import { MessageStatusCreateMessageReceipt } from '../MessageStatus/application/MessageStatusCreateMessageReceipt';
+import { MessageStatusCreateValidated } from '../MessageStatus/application/MessageStatusCreateValidated';
 
 @Module({
   imports: [
@@ -102,6 +105,9 @@ import { MessageStatusModule } from '../MessageStatus/messageStatus.module';
         messageSender,
         fileService,
         cryptoService,
+        messageStatusTracker,
+        messageStatusCreateReceipt,
+        messageStatusCreateValidated,
       ) =>
         new MessagesOrchestrator(
           messagesCreate,
@@ -112,6 +118,9 @@ import { MessageStatusModule } from '../MessageStatus/messageStatus.module';
           messageSender,
           fileService,
           cryptoService,
+          messageStatusTracker,
+          messageStatusCreateReceipt,
+          messageStatusCreateValidated,
         ),
       inject: [
         'MessagesCreate',
@@ -122,13 +131,16 @@ import { MessageStatusModule } from '../MessageStatus/messageStatus.module';
         'MessageSender',
         'FileService',
         'CryptoService',
+        MessageStatusTrackSentMessage,
+        MessageStatusCreateMessageReceipt,
+        MessageStatusCreateValidated,
       ],
     },
     {
       provide: 'SendMessage',
-      useFactory: (messagesOrchestrator) =>
-        new SendMessage(messagesOrchestrator),
-      inject: ['MessagesOrchestrator'],
+      useFactory: (messagesOrchestrator, cryptoService) =>
+        new SendMessage(messagesOrchestrator, cryptoService),
+      inject: ['MessagesOrchestrator', 'CryptoService'],
     },
     {
       provide: 'MessageHandlerFactory',

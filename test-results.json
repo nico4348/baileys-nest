@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-05-30T21:02:48.329Z",
+  "timestamp": "2025-05-30T22:22:51.222Z",
   "summary": {
     "total": 24,
     "passed": 24,
@@ -26,7 +26,7 @@
             "phone": "573022949109",
             "status": true,
             "createdAt": "2025-05-26T22:17:31.332Z",
-            "updatedAt": "2025-05-30T20:58:02.681Z"
+            "updatedAt": "2025-05-30T22:18:13.871Z"
           }
         }
       }
@@ -37,9 +37,9 @@
       "error": "HTTP 201",
       "data": {
         "success": true,
-        "messageId": "ddd625d4-2855-47ef-89e5-bc093135f10a",
-        "childMessageId": "3EB098BB9C8554F1CC4C14",
-        "timestamp": "2025-05-30T20:58:28.503Z",
+        "messageId": "21614a0d-98ed-4cf1-be2c-a4c330d2406b",
+        "childMessageId": "3EB010FB870DD8E5E4481A",
+        "timestamp": "2025-05-30T22:18:32.352Z",
         "messageType": "text"
       }
     },
@@ -49,9 +49,9 @@
       "error": "HTTP 201",
       "data": {
         "success": true,
-        "messageId": "da40f213-37f3-4798-a457-cab280fa2594",
-        "childMessageId": "3EB01223DF8D133E8C5F40",
-        "timestamp": "2025-05-30T20:58:31.532Z",
+        "messageId": "4f0539e1-95a0-424a-943f-6477d92cbbad",
+        "childMessageId": "3EB074D47ED0F52D6BEC6E",
+        "timestamp": "2025-05-30T22:18:35.384Z",
         "messageType": "text"
       }
     },
@@ -61,9 +61,9 @@
       "error": "HTTP 201",
       "data": {
         "success": true,
-        "messageId": "75c2953e-38a6-4aa4-9f16-ac8135825891",
-        "childMessageId": "3EB0CDDF251AFE2A1B5879",
-        "timestamp": "2025-05-30T20:58:34.569Z",
+        "messageId": "e4de1a7c-7060-4716-bd7f-e0ae227d8256",
+        "childMessageId": "3EB0D9ABF140216A0A9B0B",
+        "timestamp": "2025-05-30T22:18:38.411Z",
         "messageType": "text"
       }
     },
@@ -73,9 +73,9 @@
       "error": "HTTP 201",
       "data": {
         "success": true,
-        "messageId": "85345bcb-d8e9-4c1f-9562-d3d3ed0b90e6",
-        "childMessageId": "3EB0C36B247B90B2B348C5",
-        "timestamp": "2025-05-30T20:58:38.837Z",
+        "messageId": "c56b85e8-f820-4f5e-b569-2224b88af29a",
+        "childMessageId": "3EB0C3B3869FFC5633C998",
+        "timestamp": "2025-05-30T22:18:42.430Z",
         "messageType": "media"
       }
     },
@@ -85,9 +85,9 @@
       "error": "HTTP 201",
       "data": {
         "success": true,
-        "messageId": "618052a6-d98e-418b-8270-ce9c4fa53f62",
-        "childMessageId": "3EB0C607CA8317814E5AF9",
-        "timestamp": "2025-05-30T20:58:43.273Z",
+        "messageId": "e759d212-ce0a-4ad0-a53e-20950c647bf1",
+        "childMessageId": "3EB0FAB44DE6BE99C52321",
+        "timestamp": "2025-05-30T22:18:47.296Z",
         "messageType": "media"
       }
     },
@@ -97,9 +97,9 @@
       "error": "HTTP 201",
       "data": {
         "success": true,
-        "messageId": "4f82db0b-1e0f-4be1-be2a-26df5b154ce3",
-        "childMessageId": "3EB04B03190B40B462B8E2",
-        "timestamp": "2025-05-30T20:58:47.129Z",
+        "messageId": "0eb4a8fe-c84e-481d-991f-0d781bdc8c54",
+        "childMessageId": "3EB0F7DCA364E530F13539",
+        "timestamp": "2025-05-30T22:18:51.099Z",
         "messageType": "media"
       }
     },
@@ -109,9 +109,9 @@
       "error": "HTTP 201",
       "data": {
         "success": true,
-        "messageId": "93030383-271f-4fc0-a084-97a926412cc9",
-        "childMessageId": "3EB0D476A6747246E63BAE",
-        "timestamp": "2025-05-30T20:58:50.899Z",
+        "messageId": "9d475d6a-23d9-4fb0-88cf-e32558c607e6",
+        "childMessageId": "3EB0E48C2F9EC8A1E85862",
+        "timestamp": "2025-05-30T22:18:54.668Z",
         "messageType": "media"
       }
     },
@@ -121,9 +121,9 @@
       "error": "HTTP 201",
       "data": {
         "success": true,
-        "messageId": "8d377827-36d0-4587-a681-98483ebe54ad",
-        "childMessageId": "3EB0F479251F6F5E8CA3B3",
-        "timestamp": "2025-05-30T20:58:55.949Z",
+        "messageId": "e89b066a-8cb3-4d7f-a6e0-76b832bd1fa2",
+        "childMessageId": "3EB01991EAFE0BD59BB371",
+        "timestamp": "2025-05-30T22:18:58.592Z",
         "messageType": "media"
       }
     },
@@ -133,9 +133,9 @@
       "error": "HTTP 201",
       "data": {
         "success": true,
-        "messageId": "f0ccae4b-2721-4e1d-80ce-70a2ef6e46dd",
-        "childMessageId": "3EB0B0039CBFE6197CB909",
-        "timestamp": "2025-05-30T20:59:02.068Z",
+        "messageId": "f65fcb60-24fd-49b9-bcce-d8002abc2247",
+        "childMessageId": "3EB027F5C90ED6147DDF85",
+        "timestamp": "2025-05-30T22:19:04.184Z",
         "messageType": "media"
       }
     },
@@ -145,9 +145,9 @@
       "error": "HTTP 201",
       "data": {
         "success": true,
-        "messageId": "7d734b83-ff1d-4f54-b1a1-815237de7da6",
-        "childMessageId": "3EB0AEFD06DDD50A43E596",
-        "timestamp": "2025-05-30T20:59:07.445Z",
+        "messageId": "a58f328b-2f53-4221-b4e1-71f2128272ae",
+        "childMessageId": "3EB0CAF3F4A5E576255C75",
+        "timestamp": "2025-05-30T22:19:08.997Z",
         "messageType": "media"
       }
     },
@@ -157,9 +157,9 @@
       "error": "HTTP 201",
       "data": {
         "success": true,
-        "messageId": "22790f4b-b634-41bb-b9c7-9464904a2cf4",
-        "childMessageId": "3EB03D5ABF8ABF009393D8",
-        "timestamp": "2025-05-30T20:59:40.920Z",
+        "messageId": "e28bd02d-ab59-4198-a8ee-d083a397e78d",
+        "childMessageId": "3EB0E43DE49ACEDD4C15FF",
+        "timestamp": "2025-05-30T22:19:43.697Z",
         "messageType": "media"
       }
     },
@@ -170,16 +170,16 @@
       "data": {
         "originalMessage": {
           "success": true,
-          "messageId": "94f3b820-c225-46d9-8d98-0b986d9ac6c1",
-          "childMessageId": "3EB0163DE0BD24F95D12A7",
-          "timestamp": "2025-05-30T20:59:43.945Z",
+          "messageId": "496d1527-c9d6-4a6a-872b-eb626efa79b9",
+          "childMessageId": "3EB0E32EC229C7776BB4E9",
+          "timestamp": "2025-05-30T22:19:46.732Z",
           "messageType": "text"
         },
         "reaction": {
           "success": true,
-          "messageId": "74972c01-2ad2-4faf-9147-74f646a5909a",
-          "childMessageId": "3EB028B94DC48A417D2CF6",
-          "timestamp": "2025-05-30T20:59:46.980Z",
+          "messageId": "85f54da2-effc-4e24-b5f0-c38d82a772dc",
+          "childMessageId": "3EB0AA5206BFD4BC5367CF",
+          "timestamp": "2025-05-30T22:19:49.766Z",
           "messageType": "reaction"
         }
       }
@@ -190,9 +190,9 @@
       "data": {
         "originalMessage": {
           "success": true,
-          "messageId": "e2eb0944-a7bf-4606-b083-385585ba25c9",
-          "childMessageId": "3EB0BB197378BCCB4227CA",
-          "timestamp": "2025-05-30T20:59:49.993Z",
+          "messageId": "a95cb713-b8e3-4b24-903d-7f7a6b6717cf",
+          "childMessageId": "3EB0E9267C0BBA162ADB9F",
+          "timestamp": "2025-05-30T22:19:52.776Z",
           "messageType": "text"
         },
         "reactions": [
@@ -201,9 +201,9 @@
             "success": true,
             "data": {
               "success": true,
-              "messageId": "d78182a9-9eab-4163-8435-a122b8b0d039",
-              "childMessageId": "3EB0DDE2BC6D64D5AF23AE",
-              "timestamp": "2025-05-30T20:59:52.008Z",
+              "messageId": "79676f57-d675-4be5-95ed-a591ff3612b8",
+              "childMessageId": "3EB0B4A6F4B231BF5A1F83",
+              "timestamp": "2025-05-30T22:19:54.815Z",
               "messageType": "reaction"
             }
           },
@@ -212,9 +212,9 @@
             "success": true,
             "data": {
               "success": true,
-              "messageId": "45ee019b-1947-4158-9d3d-36c404fa5fbb",
-              "childMessageId": "3EB04EA738B439519EA3DC",
-              "timestamp": "2025-05-30T20:59:53.022Z",
+              "messageId": "a09349da-007a-468a-a12e-853bf11b5e36",
+              "childMessageId": "3EB078A72DFF848C5CFB11",
+              "timestamp": "2025-05-30T22:19:55.841Z",
               "messageType": "reaction"
             }
           },
@@ -223,9 +223,9 @@
             "success": true,
             "data": {
               "success": true,
-              "messageId": "944e0384-9718-4175-9ae8-a0642b827311",
-              "childMessageId": "3EB0B6E1F4E97F3455A630",
-              "timestamp": "2025-05-30T20:59:54.040Z",
+              "messageId": "78619cd8-1fde-4090-8112-c160e9cd16bb",
+              "childMessageId": "3EB0FBB3132262D297DB46",
+              "timestamp": "2025-05-30T22:19:56.855Z",
               "messageType": "reaction"
             }
           },
@@ -234,9 +234,9 @@
             "success": true,
             "data": {
               "success": true,
-              "messageId": "06f77455-7bef-41d5-b97c-d285f0b42ad3",
-              "childMessageId": "3EB08E27CC5323455B7AA1",
-              "timestamp": "2025-05-30T20:59:55.060Z",
+              "messageId": "9494b07c-c79a-4626-a088-ee6b494d68f6",
+              "childMessageId": "3EB09D114F263FD4B09968",
+              "timestamp": "2025-05-30T22:19:57.879Z",
               "messageType": "reaction"
             }
           }
@@ -250,7 +250,7 @@
       "data": {
         "success": false,
         "messageId": "",
-        "timestamp": "2025-05-30T20:59:59.063Z",
+        "timestamp": "2025-05-30T22:20:01.905Z",
         "messageType": "text",
         "error": "Session invalid-session-id not found or not connected"
       }
@@ -279,7 +279,7 @@
       "data": {
         "success": false,
         "messageId": "",
-        "timestamp": "2025-05-30T21:02:27.170Z",
+        "timestamp": "2025-05-30T22:22:30.045Z",
         "messageType": "media",
         "error": "ENOENT: no such file or directory, open 'C:\\Users\\Usuario\\Desktop\\baileys-nest\\invalid-url'"
       }
@@ -291,7 +291,7 @@
       "data": {
         "success": false,
         "messageId": "",
-        "timestamp": "2025-05-30T21:02:30.171Z",
+        "timestamp": "2025-05-30T22:22:33.071Z",
         "messageType": "media",
         "error": "Unsupported media type 'unsupported'"
       }
@@ -301,31 +301,31 @@
       "success": true,
       "error": "HTTP 200",
       "data": {
-        "count": 242,
+        "count": 18,
         "sample": [
           {
             "id": {
-              "value": "06f77455-7bef-41d5-b97c-d285f0b42ad3"
+              "value": "9494b07c-c79a-4626-a088-ee6b494d68f6"
             },
             "baileys_json": {
               "value": {
                 "key": {
                   "remoteJid": "573022949109@s.whatsapp.net",
                   "fromMe": true,
-                  "id": "3EB08E27CC5323455B7AA1"
+                  "id": "3EB09D114F263FD4B09968"
                 },
                 "message": {
                   "reactionMessage": {
                     "key": {
                       "remoteJid": "573022949109@s.whatsapp.net",
                       "fromMe": true,
-                      "id": "3EB0BB197378BCCB4227CA"
+                      "id": "3EB0E9267C0BBA162ADB9F"
                     },
                     "text": "👎",
-                    "senderTimestampMs": "1748638795046"
+                    "senderTimestampMs": "1748643597864"
                   }
                 },
-                "messageTimestamp": "1748638795",
+                "messageTimestamp": "1748643597",
                 "status": "PENDING"
               }
             },
@@ -333,7 +333,7 @@
               "value": "30ed47f1-eb16-4573-8696-4546ab37dce0"
             },
             "quoted_message_id": {
-              "value": "e2eb0944-a7bf-4606-b083-385585ba25c9"
+              "value": "a95cb713-b8e3-4b24-903d-7f7a6b6717cf"
             },
             "to": {
               "value": "573022949109"
@@ -342,32 +342,32 @@
               "value": "react"
             },
             "created_at": {
-              "value": "2025-05-30T20:59:55.054Z"
+              "value": "2025-05-30T22:19:57.870Z"
             }
           },
           {
             "id": {
-              "value": "944e0384-9718-4175-9ae8-a0642b827311"
+              "value": "78619cd8-1fde-4090-8112-c160e9cd16bb"
             },
             "baileys_json": {
               "value": {
                 "key": {
                   "remoteJid": "573022949109@s.whatsapp.net",
                   "fromMe": true,
-                  "id": "3EB0B6E1F4E97F3455A630"
+                  "id": "3EB0FBB3132262D297DB46"
                 },
                 "message": {
                   "reactionMessage": {
                     "key": {
                       "remoteJid": "573022949109@s.whatsapp.net",
                       "fromMe": true,
-                      "id": "3EB0BB197378BCCB4227CA"
+                      "id": "3EB0E9267C0BBA162ADB9F"
                     },
                     "text": "😮",
-                    "senderTimestampMs": "1748638794028"
+                    "senderTimestampMs": "1748643596839"
                   }
                 },
-                "messageTimestamp": "1748638794",
+                "messageTimestamp": "1748643596",
                 "status": "PENDING"
               }
             },
@@ -375,7 +375,7 @@
               "value": "30ed47f1-eb16-4573-8696-4546ab37dce0"
             },
             "quoted_message_id": {
-              "value": "e2eb0944-a7bf-4606-b083-385585ba25c9"
+              "value": "a95cb713-b8e3-4b24-903d-7f7a6b6717cf"
             },
             "to": {
               "value": "573022949109"
@@ -384,32 +384,32 @@
               "value": "react"
             },
             "created_at": {
-              "value": "2025-05-30T20:59:54.034Z"
+              "value": "2025-05-30T22:19:56.845Z"
             }
           },
           {
             "id": {
-              "value": "45ee019b-1947-4158-9d3d-36c404fa5fbb"
+              "value": "a09349da-007a-468a-a12e-853bf11b5e36"
             },
             "baileys_json": {
               "value": {
                 "key": {
                   "remoteJid": "573022949109@s.whatsapp.net",
                   "fromMe": true,
-                  "id": "3EB04EA738B439519EA3DC"
+                  "id": "3EB078A72DFF848C5CFB11"
                 },
                 "message": {
                   "reactionMessage": {
                     "key": {
                       "remoteJid": "573022949109@s.whatsapp.net",
                       "fromMe": true,
-                      "id": "3EB0BB197378BCCB4227CA"
+                      "id": "3EB0E9267C0BBA162ADB9F"
                     },
                     "text": "😂",
-                    "senderTimestampMs": "1748638793014"
+                    "senderTimestampMs": "1748643595820"
                   }
                 },
-                "messageTimestamp": "1748638793",
+                "messageTimestamp": "1748643595",
                 "status": "PENDING"
               }
             },
@@ -417,7 +417,7 @@
               "value": "30ed47f1-eb16-4573-8696-4546ab37dce0"
             },
             "quoted_message_id": {
-              "value": "e2eb0944-a7bf-4606-b083-385585ba25c9"
+              "value": "a95cb713-b8e3-4b24-903d-7f7a6b6717cf"
             },
             "to": {
               "value": "573022949109"
@@ -426,7 +426,7 @@
               "value": "react"
             },
             "created_at": {
-              "value": "2025-05-30T20:59:53.020Z"
+              "value": "2025-05-30T22:19:55.827Z"
             }
           }
         ]
@@ -437,31 +437,31 @@
       "success": true,
       "error": "HTTP 200",
       "data": {
-        "count": 242,
+        "count": 18,
         "sample": [
           {
             "id": {
-              "value": "06f77455-7bef-41d5-b97c-d285f0b42ad3"
+              "value": "9494b07c-c79a-4626-a088-ee6b494d68f6"
             },
             "baileys_json": {
               "value": {
                 "key": {
                   "remoteJid": "573022949109@s.whatsapp.net",
                   "fromMe": true,
-                  "id": "3EB08E27CC5323455B7AA1"
+                  "id": "3EB09D114F263FD4B09968"
                 },
                 "message": {
                   "reactionMessage": {
                     "key": {
                       "remoteJid": "573022949109@s.whatsapp.net",
                       "fromMe": true,
-                      "id": "3EB0BB197378BCCB4227CA"
+                      "id": "3EB0E9267C0BBA162ADB9F"
                     },
                     "text": "👎",
-                    "senderTimestampMs": "1748638795046"
+                    "senderTimestampMs": "1748643597864"
                   }
                 },
-                "messageTimestamp": "1748638795",
+                "messageTimestamp": "1748643597",
                 "status": "PENDING"
               }
             },
@@ -469,7 +469,7 @@
               "value": "30ed47f1-eb16-4573-8696-4546ab37dce0"
             },
             "quoted_message_id": {
-              "value": "e2eb0944-a7bf-4606-b083-385585ba25c9"
+              "value": "a95cb713-b8e3-4b24-903d-7f7a6b6717cf"
             },
             "to": {
               "value": "573022949109"
@@ -478,32 +478,32 @@
               "value": "react"
             },
             "created_at": {
-              "value": "2025-05-30T20:59:55.054Z"
+              "value": "2025-05-30T22:19:57.870Z"
             }
           },
           {
             "id": {
-              "value": "944e0384-9718-4175-9ae8-a0642b827311"
+              "value": "78619cd8-1fde-4090-8112-c160e9cd16bb"
             },
             "baileys_json": {
               "value": {
                 "key": {
                   "remoteJid": "573022949109@s.whatsapp.net",
                   "fromMe": true,
-                  "id": "3EB0B6E1F4E97F3455A630"
+                  "id": "3EB0FBB3132262D297DB46"
                 },
                 "message": {
                   "reactionMessage": {
                     "key": {
                       "remoteJid": "573022949109@s.whatsapp.net",
                       "fromMe": true,
-                      "id": "3EB0BB197378BCCB4227CA"
+                      "id": "3EB0E9267C0BBA162ADB9F"
                     },
                     "text": "😮",
-                    "senderTimestampMs": "1748638794028"
+                    "senderTimestampMs": "1748643596839"
                   }
                 },
-                "messageTimestamp": "1748638794",
+                "messageTimestamp": "1748643596",
                 "status": "PENDING"
               }
             },
@@ -511,7 +511,7 @@
               "value": "30ed47f1-eb16-4573-8696-4546ab37dce0"
             },
             "quoted_message_id": {
-              "value": "e2eb0944-a7bf-4606-b083-385585ba25c9"
+              "value": "a95cb713-b8e3-4b24-903d-7f7a6b6717cf"
             },
             "to": {
               "value": "573022949109"
@@ -520,32 +520,32 @@
               "value": "react"
             },
             "created_at": {
-              "value": "2025-05-30T20:59:54.034Z"
+              "value": "2025-05-30T22:19:56.845Z"
             }
           },
           {
             "id": {
-              "value": "45ee019b-1947-4158-9d3d-36c404fa5fbb"
+              "value": "a09349da-007a-468a-a12e-853bf11b5e36"
             },
             "baileys_json": {
               "value": {
                 "key": {
                   "remoteJid": "573022949109@s.whatsapp.net",
                   "fromMe": true,
-                  "id": "3EB04EA738B439519EA3DC"
+                  "id": "3EB078A72DFF848C5CFB11"
                 },
                 "message": {
                   "reactionMessage": {
                     "key": {
                       "remoteJid": "573022949109@s.whatsapp.net",
                       "fromMe": true,
-                      "id": "3EB0BB197378BCCB4227CA"
+                      "id": "3EB0E9267C0BBA162ADB9F"
                     },
                     "text": "😂",
-                    "senderTimestampMs": "1748638793014"
+                    "senderTimestampMs": "1748643595820"
                   }
                 },
-                "messageTimestamp": "1748638793",
+                "messageTimestamp": "1748643595",
                 "status": "PENDING"
               }
             },
@@ -553,7 +553,7 @@
               "value": "30ed47f1-eb16-4573-8696-4546ab37dce0"
             },
             "quoted_message_id": {
-              "value": "e2eb0944-a7bf-4606-b083-385585ba25c9"
+              "value": "a95cb713-b8e3-4b24-903d-7f7a6b6717cf"
             },
             "to": {
               "value": "573022949109"
@@ -562,7 +562,7 @@
               "value": "react"
             },
             "created_at": {
-              "value": "2025-05-30T20:59:53.020Z"
+              "value": "2025-05-30T22:19:55.827Z"
             }
           }
         ]
@@ -573,7 +573,7 @@
       "success": true,
       "error": "HTTP 200",
       "data": {
-        "count": 84
+        "count": 5
       }
     },
     {
@@ -581,7 +581,7 @@
       "success": true,
       "error": "HTTP 200",
       "data": {
-        "count": 99
+        "count": 8
       }
     },
     {
@@ -589,7 +589,7 @@
       "success": true,
       "error": "HTTP 200",
       "data": {
-        "count": 56
+        "count": 5
       }
     }
   ]

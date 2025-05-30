@@ -2,24 +2,33 @@ import { Injectable } from '@nestjs/common';
 import { SendMessageRequest, MessageType } from './dto/SendMessageRequest.dto';
 import { SendMessageResponse } from './dto/SendMessageResponse.dto';
 import { MessagesOrchestrator } from './MessagesOrchestrator';
+import { CryptoService } from '../domain/ports/CryptoService';
 
 @Injectable()
 export class SendMessage {
-  constructor(private readonly messagesOrchestrator: MessagesOrchestrator) {}
-
+  constructor(
+    private readonly messagesOrchestrator: MessagesOrchestrator,
+    private readonly cryptoService: CryptoService,
+  ) {}
   async run(request: SendMessageRequest): Promise<SendMessageResponse> {
+    // Generate UUID upfront for the entire flow
+    const messageUuid = this.cryptoService.generateUUID();
+
     try {
+      // Validate request (DTO/VO validations)
       this.validateRequest(request);
 
+      // Continue with message sending based on type
+      // Status creation will happen in MessagesOrchestrator after message creation
       switch (request.messageType) {
         case MessageType.TEXT:
-          return await this.sendTextMessage(request);
+          return await this.sendTextMessage(request, messageUuid);
 
         case MessageType.MEDIA:
-          return await this.sendMediaMessage(request);
+          return await this.sendMediaMessage(request, messageUuid);
 
         case MessageType.REACTION:
-          return await this.sendReactionMessage(request);
+          return await this.sendReactionMessage(request, messageUuid);
 
         default:
           throw new Error(`Unsupported message type: ${request.messageType}`);
@@ -65,29 +74,34 @@ export class SendMessage {
         break;
     }
   }
-
   private async sendTextMessage(
     request: SendMessageRequest,
+    messageUuid: string,
   ): Promise<SendMessageResponse> {
     const result = await this.messagesOrchestrator.sendTextMessage(
       request.sessionId,
       request.to,
       request.textData!.text,
       request.quotedMessageId,
+      messageUuid, // Pass the predefined UUID
     );
 
     const baileysMessageId = result?.baileysMessage?.key?.id;
     const uuid = result?.uuid;
-    
+
     if (!baileysMessageId || !uuid) {
       throw new Error('Failed to send text message');
     }
 
-    return SendMessageResponse.success(uuid, MessageType.TEXT, baileysMessageId);
+    return SendMessageResponse.success(
+      uuid,
+      MessageType.TEXT,
+      baileysMessageId,
+    );
   }
-
   private async sendMediaMessage(
     request: SendMessageRequest,
+    messageUuid: string,
   ): Promise<SendMessageResponse> {
     const result = await this.messagesOrchestrator.sendMediaMessage(
       request.sessionId,
@@ -96,19 +110,25 @@ export class SendMessage {
       request.mediaData!.url,
       request.mediaData!.caption,
       request.quotedMessageId,
+      messageUuid, // Pass the predefined UUID
     );
 
     const baileysMessageId = result?.baileysMessage?.key?.id;
     const uuid = result?.uuid;
-    
+
     if (!baileysMessageId || !uuid) {
       throw new Error('Failed to send media message');
     }
 
-    return SendMessageResponse.success(uuid, MessageType.MEDIA, baileysMessageId);
+    return SendMessageResponse.success(
+      uuid,
+      MessageType.MEDIA,
+      baileysMessageId,
+    );
   }
   private async sendReactionMessage(
     request: SendMessageRequest,
+    messageUuid: string,
   ): Promise<SendMessageResponse> {
     let messageKey: any;
     let targetMessageId: string;
@@ -131,18 +151,18 @@ export class SendMessage {
     } else {
       throw new Error('Invalid targetMessageId format');
     }
-
     const result = await this.messagesOrchestrator.sendReaction(
       request.sessionId,
       request.to,
       messageKey,
       request.reactionData!.emoji,
       targetMessageId,
+      messageUuid, // Pass the predefined UUID
     );
 
     const baileysMessageId = result?.baileysMessage?.key?.id;
     const uuid = result?.uuid;
-    
+
     if (!baileysMessageId || !uuid) {
       throw new Error('Failed to send reaction');
     }

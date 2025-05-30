@@ -8,6 +8,8 @@ import { MessageStatusGetOneById } from './application/MessageStatusGetOneById';
 import { MessageStatusGetByMessageId } from './application/MessageStatusGetByMessageId';
 import { MessageStatusGetLatestByMessageId } from './application/MessageStatusGetLatestByMessageId';
 import { MessageStatusTrackSentMessage } from './application/MessageStatusTrackSentMessage';
+import { MessageStatusCreateMessageReceipt } from './application/MessageStatusCreateMessageReceipt';
+import { MessageStatusCreateValidated } from './application/MessageStatusCreateValidated';
 import { MessageStatusDelete } from './application/MessageStatusDelete';
 import { BaileysStatusMapper } from './infrastructure/BaileysStatusMapper';
 import { MessageStatusTracker } from './infrastructure/MessageStatusTracker';
@@ -19,7 +21,10 @@ import { TypeOrmMessagesRepository } from '../Messages/infrastructure/TypeOrm/Ty
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([TypeOrmMessageStatusEntity, TypeOrmMessagesEntity]),
+    TypeOrmModule.forFeature([
+      TypeOrmMessageStatusEntity,
+      TypeOrmMessagesEntity,
+    ]),
     StatusModule,
   ],
   controllers: [MessageStatusController],
@@ -34,6 +39,8 @@ import { TypeOrmMessagesRepository } from '../Messages/infrastructure/TypeOrm/Ty
     MessageStatusGetByMessageId,
     MessageStatusGetLatestByMessageId,
     MessageStatusTrackSentMessage,
+    MessageStatusCreateMessageReceipt,
+    MessageStatusCreateValidated,
     MessageStatusDelete,
     BaileysStatusMapper,
     {
@@ -56,6 +63,8 @@ import { TypeOrmMessagesRepository } from '../Messages/infrastructure/TypeOrm/Ty
     MessageStatusGetByMessageId,
     MessageStatusGetLatestByMessageId,
     MessageStatusTrackSentMessage,
+    MessageStatusCreateMessageReceipt,
+    MessageStatusCreateValidated,
     MessageStatusDelete,
     BaileysStatusMapper,
     MessageStatusTracker,

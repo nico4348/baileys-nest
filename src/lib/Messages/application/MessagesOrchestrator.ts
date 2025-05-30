@@ -5,6 +5,8 @@ import { TextMessagesCreate } from '../../TextMessages/application/TextMessagesC
 import { MediaMessagesCreate } from '../../MediaMessages/application/MediaMessagesCreate';
 import { ReactionMessagesCreate } from '../../ReactionMessages/application/ReactionMessagesCreate';
 import { MessageStatusTrackSentMessage } from '../../MessageStatus/application/MessageStatusTrackSentMessage';
+import { MessageStatusCreateMessageReceipt } from '../../MessageStatus/application/MessageStatusCreateMessageReceipt';
+import { MessageStatusCreateValidated } from '../../MessageStatus/application/MessageStatusCreateValidated';
 import {
   MessageSender,
   TextPayload,
@@ -34,6 +36,8 @@ export class MessagesOrchestrator {
     @Inject('CryptoService')
     private readonly cryptoService: CryptoService,
     private readonly messageStatusTracker?: MessageStatusTrackSentMessage,
+    private readonly messageStatusCreateReceipt?: MessageStatusCreateMessageReceipt,
+    private readonly messageStatusCreateValidated?: MessageStatusCreateValidated,
   ) {}
 
   private async getQuotedMessageData(
@@ -55,14 +59,17 @@ export class MessagesOrchestrator {
       return undefined;
     }
   }
-
   async sendTextMessage(
     sessionId: string,
     to: string,
     text: string,
     quotedMessageId?: string,
+    predefinedUuid?: string,
   ): Promise<any> {
     try {
+      // Use predefined UUID or generate new one
+      const uuid = predefinedUuid || this.cryptoService.generateUUID();
+
       const quotedMessageData =
         await this.getQuotedMessageData(quotedMessageId);
 
@@ -81,8 +88,8 @@ export class MessagesOrchestrator {
           'Failed to send text message through WhatsApp or invalid message key',
         );
       }
-      const uuid = this.cryptoService.generateUUID();
 
+      // Create message records first (message table is the parent)
       await this.messagesCreate.run(
         uuid, // UUID como ID principal
         sentMessage, // Complete Baileys message object as JSON
@@ -97,7 +104,18 @@ export class MessagesOrchestrator {
         text,
       );
 
-      // Create initial message status
+      // Now create status records (message_status table references messages table)
+      // 1. Create initial message_receipt status when request is detected
+      if (this.messageStatusCreateReceipt) {
+        await this.messageStatusCreateReceipt.run(uuid);
+      }
+
+      // 2. Create validated status after DTO/VO validations pass
+      if (this.messageStatusCreateValidated) {
+        await this.messageStatusCreateValidated.run(uuid);
+      }
+
+      // Create sent message status (transition from validated to sent)
       if (this.messageStatusTracker) {
         await this.messageStatusTracker.run(uuid);
       }
@@ -118,8 +136,12 @@ export class MessagesOrchestrator {
     mediaUrl: string,
     caption?: string,
     quotedMessageId?: string,
+    predefinedUuid?: string,
   ): Promise<any> {
     try {
+      // Use predefined UUID or generate new one
+      const uuid = predefinedUuid || this.cryptoService.generateUUID();
+
       const quotedMessageData =
         await this.getQuotedMessageData(quotedMessageId);
 
@@ -127,7 +149,7 @@ export class MessagesOrchestrator {
       const fileName = this.fileService.getFileName(mediaUrl);
       const mimeType = this.fileService.getMimeType(mediaUrl);
 
-      // 1. Send message through Baileys first to get WhatsApp message ID
+      // Send message through Baileys to get WhatsApp message ID
       const payload: MediaPayload = {
         url: mediaUrl,
         caption,
@@ -148,8 +170,7 @@ export class MessagesOrchestrator {
         );
       }
 
-      const uuid = this.cryptoService.generateUUID(); // 2. Create base message record first (parent record)
-
+      // Create message records first (message table is the parent)
       await this.messagesCreate.run(
         uuid, // UUID como ID principal
         sentMessage, // Complete Baileys message object as JSON
@@ -158,7 +179,8 @@ export class MessagesOrchestrator {
         sessionId,
         to,
         new Date(),
-      ); // 3. Create media message record (child record)      // 3. Create media message record (child record)
+      );
+      // Create media message record (child record)
       // Use the file information extracted earlier
       await this.mediaMessagesCreate.run(
         uuid, // Use the UUID as message_id directly
@@ -169,7 +191,18 @@ export class MessagesOrchestrator {
         mediaUrl,
       );
 
-      // Create initial message status
+      // Now create status records (message_status table references messages table)
+      // 1. Create initial message_receipt status when request is detected
+      if (this.messageStatusCreateReceipt) {
+        await this.messageStatusCreateReceipt.run(uuid);
+      }
+
+      // 2. Create validated status after DTO/VO validations pass
+      if (this.messageStatusCreateValidated) {
+        await this.messageStatusCreateValidated.run(uuid);
+      }
+
+      // Create sent message status (transition from validated to sent)
       if (this.messageStatusTracker) {
         await this.messageStatusTracker.run(uuid);
       }
@@ -189,9 +222,13 @@ export class MessagesOrchestrator {
     messageKey: any,
     emoji: string,
     targetMessageId: string,
+    predefinedUuid?: string,
   ): Promise<any> {
     try {
-      // 1. Send reaction through Baileys first to get WhatsApp message ID
+      // Use predefined UUID or generate new one
+      const uuid = predefinedUuid || this.cryptoService.generateUUID();
+
+      // Send reaction through Baileys to get WhatsApp message ID
       const payload: ReactPayload = { key: messageKey, emoji };
       const sentMessage = await this.messageSender.sendReactMessage(
         sessionId,
@@ -204,8 +241,7 @@ export class MessagesOrchestrator {
         );
       }
 
-      const uuid = this.cryptoService.generateUUID(); // 2. Create base message record first (parent record)
-
+      // Create message records first (message table is the parent)
       await this.messagesCreate.run(
         uuid, // UUID como ID principal
         sentMessage, // Complete Baileys message object as JSON
@@ -214,14 +250,26 @@ export class MessagesOrchestrator {
         sessionId,
         to,
         new Date(),
-      ); // 3. Create reaction message record (child record)
+      );
+      // Create reaction message record (child record)
       await this.reactionMessagesCreate.run(
         uuid, // Use the UUID as message_id directly
         emoji,
         targetMessageId, // Use the target message ID (should be UUID)
       );
 
-      // Create initial message status
+      // Now create status records (message_status table references messages table)
+      // 1. Create initial message_receipt status when request is detected
+      if (this.messageStatusCreateReceipt) {
+        await this.messageStatusCreateReceipt.run(uuid);
+      }
+
+      // 2. Create validated status after DTO/VO validations pass
+      if (this.messageStatusCreateValidated) {
+        await this.messageStatusCreateValidated.run(uuid);
+      }
+
+      // Create sent message status (transition from validated to sent)
       if (this.messageStatusTracker) {
         await this.messageStatusTracker.run(uuid);
       }

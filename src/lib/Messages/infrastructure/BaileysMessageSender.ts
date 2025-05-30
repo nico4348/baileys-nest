@@ -46,12 +46,12 @@ export class BaileysMessageSender implements MessageSender {
       }
 
       const msg = await sock.sendMessage(jid, { text }, opts);
-      
       // Track message status if tracker is available and message was sent
-      // Note: BaileysMessageSender creates the initial 'pending' status
+      // Note: Status creation is now handled by SendMessage/MessagesOrchestrator flow
+      // starting with 'message_receipt' and 'validated' before reaching 'sent'
       // The MessageStatusTracker will handle status updates from Baileys events
       // We don't need to track here since the message isn't stored in DB yet
-      
+
       return msg || null;
     } catch (error) {
       console.error(`Error sending text message to ${jid}:`, error);

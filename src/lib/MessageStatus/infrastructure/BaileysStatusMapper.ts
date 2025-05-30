@@ -4,23 +4,22 @@ import { proto } from 'baileys';
 @Injectable()
 export class BaileysStatusMapper {
   private readonly statusMapping: Record<number, string> = {
-    0: 'pending',
-    1: 'pending',
+    0: 'sent',
+    1: 'sent',
     [proto.WebMessageInfo.Status.SERVER_ACK]: 'sent',
-    [proto.WebMessageInfo.Status.DELIVERY_ACK]: 'delivered', 
+    [proto.WebMessageInfo.Status.DELIVERY_ACK]: 'delivered',
     [proto.WebMessageInfo.Status.READ]: 'read',
     [proto.WebMessageInfo.Status.PLAYED]: 'played',
     6: 'failed',
-  };
-
-  // Orden jerárquico de estados (menor número = estado anterior)
+  }; // Orden jerárquico de estados (menor número = estado anterior)
   private readonly statusHierarchy: Record<string, number> = {
-    'pending': 0,
-    'sent': 1,
-    'delivered': 2,
-    'read': 3,
-    'played': 4,
-    'failed': 99, // failed puede ocurrir en cualquier momento
+    message_receipt: 0,
+    validated: 1,
+    sent: 2,
+    delivered: 3,
+    read: 4,
+    played: 5,
+    failed: 99, // failed puede ocurrir en cualquier momento
   };
 
   private readonly statusNames: Record<number, string> = {
@@ -32,9 +31,8 @@ export class BaileysStatusMapper {
     [proto.WebMessageInfo.Status.PLAYED]: 'Reproducido',
     6: 'Entrega Fallida',
   };
-
   mapBaileysStatusToDb(baileysStatus: number): string {
-    return this.statusMapping[baileysStatus] || 'pending';
+    return this.statusMapping[baileysStatus] || 'message_receipt';
   }
 
   getStatusName(baileysStatus: number): string {
@@ -55,7 +53,10 @@ export class BaileysStatusMapper {
     return this.statusHierarchy[statusName] ?? -1;
   }
 
-  shouldCreateNewStatus(newStatusName: string, currentStatusName?: string): boolean {
+  shouldCreateNewStatus(
+    newStatusName: string,
+    currentStatusName?: string,
+  ): boolean {
     // Si no hay estado actual, siempre crear
     if (!currentStatusName) {
       return true;
@@ -68,10 +69,48 @@ export class BaileysStatusMapper {
     return newLevel > currentLevel || newStatusName === 'failed';
   }
 
-  isStatusProgression(newStatusName: string, currentStatusName: string): boolean {
+  isStatusProgression(
+    newStatusName: string,
+    currentStatusName: string,
+  ): boolean {
     const newLevel = this.getStatusHierarchyLevel(newStatusName);
     const currentLevel = this.getStatusHierarchyLevel(currentStatusName);
-    
+
     return newLevel > currentLevel;
+  }
+
+  /**
+   * Indica si se debe crear el estado de "message_receipt"
+   * Este estado se crea cuando se detecta una solicitud para enviar un mensaje
+   */
+  shouldCreateMessageReceiptStatus(): boolean {
+    return true; // Siempre crear este estado al inicio
+  }
+
+  /**
+   * Indica si se debe crear el estado de "validated"
+   * Este estado se crea después de pasar las validaciones de DTO/VO
+   */
+  shouldCreateValidatedStatus(currentStatusName?: string): boolean {
+    // Solo crear si el estado actual es message_receipt o no hay estado actual
+    if (!currentStatusName || currentStatusName === 'message_receipt') {
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Obtiene el siguiente estado lógico después de la validación
+   */
+  getNextStatusAfterValidation(): string {
+    return 'sent'; // Después de validated, el siguiente estado es sent
+  }
+
+  /**
+   * Verifica si un estado puede transicionar a failed
+   */
+  canTransitionToFailed(currentStatusName: string): boolean {
+    // Failed puede ocurrir desde cualquier estado excepto desde sí mismo
+    return currentStatusName !== 'failed';
   }
 }
