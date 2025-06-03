@@ -23,6 +23,8 @@
     "test:endpoints:all": "npm run test:endpoints && npm run test:endpoints:advanced"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.821.0",
+    "@aws-sdk/s3-request-presigner": "^3.821.0",
     "@hapi/boom": "^10.0.1",
     "@nestjs/common": "^11.0.1",
     "@nestjs/core": "^11.0.1",
@@ -33,6 +35,7 @@
     "baileys": "^6.7.17",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.2",
+    "dotenv": "^16.5.0",
     "pg": "^8.16.0",
     "qrcode": "^1.5.4",
     "qrcode-terminal": "^0.12.0",

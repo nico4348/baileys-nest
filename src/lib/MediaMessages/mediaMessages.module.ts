@@ -12,7 +12,9 @@ import { MediaMessagesGetByMediaType } from './application/MediaMessagesGetByMed
 import { MediaMessagesUpdate } from './application/MediaMessagesUpdate';
 import { MediaMessagesDelete } from './application/MediaMessagesDelete';
 import { DownloadMediaMessage } from './application/DownloadMediaMessage';
+import { UploadMediaToS3 } from './application/UploadMediaToS3';
 import { MediaMessageHandler } from './infrastructure/MediaMessageHandler';
+import { S3MediaUploader } from './infrastructure/S3MediaUploader';
 
 @Module({
   imports: [TypeOrmModule.forFeature([TypeOrmMediaMessagesEntity])],
@@ -71,10 +73,25 @@ import { MediaMessageHandler } from './infrastructure/MediaMessageHandler';
       inject: ['MediaMessageRepository'],
     },
     {
+      provide: 'S3MediaUploader',
+      useClass: S3MediaUploader,
+    },
+    {
+      provide: 'UploadMediaToS3',
+      useFactory: (
+        mediaMessagesGetOneById: MediaMessagesGetOneById,
+        mediaMessagesUpdate: MediaMessagesUpdate,
+        s3MediaUploader: S3MediaUploader,
+      ) => new UploadMediaToS3(mediaMessagesGetOneById, mediaMessagesUpdate, s3MediaUploader),
+      inject: ['MediaMessagesGetOneById', 'MediaMessagesUpdate', 'S3MediaUploader'],
+    },
+    {
       provide: 'DownloadMediaMessage',
-      useFactory: (mediaMessagesGetOneById: MediaMessagesGetOneById) =>
-        new DownloadMediaMessage(mediaMessagesGetOneById),
-      inject: ['MediaMessagesGetOneById'],
+      useFactory: (
+        mediaMessagesGetOneById: MediaMessagesGetOneById,
+        uploadMediaToS3: UploadMediaToS3,
+      ) => new DownloadMediaMessage(mediaMessagesGetOneById, uploadMediaToS3),
+      inject: ['MediaMessagesGetOneById', 'UploadMediaToS3'],
     },
     {
       provide: 'MediaMessageHandler',
@@ -82,6 +99,6 @@ import { MediaMessageHandler } from './infrastructure/MediaMessageHandler';
       inject: ['MediaMessagesCreate'],
     },
   ],
-  exports: ['MediaMessageRepository', 'MediaMessagesCreate', 'MediaMessageHandler'],
+  exports: ['MediaMessageRepository', 'MediaMessagesCreate', 'MediaMessagesUpdate', 'MediaMessageHandler', 'S3MediaUploader'],
 })
 export class MediaMessagesModule {}

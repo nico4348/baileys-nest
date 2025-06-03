@@ -58,6 +58,8 @@ export class WhatsAppSocketFactory implements ISocketFactory {
     });
 
     socket.ev.process(async (events) => {
+      console.log(`🚀 [Socket] Processing events for session ${sessionId}:`, Object.keys(events));
+      
       // Log all events to EventLogs
       for (const eventName of Object.keys(events)) {
         await this.eventLogger.logEvent(sessionId, eventName);
@@ -90,12 +92,20 @@ export class WhatsAppSocketFactory implements ISocketFactory {
 
       // Handle other Baileys events
       if (events['messages.upsert']) {
+        console.log(`📨 [Socket] messages.upsert event received for session ${sessionId}`);
+        console.log(`📨 [Socket] Messages count: ${events['messages.upsert'].messages?.length || 0}`);
+        console.log(`📨 [Socket] Messages data:`, JSON.stringify(events['messages.upsert'].messages, null, 2));
+        
         // Handle incoming messages
         if (this.messagesHandleIncoming && events['messages.upsert'].messages) {
+          console.log(`📨 [Socket] Calling messagesHandleIncoming.handleIncomingMessages`);
           await this.messagesHandleIncoming.handleIncomingMessages(
             sessionId,
-            events['messages.upsert'].messages
+            events['messages.upsert'].messages,
+            socket // Pass the socket for media download
           );
+        } else {
+          console.log(`⚠️ [Socket] messagesHandleIncoming not available or no messages to process`);
         }
       }
 

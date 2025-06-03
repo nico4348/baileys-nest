@@ -149,22 +149,28 @@ import { MessageStatusCreateValidated } from '../MessageStatus/application/Messa
         messagesCreate,
         textMessagesCreate,
         mediaMessagesCreate,
+        mediaMessagesUpdate,
         reactionMessagesCreate,
         cryptoService,
+        s3MediaUploader,
       ) =>
         new MessagesHandleIncoming(
           messagesCreate,
           textMessagesCreate,
           mediaMessagesCreate,
+          mediaMessagesUpdate,
           reactionMessagesCreate,
           cryptoService,
+          s3MediaUploader,
         ),
       inject: [
         'MessagesCreate',
         'TextMessagesCreate',
         'MediaMessagesCreate',
+        'MediaMessagesUpdate',
         'ReactionMessagesCreate',
         'CryptoService',
+        'S3MediaUploader',
       ],
     },
     {

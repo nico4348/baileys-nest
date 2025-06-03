@@ -228,14 +228,23 @@ export class MediaMessagesController {
   }
 
   @Post(':id/download')
-  async downloadMedia(@Param('id') id: string) {
+  async downloadMedia(
+    @Param('id') id: string,
+    @Body() body: { sessionId: string; uploadToS3?: boolean }
+  ) {
     try {
-      const result = await this.downloadMediaMessage.run(id);
+      const result = await this.downloadMediaMessage.run(
+        id,
+        body.sessionId,
+        body.uploadToS3 || false
+      );
 
       return {
         success: true,
         data: result,
-        message: 'Media downloaded successfully',
+        message: body.uploadToS3 
+          ? 'Media downloaded and uploaded to S3 successfully' 
+          : 'Media downloaded successfully',
       };
     } catch (error) {
       throw new HttpException(
