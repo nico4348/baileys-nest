@@ -10,8 +10,7 @@ export class SessionOrchestrationService {
     @Inject('ConnectionPort')
     private readonly connection: ConnectionPort,
   ) {
-    // Establecer la referencia del sesión state manager en el connection manager
-    this.connection.setSessionStateManager(this.sessionState);
+    // La configuración de la dependencia circular se maneja en el módulo
   }
 
   async startSession(sessionId: string): Promise<any> {

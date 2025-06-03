@@ -21,7 +21,9 @@ import { SessionsRestart } from './application/SessionsRestart';
 import { SessionsStop } from './application/SessionsStop';
 import { WhatsAppSessionManager } from './infrastructure/WhatsAppSessionManager';
 import { SessionOrchestrationService } from './application/SessionOrchestrationService';
+import { SessionsGetQrCounterStatus } from './application/SessionsGetQrCounterStatus';
 import { SessionQrService } from './infrastructure/SessionQrService';
+import { SessionDependencyInitializer } from './infrastructure/SessionDependencyInitializer';
 import { SessionOperationsService } from './infrastructure/SessionOperationsService';
 import { SessionLifecycleManager } from './infrastructure/SessionLifecycleManager';
 import { QrManager } from './infrastructure/QrManager';
@@ -300,8 +302,7 @@ import { EventSeeder } from '../Events/infrastructure/EventSeeder';
       ) =>
         new SessionAutoInitializer(sessionManager, sessionsRepository, logger),
       inject: [WhatsAppSessionManager, 'SessionsRepository', SessionLogger],
-    },
-    // Hexagonal Architecture Ports Configuration
+    }, // Hexagonal Architecture Ports Configuration
     {
       provide: 'SessionStatePort',
       useExisting: WhatsAppSessionManager,
@@ -310,6 +311,19 @@ import { EventSeeder } from '../Events/infrastructure/EventSeeder';
       provide: 'ConnectionPort',
       useExisting: ConnectionManager,
     },
+    {
+      provide: 'QrCounterPort',
+      useExisting: QrCounterManager,
+    },
+    // Application Services
+    {
+      provide: SessionsGetQrCounterStatus,
+      useFactory: (
+        qrCounterPort: QrCounterManager,
+        sessionsGetOneById: SessionsGetOneById,
+      ) => new SessionsGetQrCounterStatus(qrCounterPort, sessionsGetOneById),
+      inject: ['QrCounterPort', 'SessionsGetOneById'],
+    },
     // Session Orchestration Service
     {
       provide: SessionOrchestrationService,
@@ -317,7 +331,18 @@ import { EventSeeder } from '../Events/infrastructure/EventSeeder';
         new SessionOrchestrationService(sessionState, connection),
       inject: ['SessionStatePort', 'ConnectionPort'],
     },
+    // Dependency initializer to resolve circular dependency
+    {
+      provide: SessionDependencyInitializer,
+      useFactory: (connection, sessionState) =>
+        new SessionDependencyInitializer(connection, sessionState),
+      inject: ['ConnectionPort', 'SessionStatePort'],
+    },
   ],
-  exports: [WhatsAppSessionManager, SessionOrchestrationService],
+  exports: [
+    WhatsAppSessionManager,
+    SessionOrchestrationService,
+    SessionsGetQrCounterStatus,
+  ],
 })
 export class SessionsModule {}

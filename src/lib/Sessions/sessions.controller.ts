@@ -26,6 +26,7 @@ import { SessionsDelete } from './application/SessionsDelete';
 import { SessionsHardDelete } from './application/SessionsHardDelete';
 import { WhatsAppSessionManager } from './infrastructure/WhatsAppSessionManager';
 import { SessionOrchestrationService } from './application/SessionOrchestrationService';
+import { SessionsGetQrCounterStatus } from './application/SessionsGetQrCounterStatus';
 import { randomUUID } from 'crypto';
 
 @Controller('sessions')
@@ -49,7 +50,7 @@ export class SessionsController {
     @Inject('SessionsDelete') private readonly sessionsDelete: SessionsDelete,
     @Inject('SessionsHardDelete')
     private readonly sessionsHardDelete: SessionsHardDelete,
-    private readonly whatsAppSessionManager: WhatsAppSessionManager,
+    private readonly getQrCounterStatus: SessionsGetQrCounterStatus,
     private readonly sessionOrchestrator: SessionOrchestrationService,
   ) {}
   @Get()
@@ -615,39 +616,14 @@ export class SessionsController {
       );
     }
   }
-
   @Get(':sessionId/qr/status')
   async getQRCounterStatus(@Param('sessionId') sessionId: string) {
     try {
-      // Verificar que la sesión existe
-      const session = await this.sessionsGetOneById.run(sessionId);
-      if (!session) {
-        throw new NotFoundException('Sesión no encontrada');
-      }
-
-      // Get QR counter information from the WhatsAppSessionManager
-      const qrCounterManager =
-        this.whatsAppSessionManager.getQrCounterManager();
-
-      const currentCount = qrCounterManager.getCurrentCount(sessionId);
-      const maxLimit = qrCounterManager.getMaxLimit();
-      const remainingAttempts =
-        qrCounterManager.getRemainingAttempts(sessionId);
-      const hasExceededLimit = qrCounterManager.hasExceededLimit(sessionId);
-      const canGenerateQr = qrCounterManager.canGenerateQr(sessionId);
-
+      const data = await this.getQrCounterStatus.run(sessionId);
       return {
         success: true,
         message: 'Estado del contador QR obtenido exitosamente.',
-        data: {
-          sessionId,
-          currentQrCount: currentCount,
-          maxQrLimit: maxLimit,
-          remainingAttempts,
-          hasExceededLimit,
-          canGenerateMoreQr: canGenerateQr,
-          status: hasExceededLimit ? 'LIMIT_EXCEEDED' : 'ACTIVE',
-        },
+        data,
       };
     } catch (error) {
       if (error instanceof NotFoundException) {

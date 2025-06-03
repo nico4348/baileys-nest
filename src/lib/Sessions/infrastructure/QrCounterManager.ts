@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { ISessionLogger } from './interfaces/ISessionLogger';
+import { QrCounterPort } from '../domain/ports/QrCounterPort';
 
 @Injectable()
-export class QrCounterManager {
+export class QrCounterManager implements QrCounterPort {
   private qrCounters: Map<string, number> = new Map();
   private readonly MAX_QR_LIMIT = 10;
 
