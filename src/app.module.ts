@@ -11,8 +11,9 @@ import { MediaMessagesModule } from './lib/MediaMessages/mediaMessages.module';
 import { ReactionMessagesModule } from './lib/ReactionMessages/reactionMessages.module';
 import { StatusModule } from './lib/Status/status.module';
 import { MessageStatusModule } from './lib/MessageStatus/messageStatus.module';
+import { SessionMediaModule } from './lib/SessionMedia/sessionMedia.module';
 
 @Module({
-  imports: [DatabaseProvider, SessionsModule, AuthModule, SessionLogsModule, EventsModule, EventLogsModule, MessagesModule, TextMessagesModule, MediaMessagesModule, ReactionMessagesModule, StatusModule, MessageStatusModule],
+  imports: [DatabaseProvider, SessionsModule, AuthModule, SessionLogsModule, EventsModule, EventLogsModule, MessagesModule, TextMessagesModule, MediaMessagesModule, ReactionMessagesModule, StatusModule, MessageStatusModule, SessionMediaModule],
 })
 export class AppModule {}

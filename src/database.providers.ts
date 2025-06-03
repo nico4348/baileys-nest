@@ -10,6 +10,7 @@ import { TypeOrmStatusEntity } from './lib/Status/infrastructure/TypeOrm/TypeOrm
 import { TypeOrmMessageStatusEntity } from './lib/MessageStatus/infrastructure/TypeOrm/TypeOrmMessageStatusEntity';
 import { TypeOrmSessionLogsEntity } from './lib/SessionLogs/infrastructure/TypeOrm/TypeOrmSessionLogsEntity';
 import { AuthDataEntity } from './lib/AuthState/infrastructure/TypeOrm/AuthDataEntity';
+import { TypeOrmSessionMediaEntity } from './lib/SessionMedia/infrastructure/TypeOrm/TypeOrmSessionMediaEntity';
 
 export const DatabaseProvider = TypeOrmModule.forRoot({
   type: 'postgres',
@@ -30,6 +31,7 @@ export const DatabaseProvider = TypeOrmModule.forRoot({
     TypeOrmMessageStatusEntity,
     TypeOrmSessionLogsEntity,
     AuthDataEntity,
+    TypeOrmSessionMediaEntity,
   ],
   synchronize: true,
   migrationsRun: true,
