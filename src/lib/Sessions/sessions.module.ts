@@ -314,9 +314,6 @@ import { EventSeeder } from '../Events/infrastructure/EventSeeder';
       inject: ['ConnectionPort', 'SessionStatePort'],
     },
   ],
-  exports: [
-    WhatsAppSessionManager,
-    SessionOrchestrationService,
-  ],
+  exports: [WhatsAppSessionManager, SessionOrchestrationService],
 })
 export class SessionsModule {}

@@ -48,7 +48,8 @@ export class ConnectionManager implements IConnectionManager, ConnectionPort {
     this.qrManager.storeQr(sessionId, qr);
 
     if (this.sessionStateManager) {
-      const isPaused = await this.sessionStateManager.isSessionPaused(sessionId);
+      const isPaused =
+        await this.sessionStateManager.isSessionPaused(sessionId);
       if (isPaused) {
         this.logger.warn('QR generated for PAUSED session', sessionId);
       } else {
