@@ -25,6 +25,7 @@ import { SessionsUpdate } from './application/SessionsUpdate';
 import { SessionsDelete } from './application/SessionsDelete';
 import { SessionsHardDelete } from './application/SessionsHardDelete';
 import { WhatsAppSessionManager } from './infrastructure/WhatsAppSessionManager';
+import { SessionOrchestrationService } from './application/SessionOrchestrationService';
 import { randomUUID } from 'crypto';
 
 @Controller('sessions')
@@ -49,6 +50,7 @@ export class SessionsController {
     @Inject('SessionsHardDelete')
     private readonly sessionsHardDelete: SessionsHardDelete,
     private readonly whatsAppSessionManager: WhatsAppSessionManager,
+    private readonly sessionOrchestrator: SessionOrchestrationService,
   ) {}
   @Get()
   async getAllSessions() {
@@ -72,17 +74,14 @@ export class SessionsController {
       const session = await this.sessionsGetOneById.run(sessionId);
       if (!session) {
         throw new NotFoundException('Sesión no encontrada');
-      }
-
-      // Obtener el estado de conexión de WhatsApp usando SessionLifecycleManager
-      const socket = this.whatsAppSessionManager.getSocket(sessionId);
+      } // Obtener el estado de conexión de WhatsApp usando SessionLifecycleManager
+      const socket = this.sessionOrchestrator.getSocket(sessionId);
       const isConnected = socket !== null && socket.readyState === 1;
       const isPaused =
-        await this.whatsAppSessionManager.isSessionPaused(sessionId);
+        await this.sessionOrchestrator.isSessionPaused(sessionId);
       const isRestarting =
-        this.whatsAppSessionManager.isSessionRestarting(sessionId);
-      const isDeleting =
-        this.whatsAppSessionManager.isSessionDeleting(sessionId);
+        this.sessionOrchestrator.isSessionRestarting(sessionId);
+      const isDeleting = this.sessionOrchestrator.isSessionDeleting(sessionId);
 
       let status = 'disconnected';
       if (isDeleting) {
@@ -398,11 +397,9 @@ export class SessionsController {
       new Date(),
       new Date(),
       false,
-    );
-
-    // Iniciar la sesión de WhatsApp
+    ); // Iniciar la sesión de WhatsApp
     try {
-      await this.whatsAppSessionManager.startSession(generatedId);
+      await this.sessionOrchestrator.startSession(generatedId);
       return {
         success: true,
         sessionId: generatedId,
@@ -418,11 +415,10 @@ export class SessionsController {
       };
     }
   }
-
   @Post(':sessionId/start')
   async startWhatsAppSession(@Param('sessionId') sessionId: string) {
     try {
-      await this.whatsAppSessionManager.startSession(sessionId);
+      await this.sessionOrchestrator.startSession(sessionId);
       return {
         success: true,
         message:
@@ -434,11 +430,10 @@ export class SessionsController {
       );
     }
   }
-
   @Post(':sessionId/resume')
   async resumeWhatsAppSession(@Param('sessionId') sessionId: string) {
     try {
-      await this.whatsAppSessionManager.resumeSession(sessionId);
+      await this.sessionOrchestrator.resumeSession(sessionId);
 
       return {
         success: true,
@@ -450,11 +445,10 @@ export class SessionsController {
       );
     }
   }
-
   @Post(':sessionId/restart')
   async restartWhatsAppSession(@Param('sessionId') sessionId: string) {
     try {
-      await this.whatsAppSessionManager.recreateSession(sessionId);
+      await this.sessionOrchestrator.recreateSession(sessionId);
       return {
         success: true,
         message: 'Sesión de WhatsApp reiniciada exitosamente.',
@@ -468,7 +462,7 @@ export class SessionsController {
   @Post(':sessionId/pause')
   async pauseWhatsAppSession(@Param('sessionId') sessionId: string) {
     try {
-      await this.whatsAppSessionManager.pauseSession(sessionId);
+      await this.sessionOrchestrator.pauseSession(sessionId);
       return {
         success: true,
         message: 'Sesión de WhatsApp pausada exitosamente.',
@@ -482,7 +476,7 @@ export class SessionsController {
   @Delete(':sessionId/delete')
   async deleteWhatsAppSession(@Param('sessionId') sessionId: string) {
     try {
-      await this.whatsAppSessionManager.deleteSession(sessionId);
+      await this.sessionOrchestrator.deleteSession(sessionId);
       return {
         success: true,
         message: 'Sesión de WhatsApp eliminada exitosamente.',
@@ -572,9 +566,8 @@ export class SessionsController {
       if (!session) {
         throw new InternalServerErrorException('Sesión no encontrada');
       }
-
-      const qrCode = this.whatsAppSessionManager.getSessionQR(sessionId);
-      const hasQR = this.whatsAppSessionManager.hasSessionQR(sessionId);
+      const qrCode = this.sessionOrchestrator.getSessionQR(sessionId);
+      const hasQR = this.sessionOrchestrator.hasSessionQR(sessionId);
 
       if (!hasQR) {
         return {
@@ -598,7 +591,7 @@ export class SessionsController {
   @Get(':sessionId/qr/image')
   async getSessionQRAsImage(@Param('sessionId') sessionId: string) {
     try {
-      const hasQR = this.whatsAppSessionManager.hasSessionQR(sessionId);
+      const hasQR = this.sessionOrchestrator.hasSessionQR(sessionId);
 
       if (!hasQR) {
         return {
@@ -609,7 +602,7 @@ export class SessionsController {
       }
 
       const qrImage =
-        await this.whatsAppSessionManager.getSessionQRAsBase64(sessionId);
+        await this.sessionOrchestrator.getSessionQRAsBase64(sessionId);
 
       return {
         success: true,

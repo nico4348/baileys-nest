@@ -10,6 +10,7 @@ import { QrManager } from './QrManager';
 import { ConnectionManager } from './ConnectionManager';
 import { QrCounterManager } from './QrCounterManager';
 import { ISessionStateManager } from './interfaces/ISessionStateManager';
+import { SessionStatePort } from '../domain/ports/SessionStatePort';
 import { ISessionLogger } from './interfaces/ISessionLogger';
 import { BaileysEventLogger } from '../../EventLogs/infrastructure/BaileysEventLogger';
 import { MessageStatusTracker } from '../../MessageStatus/infrastructure/MessageStatusTracker';
@@ -17,7 +18,7 @@ import { MessagesHandleIncoming } from '../../Messages/application/MessagesHandl
 
 @Injectable()
 export class WhatsAppSessionManager
-  implements ISessionStateManager, OnModuleInit
+  implements ISessionStateManager, SessionStatePort, OnModuleInit
 {
   constructor(
     @Inject('AuthStateFactory')
@@ -38,10 +39,8 @@ export class WhatsAppSessionManager
     @Inject('MessagesHandleIncoming')
     private readonly messagesHandleIncoming: MessagesHandleIncoming,
   ) {}
-
   onModuleInit(): void {
-    // Resolve circular dependency
-    this.connectionManager.setSessionStateManager(this);
+    // No longer needed - circular dependency resolved through orchestration service
   }
   async startSession(sessionId: string): Promise<any> {
     await this.sessionOperations.startSession(sessionId);

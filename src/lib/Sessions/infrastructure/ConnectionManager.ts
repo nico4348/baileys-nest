@@ -2,6 +2,7 @@ import { Injectable, Inject } from '@nestjs/common';
 import { Boom } from '@hapi/boom';
 import { DisconnectReason } from 'baileys';
 import { IConnectionManager } from './interfaces/IConnectionManager';
+import { ConnectionPort } from '../domain/ports/ConnectionPort';
 import { IQrManager } from './interfaces/IQrManager';
 import { ISessionStateManager } from './interfaces/ISessionStateManager';
 import { ISessionLogger } from './interfaces/ISessionLogger';
@@ -10,7 +11,7 @@ import { QrCounterManager } from './QrCounterManager';
 import * as qrcode from 'qrcode-terminal';
 
 @Injectable()
-export class ConnectionManager implements IConnectionManager {
+export class ConnectionManager implements IConnectionManager, ConnectionPort {
   private sessionStateManager: ISessionStateManager | null = null;
 
   constructor(

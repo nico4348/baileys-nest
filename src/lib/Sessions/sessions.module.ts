@@ -20,6 +20,7 @@ import { SessionsResume } from './application/SessionsResume';
 import { SessionsRestart } from './application/SessionsRestart';
 import { SessionsStop } from './application/SessionsStop';
 import { WhatsAppSessionManager } from './infrastructure/WhatsAppSessionManager';
+import { SessionOrchestrationService } from './application/SessionOrchestrationService';
 import { SessionQrService } from './infrastructure/SessionQrService';
 import { SessionOperationsService } from './infrastructure/SessionOperationsService';
 import { SessionLifecycleManager } from './infrastructure/SessionLifecycleManager';
@@ -300,7 +301,23 @@ import { EventSeeder } from '../Events/infrastructure/EventSeeder';
         new SessionAutoInitializer(sessionManager, sessionsRepository, logger),
       inject: [WhatsAppSessionManager, 'SessionsRepository', SessionLogger],
     },
+    // Hexagonal Architecture Ports Configuration
+    {
+      provide: 'SessionStatePort',
+      useExisting: WhatsAppSessionManager,
+    },
+    {
+      provide: 'ConnectionPort',
+      useExisting: ConnectionManager,
+    },
+    // Session Orchestration Service
+    {
+      provide: SessionOrchestrationService,
+      useFactory: (sessionState, connection) =>
+        new SessionOrchestrationService(sessionState, connection),
+      inject: ['SessionStatePort', 'ConnectionPort'],
+    },
   ],
-  exports: [WhatsAppSessionManager],
+  exports: [WhatsAppSessionManager, SessionOrchestrationService],
 })
 export class SessionsModule {}
