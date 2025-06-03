@@ -12,7 +12,7 @@ export class TypeOrmMediaMessagesEntity {
   @Column({ type: 'varchar', length: 50 })
   media_type: string;
 
-  @Column({ type: 'varchar', length: 50 })
+  @Column({ type: 'varchar', length: 100 })
   mime_type: string;
 
   @Column({ type: 'varchar', length: 255 })
