@@ -7,7 +7,6 @@ import { IQrManager } from './interfaces/IQrManager';
 import { ISessionStateManager } from './interfaces/ISessionStateManager';
 import { ISessionLogger } from './interfaces/ISessionLogger';
 import { ISessionLogLogger } from '../../SessionLogs/infrastructure/interfaces/ISessionLogLogger';
-import { QrCounterManager } from './QrCounterManager';
 import * as qrcode from 'qrcode-terminal';
 
 @Injectable()
@@ -16,7 +15,6 @@ export class ConnectionManager implements IConnectionManager, ConnectionPort {
 
   constructor(
     private readonly qrManager: IQrManager,
-    private readonly qrCounterManager: QrCounterManager,
     private readonly logger: ISessionLogger,
     @Inject('ISessionLogLogger')
     private readonly sessionLogLogger: ISessionLogLogger,
@@ -47,56 +45,20 @@ export class ConnectionManager implements IConnectionManager, ConnectionPort {
     sessionId: string,
     qr: string,
   ): Promise<void> {
-    // Check if the session can generate more QR codes
-    if (!this.qrCounterManager.canGenerateQr(sessionId)) {
-      const maxLimit = this.qrCounterManager.getMaxLimit();
-      this.logger.warn(
-        `QR limit of ${maxLimit} exceeded for session. Pausing session.`,
-        sessionId,
-      );
-
-      // Log the QR limit exceeded event
-      await this.sessionLogLogger.logError(
-        sessionId,
-        new Error(`QR generation limit of ${maxLimit} exceeded`),
-        'QR_LIMIT_EXCEEDED',
-      );
-
-      // Pause the session to prevent further QR generation
-      if (this.sessionStateManager) {
-        await this.sessionStateManager.pauseSession(sessionId);
-        this.logger.info('Session paused due to QR limit exceeded', sessionId);
-      }
-
-      return;
-    }
-
-    // Increment the QR counter
-    const currentCount = this.qrCounterManager.incrementCounter(sessionId);
-    const remainingAttempts =
-      this.qrCounterManager.getRemainingAttempts(sessionId);
-
     this.qrManager.storeQr(sessionId, qr);
 
     if (this.sessionStateManager) {
-      const isPaused =
-        await this.sessionStateManager.isSessionPaused(sessionId);
+      const isPaused = await this.sessionStateManager.isSessionPaused(sessionId);
       if (isPaused) {
         this.logger.warn('QR generated for PAUSED session', sessionId);
       } else {
-        this.logger.info(
-          `QR generated for session (${currentCount}/${this.qrCounterManager.getMaxLimit()}, ${remainingAttempts} remaining)`,
-          sessionId,
-        );
+        this.logger.info('QR generated for session', sessionId);
       }
     } else {
-      this.logger.info(
-        `QR generated for session (${currentCount}/${this.qrCounterManager.getMaxLimit()}, ${remainingAttempts} remaining)`,
-        sessionId,
-      );
+      this.logger.info('QR generated for session', sessionId);
     }
 
-    // Log QR generation event with counter information
+    // Log QR generation event
     await this.sessionLogLogger.logQrEvent(sessionId);
 
     qrcode.generate(qr, { small: true });
@@ -154,9 +116,6 @@ export class ConnectionManager implements IConnectionManager, ConnectionPort {
     }
 
     this.qrManager.removeQr(sessionId);
-
-    // Reset QR counter on successful connection
-    this.qrCounterManager.resetCounter(sessionId);
 
     this.logger.info('Session connected successfully', sessionId);
 

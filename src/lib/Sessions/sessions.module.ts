@@ -21,7 +21,6 @@ import { SessionsRestart } from './application/SessionsRestart';
 import { SessionsStop } from './application/SessionsStop';
 import { WhatsAppSessionManager } from './infrastructure/WhatsAppSessionManager';
 import { SessionOrchestrationService } from './application/SessionOrchestrationService';
-import { SessionsGetQrCounterStatus } from './application/SessionsGetQrCounterStatus';
 import { SessionQrService } from './infrastructure/SessionQrService';
 import { SessionDependencyInitializer } from './infrastructure/SessionDependencyInitializer';
 import { SessionOperationsService } from './infrastructure/SessionOperationsService';
@@ -30,7 +29,6 @@ import { QrManager } from './infrastructure/QrManager';
 import { ConnectionManager } from './infrastructure/ConnectionManager';
 import { SessionLogger } from './infrastructure/SessionLogger';
 import { SessionAutoInitializer } from './infrastructure/SessionAutoInitializer';
-import { QrCounterManager } from './infrastructure/QrCounterManager';
 import { AuthModule } from '../AuthState/authState.module';
 import { AuthStateFactory } from '../AuthState/infrastructure/AuthStateFactory';
 import { SessionLogsModule } from '../SessionLogs/sessionLogs.module';
@@ -217,25 +215,13 @@ import { EventSeeder } from '../Events/infrastructure/EventSeeder';
       inject: [SessionLogger],
     },
     {
-      provide: QrCounterManager,
-      useFactory: (logger: SessionLogger) => new QrCounterManager(logger),
-      inject: [SessionLogger],
-    },
-    {
       provide: ConnectionManager,
       useFactory: (
         qrManager: QrManager,
-        qrCounterManager: QrCounterManager,
         logger: SessionLogger,
         sessionLogLogger: any,
-      ) =>
-        new ConnectionManager(
-          qrManager,
-          qrCounterManager,
-          logger,
-          sessionLogLogger,
-        ),
-      inject: [QrManager, QrCounterManager, SessionLogger, 'ISessionLogLogger'],
+      ) => new ConnectionManager(qrManager, logger, sessionLogLogger),
+      inject: [QrManager, SessionLogger, 'ISessionLogLogger'],
     },
     {
       provide: WhatsAppSessionManager,
@@ -248,7 +234,6 @@ import { EventSeeder } from '../Events/infrastructure/EventSeeder';
         lifecycleManager: SessionLifecycleManager,
         qrManager: QrManager,
         connectionManager: ConnectionManager,
-        qrCounterManager: QrCounterManager,
         logger: SessionLogger,
         eventLogger: BaileysEventLogger,
         messageStatusTracker: MessageStatusTracker,
@@ -263,7 +248,6 @@ import { EventSeeder } from '../Events/infrastructure/EventSeeder';
           lifecycleManager,
           qrManager,
           connectionManager,
-          qrCounterManager,
           logger,
           eventLogger,
           messageStatusTracker,
@@ -278,7 +262,6 @@ import { EventSeeder } from '../Events/infrastructure/EventSeeder';
         SessionLifecycleManager,
         QrManager,
         ConnectionManager,
-        QrCounterManager,
         SessionLogger,
         BaileysEventLogger,
         MessageStatusTracker,
@@ -313,17 +296,9 @@ import { EventSeeder } from '../Events/infrastructure/EventSeeder';
     },
     {
       provide: 'QrCounterPort',
-      useExisting: QrCounterManager,
+      useExisting: QrManager,
     },
     // Application Services
-    {
-      provide: SessionsGetQrCounterStatus,
-      useFactory: (
-        qrCounterPort: QrCounterManager,
-        sessionsGetOneById: SessionsGetOneById,
-      ) => new SessionsGetQrCounterStatus(qrCounterPort, sessionsGetOneById),
-      inject: ['QrCounterPort', 'SessionsGetOneById'],
-    },
     // Session Orchestration Service
     {
       provide: SessionOrchestrationService,
@@ -342,7 +317,6 @@ import { EventSeeder } from '../Events/infrastructure/EventSeeder';
   exports: [
     WhatsAppSessionManager,
     SessionOrchestrationService,
-    SessionsGetQrCounterStatus,
   ],
 })
 export class SessionsModule {}
