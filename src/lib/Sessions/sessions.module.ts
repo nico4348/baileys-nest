@@ -26,6 +26,7 @@ import { SessionDependencyInitializer } from './infrastructure/SessionDependency
 import { SessionOperationsService } from './infrastructure/SessionOperationsService';
 import { SessionLifecycleManager } from './infrastructure/SessionLifecycleManager';
 import { QrManager } from './infrastructure/QrManager';
+import { QrCounterManager } from './infrastructure/QrCounterManager';
 import { ConnectionManager } from './infrastructure/ConnectionManager';
 import { SessionLogger } from './infrastructure/SessionLogger';
 import { SessionAutoInitializer } from './infrastructure/SessionAutoInitializer';
@@ -215,13 +216,25 @@ import { EventSeeder } from '../Events/infrastructure/EventSeeder';
       inject: [SessionLogger],
     },
     {
+      provide: QrCounterManager,
+      useFactory: (logger: SessionLogger) => new QrCounterManager(logger),
+      inject: [SessionLogger],
+    },
+    {
       provide: ConnectionManager,
       useFactory: (
         qrManager: QrManager,
+        qrCounterManager: QrCounterManager,
         logger: SessionLogger,
         sessionLogLogger: any,
-      ) => new ConnectionManager(qrManager, logger, sessionLogLogger),
-      inject: [QrManager, SessionLogger, 'ISessionLogLogger'],
+      ) =>
+        new ConnectionManager(
+          qrManager,
+          qrCounterManager,
+          logger,
+          sessionLogLogger,
+        ),
+      inject: [QrManager, QrCounterManager, SessionLogger, 'ISessionLogLogger'],
     },
     {
       provide: WhatsAppSessionManager,
@@ -234,6 +247,7 @@ import { EventSeeder } from '../Events/infrastructure/EventSeeder';
         lifecycleManager: SessionLifecycleManager,
         qrManager: QrManager,
         connectionManager: ConnectionManager,
+        qrCounterManager: QrCounterManager,
         logger: SessionLogger,
         eventLogger: BaileysEventLogger,
         messageStatusTracker: MessageStatusTracker,
@@ -248,6 +262,7 @@ import { EventSeeder } from '../Events/infrastructure/EventSeeder';
           lifecycleManager,
           qrManager,
           connectionManager,
+          qrCounterManager,
           logger,
           eventLogger,
           messageStatusTracker,
@@ -262,6 +277,7 @@ import { EventSeeder } from '../Events/infrastructure/EventSeeder';
         SessionLifecycleManager,
         QrManager,
         ConnectionManager,
+        QrCounterManager,
         SessionLogger,
         BaileysEventLogger,
         MessageStatusTracker,
@@ -296,7 +312,7 @@ import { EventSeeder } from '../Events/infrastructure/EventSeeder';
     },
     {
       provide: 'QrCounterPort',
-      useExisting: QrManager,
+      useExisting: QrCounterManager,
     },
     // Application Services
     // Session Orchestration Service

@@ -8,6 +8,7 @@ import { SessionOperationsService } from './SessionOperationsService';
 import { SessionLifecycleManager } from './SessionLifecycleManager';
 import { QrManager } from './QrManager';
 import { ConnectionManager } from './ConnectionManager';
+import { QrCounterPort } from '../domain/ports/QrCounterPort';
 import { ISessionStateManager } from './interfaces/ISessionStateManager';
 import { SessionStatePort } from '../domain/ports/SessionStatePort';
 import { ISessionLogger } from './interfaces/ISessionLogger';
@@ -31,6 +32,8 @@ export class WhatsAppSessionManager
     private readonly lifecycleManager: SessionLifecycleManager,
     private readonly qrManager: QrManager,
     private readonly connectionManager: ConnectionManager,
+    @Inject('QrCounterPort')
+    private readonly qrCounterManager: QrCounterPort,
     private readonly logger: ISessionLogger,
     private readonly eventLogger: BaileysEventLogger,
     private readonly messageStatusTracker: MessageStatusTracker,
@@ -119,6 +122,9 @@ export class WhatsAppSessionManager
     try {
       await this.lifecycleManager.closeSession(sessionId);
       this.sessionQrService.removeSocketFactory(sessionId);
+
+      // Clean up QR counter for the session
+      this.qrCounterManager.removeSession(sessionId);
 
       await this.sessionOperations.deleteSession(sessionId);
     } catch (error) {
