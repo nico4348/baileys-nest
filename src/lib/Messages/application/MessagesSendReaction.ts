@@ -32,6 +32,7 @@ export class MessagesSendReaction {
           targetMessageId,
           sessionId,
           to,
+          true, // fromMe: true for outgoing messages
           new Date(),
         );
 

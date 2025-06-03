@@ -7,6 +7,7 @@ import { MessageSessionId } from '../domain/MessageSessionId';
 import { MessageTo } from '../domain/MessageTo';
 import { MessageCreatedAt } from '../domain/MessageCreatedAt';
 import { MessageBaileysJson } from '../domain/MessageBaileysJson';
+import { MessageFromMe } from '../domain/MessageFromMe';
 
 export class MessagesCreate {
   constructor(private readonly repository: MessageRepository) {}
@@ -17,6 +18,7 @@ export class MessagesCreate {
     quotedMessageId: string | null,
     sessionId: string,
     to: string,
+    fromMe: boolean,
     createdAt: Date,
   ): Promise<void> {
     const message = new Message(
@@ -26,6 +28,7 @@ export class MessagesCreate {
       new MessageQuotedMessageId(quotedMessageId),
       new MessageTo(to),
       new MessageMessageType(messageType),
+      new MessageFromMe(fromMe),
       new MessageCreatedAt(createdAt),
     );
     await this.repository.create(message);

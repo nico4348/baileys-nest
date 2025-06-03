@@ -11,6 +11,7 @@ import { MessageTo } from '../../domain/MessageTo';
 import { MessageMessageType } from '../../domain/MessageMessageType';
 import { MessageCreatedAt } from '../../domain/MessageCreatedAt';
 import { MessageBaileysJson } from '../../domain/MessageBaileysJson';
+import { MessageFromMe } from '../../domain/MessageFromMe';
 
 @Injectable()
 export class TypeOrmMessagesRepository implements MessageRepository {
@@ -98,6 +99,7 @@ export class TypeOrmMessagesRepository implements MessageRepository {
     entity.quoted_message_id = message.quoted_message_id.value || null;
     entity.to = message.to.value;
     entity.message_type = message.message_type.value;
+    entity.from_me = message.from_me.value;
     entity.created_at = message.created_at.value;
     return entity;
   }
@@ -110,6 +112,7 @@ export class TypeOrmMessagesRepository implements MessageRepository {
       new MessageQuotedMessageId(entity.quoted_message_id),
       new MessageTo(entity.to),
       new MessageMessageType(entity.message_type),
+      new MessageFromMe(entity.from_me),
       new MessageCreatedAt(entity.created_at),
     );
   }

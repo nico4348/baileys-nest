@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { SessionsController } from './sessions.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TypeOrmSessionsEntity } from './infrastructure/TypeOrm/TypeOrmSessionsEntity';
@@ -34,6 +34,7 @@ import { SessionLogsModule } from '../SessionLogs/sessionLogs.module';
 import { EventsModule } from '../Events/events.module';
 import { EventLogsModule } from '../EventLogs/eventLogs.module';
 import { MessageStatusModule } from '../MessageStatus/messageStatus.module';
+import { MessagesModule } from '../Messages/messages.module';
 import { BaileysEventLogger } from '../EventLogs/infrastructure/BaileysEventLogger';
 import { MessageStatusTracker } from '../MessageStatus/infrastructure/MessageStatusTracker';
 import { EventSeeder } from '../Events/infrastructure/EventSeeder';
@@ -45,6 +46,7 @@ import { EventSeeder } from '../Events/infrastructure/EventSeeder';
     EventsModule,
     EventLogsModule,
     MessageStatusModule,
+    forwardRef(() => MessagesModule),
   ],
   controllers: [SessionsController],
   providers: [
@@ -247,6 +249,7 @@ import { EventSeeder } from '../Events/infrastructure/EventSeeder';
         logger: SessionLogger,
         eventLogger: BaileysEventLogger,
         messageStatusTracker: MessageStatusTracker,
+        messagesHandleIncoming: any,
       ) =>
         new WhatsAppSessionManager(
           authStateFactory,
@@ -261,6 +264,7 @@ import { EventSeeder } from '../Events/infrastructure/EventSeeder';
           logger,
           eventLogger,
           messageStatusTracker,
+          messagesHandleIncoming,
         ),
       inject: [
         'AuthStateFactory',
@@ -275,6 +279,7 @@ import { EventSeeder } from '../Events/infrastructure/EventSeeder';
         SessionLogger,
         BaileysEventLogger,
         MessageStatusTracker,
+        'MessagesHandleIncoming',
       ],
     },
     // Baileys Event Logger

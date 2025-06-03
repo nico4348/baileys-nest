@@ -5,6 +5,7 @@ import { MessageQuotedMessageId } from './MessageQuotedMessageId';
 import { MessageSessionId } from './MessageSessionId';
 import { MessageTo } from './MessageTo';
 import { MessageBaileysJson } from './MessageBaileysJson';
+import { MessageFromMe } from './MessageFromMe';
 
 export class Message {
   id: MessageId;
@@ -13,6 +14,7 @@ export class Message {
   quoted_message_id: MessageQuotedMessageId;
   to: MessageTo;
   message_type: MessageMessageType;
+  from_me: MessageFromMe;
   created_at: MessageCreatedAt;
 
   constructor(
@@ -22,6 +24,7 @@ export class Message {
     quoted_message_id: MessageQuotedMessageId,
     to: MessageTo,
     message_type: MessageMessageType,
+    from_me: MessageFromMe,
     created_at: MessageCreatedAt,
   ) {
     this.id = id;
@@ -30,6 +33,7 @@ export class Message {
     this.quoted_message_id = quoted_message_id;
     this.to = to;
     this.message_type = message_type;
+    this.from_me = from_me;
     this.created_at = created_at;
   }
 }

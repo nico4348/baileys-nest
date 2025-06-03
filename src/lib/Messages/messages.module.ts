@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MessagesController } from './messages.controller';
 import { TypeOrmMessagesEntity } from './infrastructure/TypeOrm/TypeOrmMessagesEntity';
@@ -11,6 +11,7 @@ import { MessagesGetByBaileysId } from './application/MessagesGetByBaileysId';
 import { MessagesUpdate } from './application/MessagesUpdate';
 import { MessagesDelete } from './application/MessagesDelete';
 import { MessagesOrchestrator } from './application/MessagesOrchestrator';
+import { MessagesHandleIncoming } from './application/MessagesHandleIncoming';
 import { SendMessage } from './application/SendMessage';
 import { BaileysMessageSender } from './infrastructure/BaileysMessageSender';
 import { MessageHandlerFactory } from './infrastructure/MessageHandlerFactory';
@@ -28,7 +29,7 @@ import { MessageStatusCreateValidated } from '../MessageStatus/application/Messa
 @Module({
   imports: [
     TypeOrmModule.forFeature([TypeOrmMessagesEntity]),
-    SessionsModule,
+    forwardRef(() => SessionsModule),
     TextMessagesModule,
     MediaMessagesModule,
     ReactionMessagesModule,
@@ -143,6 +144,30 @@ import { MessageStatusCreateValidated } from '../MessageStatus/application/Messa
       inject: ['MessagesOrchestrator', 'CryptoService'],
     },
     {
+      provide: 'MessagesHandleIncoming',
+      useFactory: (
+        messagesCreate,
+        textMessagesCreate,
+        mediaMessagesCreate,
+        reactionMessagesCreate,
+        cryptoService,
+      ) =>
+        new MessagesHandleIncoming(
+          messagesCreate,
+          textMessagesCreate,
+          mediaMessagesCreate,
+          reactionMessagesCreate,
+          cryptoService,
+        ),
+      inject: [
+        'MessagesCreate',
+        'TextMessagesCreate',
+        'MediaMessagesCreate',
+        'ReactionMessagesCreate',
+        'CryptoService',
+      ],
+    },
+    {
       provide: 'MessageHandlerFactory',
       useFactory: (textHandler, mediaHandler, reactionHandler) =>
         new MessageHandlerFactory(textHandler, mediaHandler, reactionHandler),
@@ -159,6 +184,7 @@ import { MessageStatusCreateValidated } from '../MessageStatus/application/Messa
     'MessagesGetByBaileysId',
     'MessageSender',
     'MessagesOrchestrator',
+    'MessagesHandleIncoming',
     'SendMessage',
   ],
 })

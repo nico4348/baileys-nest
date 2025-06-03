@@ -35,6 +35,9 @@ export class TypeOrmMessagesEntity {
   @Column({ type: 'varchar', length: 50 })
   message_type: string;
 
+  @Column({ type: 'boolean', default: false })
+  from_me: boolean;
+
   @Column({ type: 'timestamp' })
   created_at: Date;
 

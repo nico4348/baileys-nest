@@ -46,6 +46,7 @@ export class MessagesSendMedia {
           quotedMessageId ? JSON.stringify(quotedMessageId) : null,
           sessionId,
           to,
+          true, // fromMe: true for outgoing messages
           new Date(),
         );
 

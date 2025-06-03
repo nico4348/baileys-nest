@@ -50,6 +50,7 @@ export class MessagesController {
       to: string;
       message_type: string;
       quoted_message_id?: string;
+      from_me?: boolean;
     },
   ) {
     try {
@@ -62,6 +63,7 @@ export class MessagesController {
         createMessageDto.quoted_message_id || null,
         createMessageDto.session_id,
         createMessageDto.to,
+        createMessageDto.from_me ?? false, // Default to false if not provided
         createdAt,
       );
       return {
@@ -151,6 +153,7 @@ export class MessagesController {
       to?: string;
       message_type?: string;
       quoted_message_id?: string;
+      from_me?: boolean;
     },
   ) {
     try {
@@ -174,6 +177,7 @@ export class MessagesController {
           existingMessage.quoted_message_id.value,
         updateMessageDto.session_id || existingMessage.session_id.value,
         updateMessageDto.to || existingMessage.to.value,
+        updateMessageDto.from_me ?? existingMessage.from_me.value,
         existingMessage.created_at.value,
       );
 

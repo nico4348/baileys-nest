@@ -97,6 +97,7 @@ export class MessagesOrchestrator {
         quotedMessageId || null,
         sessionId,
         to,
+        true, // fromMe: true for outgoing messages
         new Date(),
       );
       await this.textMessagesCreate.run(
@@ -178,6 +179,7 @@ export class MessagesOrchestrator {
         quotedMessageId || null,
         sessionId,
         to,
+        true, // fromMe: true for outgoing messages
         new Date(),
       );
       // Create media message record (child record)
@@ -249,6 +251,7 @@ export class MessagesOrchestrator {
         targetMessageId, // Use the actual target message ID (UUID)
         sessionId,
         to,
+        true, // fromMe: true for outgoing messages
         new Date(),
       );
       // Create reaction message record (child record)

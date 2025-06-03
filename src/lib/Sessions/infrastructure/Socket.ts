@@ -12,6 +12,7 @@ import { IQrManager } from './interfaces/IQrManager';
 import { ISessionStateManager } from './interfaces/ISessionStateManager';
 import { IBaileysEventLogger } from '../../EventLogs/infrastructure/BaileysEventLogger';
 import { MessageStatusTracker } from '../../MessageStatus/infrastructure/MessageStatusTracker';
+import { MessagesHandleIncoming } from '../../Messages/application/MessagesHandleIncoming';
 
 export class WhatsAppSocketFactory implements ISocketFactory {
   constructor(
@@ -21,6 +22,7 @@ export class WhatsAppSocketFactory implements ISocketFactory {
     private readonly sessionStateManager: ISessionStateManager,
     private readonly eventLogger: IBaileysEventLogger,
     private readonly messageStatusTracker?: MessageStatusTracker,
+    private readonly messagesHandleIncoming?: MessagesHandleIncoming,
     private readonly logger: any = pino({ level: 'silent' }),
     private readonly retryCache: any = undefined,
   ) {}
@@ -88,7 +90,13 @@ export class WhatsAppSocketFactory implements ISocketFactory {
 
       // Handle other Baileys events
       if (events['messages.upsert']) {
-        // Additional message handling logic can be added here
+        // Handle incoming messages
+        if (this.messagesHandleIncoming && events['messages.upsert'].messages) {
+          await this.messagesHandleIncoming.handleIncomingMessages(
+            sessionId,
+            events['messages.upsert'].messages
+          );
+        }
       }
 
       if (events['messages.update']) {
