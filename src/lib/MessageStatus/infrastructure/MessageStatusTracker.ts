@@ -5,6 +5,7 @@ import { MessageStatusGetLatestByMessageId } from '../application/MessageStatusG
 import { StatusRepository } from '../../Status/domain/StatusRepository';
 import { StatusName } from '../../Status/domain/StatusName';
 import { MessagesGetByBaileysId } from '../../Messages/application/MessagesGetByBaileysId';
+import { MessageStatusQueue } from './MessageStatusQueue';
 import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
@@ -19,6 +20,7 @@ export class MessageStatusTracker {
     private readonly statusRepository: StatusRepository,
     @Inject('MessagesGetByBaileysId')
     private readonly messagesGetByBaileysId: MessagesGetByBaileysId,
+    private readonly messageStatusQueue: MessageStatusQueue,
   ) {}
 
   async trackMessageStatus(
@@ -64,19 +66,23 @@ export class MessageStatusTracker {
         return;
       }
 
-      // Crear nuevo registro solo si es progreso o failed
-      await this.messageStatusCreate.run(
-        uuidv4(),
-        messageUuid,
-        status.id.value,
-        new Date(),
-      );
+      // Queue status update instead of creating directly
+      await this.messageStatusQueue.addStatusUpdate({
+        messageId: messageUuid,
+        statusId: status.id.value,
+        sessionId,
+        timestamp: new Date(),
+        priority: dbStatusName === 'failed' ? 'high' : 'normal',
+        baileysMessageId,
+        previousStatus: latestStatus?.statusName,
+        newStatus: dbStatusName,
+      });
       
       const progressText = latestStatus ? 
         `${latestStatus.statusName} → ${dbStatusName}` : 
         `initial → ${dbStatusName}`;
         
-      console.log(`📝 Created MessageStatus log for message ${messageUuid} (Baileys: ${baileysMessageId}): ${progressText}`);
+      console.log(`📬 Queued MessageStatus update for message ${messageUuid} (Baileys: ${baileysMessageId}): ${progressText}`);
     } catch (error) {
       console.error(`Error tracking message status for Baileys ID ${baileysMessageId}:`, error);
     }

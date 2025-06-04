@@ -5,6 +5,8 @@ export class SendMessageResponse {
   timestamp: Date;
   messageType: string;
   error?: string;
+  queued?: boolean;
+  message?: string;
 
   constructor(
     success: boolean,

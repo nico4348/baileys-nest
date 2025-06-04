@@ -33,6 +33,9 @@ import { OutgoingMessageQueue } from './infrastructure/OutgoingMessageQueue';
 import { OutgoingMessageProcessor } from './infrastructure/OutgoingMessageProcessor';
 import { IncomingMessageQueue } from './infrastructure/IncomingMessageQueue';
 import { IncomingMessageProcessor } from './infrastructure/IncomingMessageProcessor';
+import { MessagesSendText } from './application/MessagesSendText';
+import { MessagesSendMedia } from './application/MessagesSendMedia';
+import { MessagesSendReaction } from './application/MessagesSendReaction';
 
 @Module({
   imports: [
@@ -212,6 +215,24 @@ import { IncomingMessageProcessor } from './infrastructure/IncomingMessageProces
       provide: 'IncomingMessageQueue',
       useExisting: IncomingMessageQueue,
     },
+    {
+      provide: 'MessagesSendText',
+      useFactory: (messagesCreate, messageSender) =>
+        new MessagesSendText(messagesCreate, messageSender),
+      inject: ['MessagesCreate', 'MessageSender'],
+    },
+    {
+      provide: 'MessagesSendMedia',
+      useFactory: (messagesCreate, messageSender) =>
+        new MessagesSendMedia(messagesCreate, messageSender),
+      inject: ['MessagesCreate', 'MessageSender'],
+    },
+    {
+      provide: 'MessagesSendReaction',
+      useFactory: (messagesCreate, messageSender) =>
+        new MessagesSendReaction(messagesCreate, messageSender),
+      inject: ['MessagesCreate', 'MessageSender'],
+    },
   ],
   exports: [
     'MessageRepository',
@@ -221,6 +242,9 @@ import { IncomingMessageProcessor } from './infrastructure/IncomingMessageProces
     'MessagesOrchestrator',
     'MessagesHandleIncoming',
     'SendMessage',
+    'MessagesSendText',
+    'MessagesSendMedia',
+    'MessagesSendReaction',
     OutgoingMessageQueue,
     IncomingMessageQueue,
     'IncomingMessageQueue',

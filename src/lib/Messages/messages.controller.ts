@@ -22,6 +22,7 @@ import { MessagesDelete } from './application/MessagesDelete';
 import { SendMessage } from './application/SendMessage';
 import { SendMessageRequest } from './application/dto/SendMessageRequest.dto';
 import { SendMessageResponse } from './application/dto/SendMessageResponse.dto';
+import { OutgoingMessageQueue } from './infrastructure/OutgoingMessageQueue';
 import { v4 as uuidv4 } from 'uuid';
 
 @Controller('messages')
@@ -41,6 +42,7 @@ export class MessagesController {
     private readonly messagesDelete: MessagesDelete,
     @Inject('SendMessage')
     private readonly sendMessage: SendMessage,
+    private readonly outgoingMessageQueue: OutgoingMessageQueue,
   ) {}
   @Post()
   async create(
@@ -225,8 +227,74 @@ export class MessagesController {
     @Body() request: SendMessageRequest,
   ): Promise<SendMessageResponse> {
     try {
-      const result = await this.sendMessage.run(request);
-      return result;
+      // Queue the message instead of sending immediately
+      const messageId = uuidv4();
+      
+      let content: string | Buffer;
+      let messageData: any = {
+        to: `${request.to}@s.whatsapp.net`,
+      };
+
+      // Prepare content based on message type
+      switch (request.messageType) {
+        case 'text':
+          if (!request.textData?.text) {
+            throw new Error('Text data is required for text messages');
+          }
+          content = request.textData.text;
+          messageData.content = content;
+          if (request.quotedMessageId) {
+            messageData.quotedMessageId = request.quotedMessageId;
+          }
+          break;
+          
+        case 'media':
+          if (!request.mediaData?.url) {
+            throw new Error('Media data is required for media messages');
+          }
+          content = request.mediaData.url;
+          messageData.content = content;
+          messageData.mediaType = request.mediaData.mediaType;
+          messageData.fileName = request.mediaData.fileName;
+          messageData.caption = request.mediaData.caption;
+          if (request.quotedMessageId) {
+            messageData.quotedMessageId = request.quotedMessageId;
+          }
+          break;
+          
+        case 'reaction':
+          if (!request.reactionData?.emoji) {
+            throw new Error('Reaction data is required for reaction messages');
+          }
+          content = request.reactionData.emoji;
+          messageData.content = content;
+          messageData.emoji = request.reactionData.emoji;
+          messageData.targetMessageId = request.reactionData.targetMessageId;
+          break;
+          
+        default:
+          throw new Error(`Unsupported message type: ${request.messageType}`);
+      }
+
+      // Add to outgoing message queue
+      await this.outgoingMessageQueue.addMessage({
+        sessionId: request.sessionId,
+        messageType: request.messageType as 'text' | 'media' | 'reaction',
+        messageData,
+        priority: request.messageType === 'reaction' ? 'high' : 'normal',
+        retryCount: 3,
+      });
+
+      console.log(`📤 [${request.sessionId}] ${request.messageType} message queued for ${request.to}`);
+
+      return {
+        success: true,
+        messageId,
+        message: `${request.messageType} message queued successfully`,
+        messageType: request.messageType,
+        queued: true,
+        timestamp: new Date(),
+      };
     } catch (error) {
       throw new HttpException(
         {

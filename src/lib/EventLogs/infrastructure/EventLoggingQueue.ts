@@ -7,8 +7,8 @@ export interface EventLogJob {
   eventId: string;
   eventData: Record<string, any>;
   timestamp: Date;
-  priority: 'high' | 'normal' | 'low';
-  category: 'system' | 'user' | 'whatsapp' | 'error' | 'performance';
+  priority?: 'high' | 'normal' | 'low';
+  category: 'connection' | 'message' | 'system' | 'error';
 }
 
 export interface BatchEventLogJob {
@@ -25,8 +25,8 @@ export class EventLoggingQueue {
     private readonly eventQueue: Queue,
   ) {}
 
-  async addEvent(job: EventLogJob): Promise<void> {
-    const priority = this.getPriorityValue(job.priority);
+  async addEventLog(job: EventLogJob): Promise<void> {
+    const priority = this.getPriorityValue(job.priority || 'normal');
 
     await this.eventQueue.add('log-event', job, {
       priority,
@@ -37,7 +37,12 @@ export class EventLoggingQueue {
       },
       removeOnComplete: 500,
       removeOnFail: 100,
+      jobId: `event_${job.sessionId}_${job.eventId}_${Date.now()}`,
     });
+  }
+
+  async addEvent(job: EventLogJob): Promise<void> {
+    return this.addEventLog(job);
   }
 
   async addBatchEvents(jobs: EventLogJob[]): Promise<void> {
@@ -91,7 +96,7 @@ export class EventLoggingQueue {
       eventData,
       timestamp: new Date(),
       priority: 'low',
-      category: 'performance',
+      category: 'system',
     });
   }
 

@@ -40,6 +40,7 @@ import { MessagesModule } from '../Messages/messages.module';
 import { BaileysEventLogger } from '../EventLogs/infrastructure/BaileysEventLogger';
 import { MessageStatusTracker } from '../MessageStatus/infrastructure/MessageStatusTracker';
 import { EventSeeder } from '../Events/infrastructure/EventSeeder';
+import { EventLoggingQueue } from '../EventLogs/infrastructure/EventLoggingQueue';
 @Module({
   imports: [
     TypeOrmModule.forFeature([TypeOrmSessionsEntity]),
@@ -290,9 +291,9 @@ import { EventSeeder } from '../Events/infrastructure/EventSeeder';
     // Baileys Event Logger
     {
       provide: BaileysEventLogger,
-      useFactory: (eventLogsCreate: any, eventsGetOneByName: any) =>
-        new BaileysEventLogger(eventLogsCreate, eventsGetOneByName),
-      inject: ['EventLogsCreate', 'EventsGetOneByName'],
+      useFactory: (eventLogsCreate: any, eventsGetOneByName: any, eventLoggingQueue: any) =>
+        new BaileysEventLogger(eventLogsCreate, eventsGetOneByName, eventLoggingQueue),
+      inject: ['EventLogsCreate', 'EventsGetOneByName', 'EventLoggingQueue'],
     },
     // Auto-initializer for starting sessions on bootstrap
     {
@@ -331,6 +332,11 @@ import { EventSeeder } from '../Events/infrastructure/EventSeeder';
       useFactory: (connection, sessionState) =>
         new SessionDependencyInitializer(connection, sessionState),
       inject: ['ConnectionPort', 'SessionStatePort'],
+    },
+    // Import EventLoggingQueue class directly for injection
+    {
+      provide: 'EventLoggingQueue',
+      useExisting: EventLoggingQueue,
     },
   ],
   exports: [WhatsAppSessionManager, SessionOrchestrationService],

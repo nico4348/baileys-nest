@@ -10,8 +10,10 @@ export class OutgoingMessageProcessor extends WorkerHost {
   private readonly redis: Redis;
 
   constructor(
-    @Inject('MessagesOrchestrator')
-    private readonly messagesOrchestrator: any,
+    @Inject('MessagesCreate')
+    private readonly messagesCreate: any,
+    @Inject('MessageSender')
+    private readonly messageSender: any,
   ) {
     super();
     this.redis = new Redis({
@@ -59,9 +61,22 @@ export class OutgoingMessageProcessor extends WorkerHost {
     try {
       let result;
       
-      // Mock result for now - actual sending will be implemented later
-      result = { messageId: `mock_${Date.now()}`, success: true };
-      this.logger.debug(`Processed ${messageType} message for ${sessionId}`);
+      // Actually send the message based on type
+      switch (messageType) {
+        case 'text':
+          result = await this.sendTextMessage(sessionId, messageData);
+          break;
+        case 'media':
+          result = await this.sendMediaMessage(sessionId, messageData);
+          break;
+        case 'reaction':
+          result = await this.sendReactionMessage(sessionId, messageData);
+          break;
+        default:
+          throw new Error(`Unsupported message type: ${messageType}`);
+      }
+      
+      this.logger.debug(`Sent ${messageType} message for ${sessionId}: ${result.messageId}`);
       
       // Update rate limiting counter
       await this.updateRateLimit(sessionId);
@@ -149,5 +164,125 @@ export class OutgoingMessageProcessor extends WorkerHost {
 
   private delay(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  private async sendTextMessage(sessionId: string, messageData: any): Promise<any> {
+    const { to, content, quotedMessageId } = messageData;
+    const { v4: uuidv4 } = require('uuid');
+    const messageId = uuidv4();
+
+    console.log(`📤 [OutgoingProcessor] Sending text message:`, { sessionId, to, content, quotedMessageId });
+
+    // Send message through Baileys
+    const sentMessage = await this.messageSender.sendTextMessage(
+      sessionId,
+      to,
+      { text: content },
+      quotedMessageId ? JSON.parse(quotedMessageId) : undefined
+    );
+
+    if (sentMessage) {
+      // Save message to database
+      await this.messagesCreate.run(
+        messageId,
+        sentMessage,
+        'txt',
+        quotedMessageId || null,
+        sessionId,
+        to.replace('@s.whatsapp.net', ''),
+        true, // fromMe: true for outgoing messages
+        new Date(),
+      );
+
+      return { messageId, success: true };
+    } else {
+      throw new Error('Failed to send text message through WhatsApp');
+    }
+  }
+
+  private async sendMediaMessage(sessionId: string, messageData: any): Promise<any> {
+    const { to, content, mediaType, fileName, caption, quotedMessageId } = messageData;
+    const { v4: uuidv4 } = require('uuid');
+    const messageId = uuidv4();
+
+    console.log(`📤 [OutgoingProcessor] Sending media message:`, { sessionId, to, content, mediaType, fileName, caption });
+
+    const payload = {
+      url: content, // content contains the media URL
+      caption,
+      media_type: mediaType,
+      mime_type: 'application/octet-stream', // Will be determined by the sender
+      file_name: fileName,
+      file_path: content,
+    };
+
+    // Send media message through Baileys
+    const sentMessage = await this.messageSender.sendMediaMessage(
+      sessionId,
+      to,
+      mediaType,
+      payload,
+      quotedMessageId ? JSON.parse(quotedMessageId) : undefined
+    );
+
+    if (sentMessage) {
+      // Save message to database
+      await this.messagesCreate.run(
+        messageId,
+        sentMessage,
+        'media',
+        quotedMessageId || null,
+        sessionId,
+        to.replace('@s.whatsapp.net', ''),
+        true, // fromMe: true for outgoing messages
+        new Date(),
+      );
+
+      return { messageId, success: true };
+    } else {
+      throw new Error('Failed to send media message through WhatsApp');
+    }
+  }
+
+  private async sendReactionMessage(sessionId: string, messageData: any): Promise<any> {
+    const { to, content, emoji, targetMessageId } = messageData;
+    const { v4: uuidv4 } = require('uuid');
+    const messageId = uuidv4();
+
+    console.log(`📤 [OutgoingProcessor] Sending reaction:`, { sessionId, to, emoji: content, targetMessageId });
+
+    // For reactions, we need the target message key - this should be improved
+    const payload = { 
+      key: { 
+        id: targetMessageId, // This should be the actual message key from the target message
+        remoteJid: to 
+      }, 
+      text: content // emoji
+    };
+
+    // Send reaction through Baileys
+    const sentMessage = await this.messageSender.sendReactMessage(
+      sessionId,
+      to,
+      payload
+    );
+
+    if (sentMessage) {
+      // Save message to database
+      await this.messagesCreate.run(
+        messageId,
+        sentMessage,
+        'react',
+        targetMessageId,
+        sessionId,
+        to.replace('@s.whatsapp.net', ''),
+        true, // fromMe: true for outgoing messages
+        new Date(),
+      );
+
+      return { messageId, success: true };
+    } else {
+      throw new Error('Failed to send reaction through WhatsApp');
+    }
   }
 }

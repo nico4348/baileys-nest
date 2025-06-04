@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EventLogsCreate } from '../application/EventLogsCreate';
 import { EventsGetOneByName } from '../../Events/application/EventsGetOneByName';
+import { EventLoggingQueue } from './EventLoggingQueue';
 import { v4 as uuidv4 } from 'uuid';
 
 export interface IBaileysEventLogger {
@@ -14,6 +15,7 @@ export class BaileysEventLogger implements IBaileysEventLogger {
   constructor(
     private readonly eventLogsCreate: EventLogsCreate,
     private readonly eventsGetOneByName: EventsGetOneByName,
+    private readonly eventLoggingQueue: EventLoggingQueue,
   ) {}
 
   async logEvent(sessionId: string, eventName: string): Promise<void> {
@@ -29,19 +31,28 @@ export class BaileysEventLogger implements IBaileysEventLogger {
       }
 
       if (eventId) {
-        await this.eventLogsCreate.run(
-          uuidv4(),
+        // Queue the event log instead of creating directly
+        await this.eventLoggingQueue.addEventLog({
           sessionId,
           eventId,
-          new Date(),
-        );
+          eventData: { eventName },
+          timestamp: new Date(),
+          category: this.getEventCategory(eventName),
+        });
       }
     } catch (error) {
       console.error(
-        `Error logging event ${eventName} for session ${sessionId}:`,
+        `Error queueing event ${eventName} for session ${sessionId}:`,
         error,
       );
     }
+  }
+
+  private getEventCategory(eventName: string): 'connection' | 'message' | 'system' | 'error' {
+    if (eventName.includes('connection')) return 'connection';
+    if (eventName.includes('message') || eventName.includes('chat')) return 'message';
+    if (eventName.includes('error') || eventName.includes('fail')) return 'error';
+    return 'system';
   }
 
   setEventId(eventName: string, eventId: string): void {

@@ -7,6 +7,10 @@ export interface MessageStatusUpdateJob {
   statusId: string;
   sessionId: string;
   timestamp: Date;
+  priority?: 'high' | 'normal' | 'low';
+  baileysMessageId?: string;
+  previousStatus?: string;
+  newStatus?: string;
   metadata?: Record<string, any>;
 }
 
@@ -23,7 +27,10 @@ export class MessageStatusQueue {
   ) {}
 
   async addStatusUpdate(job: MessageStatusUpdateJob): Promise<void> {
+    const priority = this.getPriorityValue(job.priority || 'normal');
+    
     await this.statusQueue.add('update-status', job, {
+      priority,
       attempts: 3,
       backoff: {
         type: 'exponential',
@@ -31,7 +38,17 @@ export class MessageStatusQueue {
       },
       removeOnComplete: 100,
       removeOnFail: 50,
+      jobId: `status_${job.messageId}_${Date.now()}`,
     });
+  }
+
+  private getPriorityValue(priority: 'high' | 'normal' | 'low'): number {
+    switch (priority) {
+      case 'high': return 1;
+      case 'normal': return 5;
+      case 'low': return 10;
+      default: return 5;
+    }
   }
 
   async addBatchStatusUpdate(jobs: MessageStatusUpdateJob[]): Promise<void> {
