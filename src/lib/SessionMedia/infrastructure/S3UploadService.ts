@@ -35,7 +35,7 @@ export class S3UploadService {
         secretAccessKey,
       },
     });
-    this.bucketName = process.env.AWS_S3_BUCKET_NAME || 'baileys-nest-media';
+    this.bucketName = process.env.AWS_S3_BUCKET_NAME || 'default-bucket';
   }
 
   async uploadFile(request: S3UploadRequest): Promise<S3UploadResponse> {

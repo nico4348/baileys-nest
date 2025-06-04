@@ -46,7 +46,7 @@ export class S3MediaUploader implements MediaStorageService {
   private getS3Config(): S3Config {
     return {
       region: process.env.AWS_REGION || 'us-east-1',
-      bucketName: process.env.AWS_S3_BUCKET_NAME || 'baileys-media-bucket',
+      bucketName: process.env.AWS_S3_BUCKET_NAME || 'default-bucket',
       accessKeyId: process.env.AWS_ACCESS_KEY_ID,
       secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
       endpoint: process.env.S3_ENDPOINT,

@@ -10,11 +10,11 @@ export class RedisHealthCheck {
       console.log('Attempting to connect to Redis...');
       
       client = createClient({
-        username: 'default',
-        password: '6gYTbWK4SnusWV06uIGaEzTo2sw5QqyR',
+        username: process.env.REDIS_USERNAME || 'default',
+        password: process.env.REDIS_PASSWORD,
         socket: {
-          host: 'redis-18736.c99.us-east-1-4.ec2.redns.redis-cloud.com',
-          port: 18736,
+          host: process.env.REDIS_HOST || 'localhost',
+          port: parseInt(process.env.REDIS_PORT) || 6379,
         }
       });
 

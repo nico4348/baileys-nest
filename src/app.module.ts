@@ -17,7 +17,12 @@ import { SessionMediaModule } from './lib/SessionMedia/sessionMedia.module';
 @Module({
   imports: [
     BullModule.forRoot({
-      redis: 'redis://default:6gYTbWK4SnusWV06uIGaEzTo2sw5QqyR@redis-18736.c99.us-east-1-4.ec2.redns.redis-cloud.com:18736',
+      redis: process.env.REDIS_URL || {
+        host: process.env.REDIS_HOST || 'localhost',
+        port: parseInt(process.env.REDIS_PORT || '6379') || 6379,
+        username: process.env.REDIS_USERNAME || 'default',
+        password: process.env.REDIS_PASSWORD,
+      },
     }),
     DatabaseProvider,
     SessionsModule,

@@ -15,7 +15,8 @@
       "Bash(timeout:*)",
       "Bash(npm install:*)",
       "Bash(mkdir:*)",
-      "Bash(redis-cli:*)"
+      "Bash(redis-cli:*)",
+      "Bash(rg:*)"
     ],
     "deny": []
   }

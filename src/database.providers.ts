@@ -14,11 +14,11 @@ import { TypeOrmSessionMediaEntity } from './lib/SessionMedia/infrastructure/Typ
 
 export const DatabaseProvider = TypeOrmModule.forRoot({
   type: 'postgres',
-  host: 'localhost',
-  port: 5432,
-  username: 'postgres',
-  password: 'root',
-  database: 'pruebaNest',
+  host: process.env.DATABASE_HOST,
+  port: parseInt(process.env.DATABASE_PORT || '5432'),
+  username: process.env.DATABASE_USER,
+  password: process.env.DATABASE_PASSWORD,
+  database: process.env.DATABASE_NAME,
   entities: [
     TypeOrmSessionsEntity,
     TypeOrmEventLogsEntity,
@@ -33,7 +33,7 @@ export const DatabaseProvider = TypeOrmModule.forRoot({
     AuthDataEntity,
     TypeOrmSessionMediaEntity,
   ],
-  synchronize: true,
+  synchronize: process.env.NODE_ENV !== 'production',
   migrationsRun: true,
   retryAttempts: 2,
   retryDelay: 30000,
