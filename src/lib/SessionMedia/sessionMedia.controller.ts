@@ -11,6 +11,8 @@ import {
   UploadedFile,
   HttpStatus,
   HttpCode,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { SessionMediaCreate, CreateSessionMediaRequest } from './application/SessionMediaCreate';
@@ -22,7 +24,6 @@ import { SessionMediaDelete } from './application/SessionMediaDelete';
 import { FileUploadQueue } from './infrastructure/FileUploadQueue';
 import { FileStorage } from './infrastructure/FileStorage';
 import { UploadFileRequestDto } from './dto/UploadFileRequest.dto';
-import { RedisHealthCheck } from './infrastructure/RedisHealthCheck';
 
 @Controller('session-media')
 export class SessionMediaController {
@@ -35,17 +36,13 @@ export class SessionMediaController {
     private readonly sessionMediaDelete: SessionMediaDelete,
     private readonly fileUploadQueue: FileUploadQueue,
     private readonly fileStorage: FileStorage,
-    private readonly redisHealthCheck: RedisHealthCheck,
   ) {}
 
-  @Get('health/redis')
-  async checkRedisHealth() {
-    return await this.redisHealthCheck.testConnection();
-  }
 
   @Post('upload')
   @HttpCode(HttpStatus.ACCEPTED)
   @UseInterceptors(FileInterceptor('file'))
+  @UsePipes(new ValidationPipe({ transform: true }))
   async uploadFile(
     @UploadedFile() file: Express.Multer.File,
     @Body() uploadRequest: UploadFileRequestDto,
@@ -59,7 +56,6 @@ export class SessionMediaController {
         throw new Error('Session ID is required');
       }
 
-      console.log('Creating session media record...');
       const sessionMedia = await this.sessionMediaCreate.execute({
         sessionId: uploadRequest.sessionId,
         s3Url: '',
@@ -69,13 +65,11 @@ export class SessionMediaController {
         isUploaded: false,
       });
 
-      console.log('Storing temporary file...');
       await this.fileStorage.storeTemporaryFile(
         sessionMedia.getId().toString(),
         file.buffer
       );
 
-      console.log('Adding to upload queue...');
       await this.fileUploadQueue.addFileUpload({
         sessionMediaId: sessionMedia.getId().toString(),
         fileBuffer: file.buffer,
@@ -83,8 +77,6 @@ export class SessionMediaController {
         mediaType: file.mimetype,
         sessionId: uploadRequest.sessionId,
       });
-
-      console.log('File queued successfully');
       return {
         id: sessionMedia.getId().toString(),
         status: 'accepted',

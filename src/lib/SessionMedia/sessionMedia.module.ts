@@ -15,7 +15,6 @@ import { S3UploadService } from './infrastructure/S3UploadService';
 import { FileUploadQueue } from './infrastructure/FileUploadQueue';
 import { FileUploadProcessor } from './infrastructure/FileUploadProcessor';
 import { FileStorage } from './infrastructure/FileStorage';
-import { RedisHealthCheck } from './infrastructure/RedisHealthCheck';
 
 @Module({
   imports: [
@@ -40,7 +39,6 @@ import { RedisHealthCheck } from './infrastructure/RedisHealthCheck';
     FileUploadQueue,
     FileUploadProcessor,
     FileStorage,
-    RedisHealthCheck,
   ],
   exports: [
     'SessionMediaRepository',

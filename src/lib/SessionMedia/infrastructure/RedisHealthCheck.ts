@@ -15,7 +15,6 @@ export class RedisHealthCheck {
         socket: {
           host: 'redis-18736.c99.us-east-1-4.ec2.redns.redis-cloud.com',
           port: 18736,
-          tls: true,
         }
       });
 

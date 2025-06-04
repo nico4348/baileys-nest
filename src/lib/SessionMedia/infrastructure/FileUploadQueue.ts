@@ -13,7 +13,7 @@ export interface FileUploadJob {
 @Injectable()
 export class FileUploadQueue {
   constructor(
-    @InjectQueue('file-upload') private readonly uploadQueue: Queue,
+    @InjectQueue('file-upload') public readonly uploadQueue: Queue,
   ) {}
 
   async addFileUpload(job: FileUploadJob): Promise<void> {

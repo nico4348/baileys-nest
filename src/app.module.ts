@@ -17,17 +17,7 @@ import { SessionMediaModule } from './lib/SessionMedia/sessionMedia.module';
 @Module({
   imports: [
     BullModule.forRoot({
-      redis: {
-        host: 'redis-18736.c99.us-east-1-4.ec2.redns.redis-cloud.com',
-        port: 18736,
-        username: 'default',
-        password: '6gYTbWK4SnusWV06uIGaEzTo2sw5QqyR',
-        connectTimeout: 60000,
-        lazyConnect: true,
-        tls: {
-          rejectUnauthorized: false,
-        },
-      },
+      redis: 'redis://default:6gYTbWK4SnusWV06uIGaEzTo2sw5QqyR@redis-18736.c99.us-east-1-4.ec2.redns.redis-cloud.com:18736',
     }),
     DatabaseProvider,
     SessionsModule,

@@ -21,9 +21,11 @@ export class S3UploadService {
   constructor() {
     const accessKeyId = process.env.AWS_ACCESS_KEY_ID;
     const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
-    
+
     if (!accessKeyId || !secretAccessKey) {
-      throw new Error('AWS credentials are required: AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY');
+      throw new Error(
+        'AWS credentials are required: AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY',
+      );
     }
 
     this.s3Client = new S3Client({
@@ -33,18 +35,34 @@ export class S3UploadService {
         secretAccessKey,
       },
     });
-    this.bucketName = process.env.S3_BUCKET_NAME || 'baileys-nest-media';
+    this.bucketName = process.env.AWS_S3_BUCKET_NAME || 'baileys-nest-media';
   }
 
   async uploadFile(request: S3UploadRequest): Promise<S3UploadResponse> {
     const timestamp = Date.now();
     const s3Key = `session-media/${request.sessionId}/${timestamp}-${request.fileName}`;
-    
+
+    // Ensure we have a proper Buffer
+    let fileBuffer: Buffer;
+    if (Buffer.isBuffer(request.file)) {
+      fileBuffer = request.file;
+    } else if (
+      request.file &&
+      typeof request.file === 'object' &&
+      (request.file as any).type === 'Buffer'
+    ) {
+      // Handle serialized Buffer from Redis
+      fileBuffer = Buffer.from((request.file as any).data);
+    } else {
+      throw new Error('Invalid file data received');
+    }
+
     const command = new PutObjectCommand({
       Bucket: this.bucketName,
       Key: s3Key,
-      Body: request.file,
+      Body: fileBuffer,
       ContentType: request.mediaType,
+      ContentLength: fileBuffer.length,
     });
 
     await this.s3Client.send(command);
