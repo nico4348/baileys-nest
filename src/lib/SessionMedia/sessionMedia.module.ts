@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { BullModule } from '@nestjs/bull';
 import { SessionMediaController } from './sessionMedia.controller';
 import { TypeOrmSessionMediaEntity } from './infrastructure/TypeOrm/TypeOrmSessionMediaEntity';
 import { TypeOrmSessionMediaRepository } from './infrastructure/TypeOrm/TypeOrmSessionMediaRepository';
@@ -10,10 +11,19 @@ import { SessionMediaGetOneById } from './application/SessionMediaGetOneById';
 import { SessionMediaGetBySessionId } from './application/SessionMediaGetBySessionId';
 import { SessionMediaUpdate } from './application/SessionMediaUpdate';
 import { SessionMediaDelete } from './application/SessionMediaDelete';
-import { S3PresignedUrlService } from './infrastructure/S3PresignedUrlService';
+import { S3UploadService } from './infrastructure/S3UploadService';
+import { FileUploadQueue } from './infrastructure/FileUploadQueue';
+import { FileUploadProcessor } from './infrastructure/FileUploadProcessor';
+import { FileStorage } from './infrastructure/FileStorage';
+import { RedisHealthCheck } from './infrastructure/RedisHealthCheck';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([TypeOrmSessionMediaEntity])],
+  imports: [
+    TypeOrmModule.forFeature([TypeOrmSessionMediaEntity]),
+    BullModule.registerQueue({
+      name: 'file-upload',
+    }),
+  ],
   controllers: [SessionMediaController],
   providers: [
     {
@@ -26,7 +36,11 @@ import { S3PresignedUrlService } from './infrastructure/S3PresignedUrlService';
     SessionMediaGetBySessionId,
     SessionMediaUpdate,
     SessionMediaDelete,
-    S3PresignedUrlService,
+    S3UploadService,
+    FileUploadQueue,
+    FileUploadProcessor,
+    FileStorage,
+    RedisHealthCheck,
   ],
   exports: [
     'SessionMediaRepository',
@@ -36,7 +50,9 @@ import { S3PresignedUrlService } from './infrastructure/S3PresignedUrlService';
     SessionMediaGetBySessionId,
     SessionMediaUpdate,
     SessionMediaDelete,
-    S3PresignedUrlService,
+    S3UploadService,
+    FileUploadQueue,
+    FileStorage,
   ],
 })
 export class SessionMediaModule {}

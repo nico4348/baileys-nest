@@ -1,21 +1,20 @@
 import { Injectable } from '@nestjs/common';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
-export interface PresignedUrlRequest {
+export interface S3UploadRequest {
+  file: Buffer;
   fileName: string;
   mediaType: string;
   sessionId: string;
 }
 
-export interface PresignedUrlResponse {
-  uploadUrl: string;
+export interface S3UploadResponse {
   s3Key: string;
   s3Url: string;
 }
 
 @Injectable()
-export class S3PresignedUrlService {
+export class S3UploadService {
   private readonly s3Client: S3Client;
   private readonly bucketName: string;
 
@@ -37,21 +36,21 @@ export class S3PresignedUrlService {
     this.bucketName = process.env.S3_BUCKET_NAME || 'baileys-nest-media';
   }
 
-  async generatePresignedUrl(request: PresignedUrlRequest): Promise<PresignedUrlResponse> {
+  async uploadFile(request: S3UploadRequest): Promise<S3UploadResponse> {
     const timestamp = Date.now();
     const s3Key = `session-media/${request.sessionId}/${timestamp}-${request.fileName}`;
     
     const command = new PutObjectCommand({
       Bucket: this.bucketName,
       Key: s3Key,
+      Body: request.file,
       ContentType: request.mediaType,
     });
 
-    const uploadUrl = await getSignedUrl(this.s3Client, command, { expiresIn: 3600 });
+    await this.s3Client.send(command);
     const s3Url = `https://${this.bucketName}.s3.amazonaws.com/${s3Key}`;
 
     return {
-      uploadUrl,
       s3Key,
       s3Url,
     };

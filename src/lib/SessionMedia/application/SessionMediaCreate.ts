@@ -9,6 +9,7 @@ export interface CreateSessionMediaRequest {
   fileName: string;
   mediaType: string;
   description?: string;
+  isUploaded?: boolean;
 }
 
 @Injectable()
@@ -23,6 +24,7 @@ export class SessionMediaCreate {
       request.fileName,
       request.mediaType,
       request.description,
+      request.isUploaded,
     );
 
     return await this.repository.create(sessionMedia);

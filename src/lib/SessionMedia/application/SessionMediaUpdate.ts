@@ -10,6 +10,7 @@ export interface UpdateSessionMediaRequest {
   fileName?: string;
   mediaType?: string;
   description?: string;
+  isUploaded?: boolean;
 }
 
 @Injectable()
@@ -31,6 +32,7 @@ export class SessionMediaUpdate {
       request.fileName ?? existingSessionMedia.getFileName().toString(),
       request.mediaType ?? existingSessionMedia.getMediaType().toString(),
       request.description ?? existingSessionMedia.getDescription().toString(),
+      request.isUploaded ?? existingSessionMedia.getIsUploaded().toBoolean(),
       existingSessionMedia.getCreatedAt().toDate(),
     );
 

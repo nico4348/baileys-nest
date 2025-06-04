@@ -7,14 +7,22 @@ import {
   Body,
   Param,
   Query,
+  UseInterceptors,
+  UploadedFile,
+  HttpStatus,
+  HttpCode,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { SessionMediaCreate, CreateSessionMediaRequest } from './application/SessionMediaCreate';
 import { SessionMediaGetAll } from './application/SessionMediaGetAll';
 import { SessionMediaGetOneById } from './application/SessionMediaGetOneById';
 import { SessionMediaGetBySessionId } from './application/SessionMediaGetBySessionId';
 import { SessionMediaUpdate, UpdateSessionMediaRequest } from './application/SessionMediaUpdate';
 import { SessionMediaDelete } from './application/SessionMediaDelete';
-import { S3PresignedUrlService, PresignedUrlRequest } from './infrastructure/S3PresignedUrlService';
+import { FileUploadQueue } from './infrastructure/FileUploadQueue';
+import { FileStorage } from './infrastructure/FileStorage';
+import { UploadFileRequestDto } from './dto/UploadFileRequest.dto';
+import { RedisHealthCheck } from './infrastructure/RedisHealthCheck';
 
 @Controller('session-media')
 export class SessionMediaController {
@@ -25,12 +33,67 @@ export class SessionMediaController {
     private readonly sessionMediaGetBySessionId: SessionMediaGetBySessionId,
     private readonly sessionMediaUpdate: SessionMediaUpdate,
     private readonly sessionMediaDelete: SessionMediaDelete,
-    private readonly s3PresignedUrlService: S3PresignedUrlService,
+    private readonly fileUploadQueue: FileUploadQueue,
+    private readonly fileStorage: FileStorage,
+    private readonly redisHealthCheck: RedisHealthCheck,
   ) {}
 
-  @Post('presigned-url')
-  async generatePresignedUrl(@Body() request: PresignedUrlRequest) {
-    return await this.s3PresignedUrlService.generatePresignedUrl(request);
+  @Get('health/redis')
+  async checkRedisHealth() {
+    return await this.redisHealthCheck.testConnection();
+  }
+
+  @Post('upload')
+  @HttpCode(HttpStatus.ACCEPTED)
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadFile(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() uploadRequest: UploadFileRequestDto,
+  ) {
+    try {
+      if (!file) {
+        throw new Error('No file provided');
+      }
+
+      if (!uploadRequest.sessionId) {
+        throw new Error('Session ID is required');
+      }
+
+      console.log('Creating session media record...');
+      const sessionMedia = await this.sessionMediaCreate.execute({
+        sessionId: uploadRequest.sessionId,
+        s3Url: '',
+        fileName: file.originalname,
+        mediaType: file.mimetype,
+        description: uploadRequest.description,
+        isUploaded: false,
+      });
+
+      console.log('Storing temporary file...');
+      await this.fileStorage.storeTemporaryFile(
+        sessionMedia.getId().toString(),
+        file.buffer
+      );
+
+      console.log('Adding to upload queue...');
+      await this.fileUploadQueue.addFileUpload({
+        sessionMediaId: sessionMedia.getId().toString(),
+        fileBuffer: file.buffer,
+        fileName: file.originalname,
+        mediaType: file.mimetype,
+        sessionId: uploadRequest.sessionId,
+      });
+
+      console.log('File queued successfully');
+      return {
+        id: sessionMedia.getId().toString(),
+        status: 'accepted',
+        message: 'File queued for upload',
+      };
+    } catch (error) {
+      console.error('Error in upload endpoint:', error);
+      throw error;
+    }
   }
 
   @Post()
@@ -43,6 +106,7 @@ export class SessionMediaController {
       fileName: sessionMedia.getFileName().toString(),
       mediaType: sessionMedia.getMediaType().toString(),
       description: sessionMedia.getDescription().toString(),
+      isUploaded: sessionMedia.getIsUploaded().toBoolean(),
       createdAt: sessionMedia.getCreatedAt().toDate(),
     };
   }
@@ -70,6 +134,7 @@ export class SessionMediaController {
       fileName: sessionMedia.getFileName().toString(),
       mediaType: sessionMedia.getMediaType().toString(),
       description: sessionMedia.getDescription().toString(),
+      isUploaded: sessionMedia.getIsUploaded().toBoolean(),
       createdAt: sessionMedia.getCreatedAt().toDate(),
     }));
   }
@@ -84,6 +149,7 @@ export class SessionMediaController {
       fileName: sessionMedia.getFileName().toString(),
       mediaType: sessionMedia.getMediaType().toString(),
       description: sessionMedia.getDescription().toString(),
+      isUploaded: sessionMedia.getIsUploaded().toBoolean(),
       createdAt: sessionMedia.getCreatedAt().toDate(),
     };
   }
@@ -98,6 +164,7 @@ export class SessionMediaController {
       fileName: sessionMedia.getFileName().toString(),
       mediaType: sessionMedia.getMediaType().toString(),
       description: sessionMedia.getDescription().toString(),
+      isUploaded: sessionMedia.getIsUploaded().toBoolean(),
       createdAt: sessionMedia.getCreatedAt().toDate(),
     };
   }

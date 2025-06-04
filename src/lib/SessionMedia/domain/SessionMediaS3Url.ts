@@ -1,8 +1,6 @@
 export class SessionMediaS3Url {
   constructor(private readonly value: string) {
-    if (!value || value.trim().length === 0) {
-      throw new Error('SessionMediaS3Url cannot be empty');
-    }
+    // Allow empty S3 URL for pending uploads
   }
 
   toString(): string {

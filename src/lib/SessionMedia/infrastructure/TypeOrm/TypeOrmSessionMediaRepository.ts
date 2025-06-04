@@ -58,6 +58,7 @@ export class TypeOrmSessionMediaRepository implements SessionMediaRepository {
       entity.fileName,
       entity.mediaType,
       entity.description,
+      entity.isUploaded,
       entity.createdAt,
     );
   }
@@ -70,6 +71,7 @@ export class TypeOrmSessionMediaRepository implements SessionMediaRepository {
     entity.fileName = sessionMedia.getFileName().toString();
     entity.mediaType = sessionMedia.getMediaType().toString();
     entity.description = sessionMedia.getDescription().toString();
+    entity.isUploaded = sessionMedia.getIsUploaded().toBoolean();
     entity.createdAt = sessionMedia.getCreatedAt().toDate();
     return entity;
   }

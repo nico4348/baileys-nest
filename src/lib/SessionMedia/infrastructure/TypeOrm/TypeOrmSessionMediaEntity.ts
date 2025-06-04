@@ -20,6 +20,9 @@ export class TypeOrmSessionMediaEntity {
   @Column({ name: 'description', type: 'varchar', length: 4096, nullable: true })
   description: string;
 
+  @Column({ name: 'is_uploaded', type: 'boolean', default: false })
+  isUploaded: boolean;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 }
