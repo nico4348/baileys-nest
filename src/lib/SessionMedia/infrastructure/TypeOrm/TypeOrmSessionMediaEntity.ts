@@ -1,4 +1,5 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { TypeOrmSessionsEntity } from '../../../Sessions/infrastructure/TypeOrm/TypeOrmSessionsEntity';
 
 @Entity('session_media')
 export class TypeOrmSessionMediaEntity {
@@ -7,6 +8,10 @@ export class TypeOrmSessionMediaEntity {
 
   @Column({ name: 'session_id', type: 'uuid' })
   sessionId: string;
+
+  @ManyToOne(() => TypeOrmSessionsEntity, (session) => session.sessionMedia)
+  @JoinColumn({ name: 'session_id' })
+  session: TypeOrmSessionsEntity;
 
   @Column({ name: 's3_url', type: 'text' })
   s3Url: string;

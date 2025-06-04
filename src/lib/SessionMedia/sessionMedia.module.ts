@@ -1,10 +1,11 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { BullModule } from '@nestjs/bull';
+import { BullModule } from '@nestjs/bullmq';
+import { BullBoardModule } from '@bull-board/nestjs';
+import { BullMQAdapter } from '@bull-board/api/bullMQAdapter';
 import { SessionMediaController } from './sessionMedia.controller';
 import { TypeOrmSessionMediaEntity } from './infrastructure/TypeOrm/TypeOrmSessionMediaEntity';
 import { TypeOrmSessionMediaRepository } from './infrastructure/TypeOrm/TypeOrmSessionMediaRepository';
-import { SessionMediaRepository } from './domain/SessionMediaRepository';
 import { SessionMediaCreate } from './application/SessionMediaCreate';
 import { SessionMediaGetAll } from './application/SessionMediaGetAll';
 import { SessionMediaGetOneById } from './application/SessionMediaGetOneById';
@@ -21,6 +22,10 @@ import { FileStorage } from './infrastructure/FileStorage';
     TypeOrmModule.forFeature([TypeOrmSessionMediaEntity]),
     BullModule.registerQueue({
       name: 'file-upload',
+    }),
+    BullBoardModule.forFeature({
+      name: 'file-upload',
+      adapter: BullMQAdapter,
     }),
   ],
   controllers: [SessionMediaController],

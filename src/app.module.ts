@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
-import { BullModule } from '@nestjs/bull';
+import { BullModule } from '@nestjs/bullmq';
+import { BullBoardModule } from '@bull-board/nestjs';
+import { ExpressAdapter } from '@bull-board/express';
 import { DatabaseProvider } from './database.providers';
 import { SessionsModule } from './lib/Sessions/sessions.module';
 import { AuthModule } from './lib/AuthState/authState.module';
@@ -17,12 +19,18 @@ import { SessionMediaModule } from './lib/SessionMedia/sessionMedia.module';
 @Module({
   imports: [
     BullModule.forRoot({
-      redis: process.env.REDIS_URL || {
+      connection: process.env.REDIS_URL ? {
+        url: process.env.REDIS_URL,
+      } : {
         host: process.env.REDIS_HOST || 'localhost',
-        port: parseInt(process.env.REDIS_PORT || '6379') || 6379,
+        port: parseInt(process.env.REDIS_PORT || '6379'),
         username: process.env.REDIS_USERNAME || 'default',
         password: process.env.REDIS_PASSWORD,
       },
+    }),
+    BullBoardModule.forRoot({
+      route: '/admin/queues',
+      adapter: ExpressAdapter,
     }),
     DatabaseProvider,
     SessionsModule,

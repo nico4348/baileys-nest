@@ -11,14 +11,26 @@ import { TypeOrmMessageStatusEntity } from './lib/MessageStatus/infrastructure/T
 import { TypeOrmSessionLogsEntity } from './lib/SessionLogs/infrastructure/TypeOrm/TypeOrmSessionLogsEntity';
 import { AuthDataEntity } from './lib/AuthState/infrastructure/TypeOrm/AuthDataEntity';
 import { TypeOrmSessionMediaEntity } from './lib/SessionMedia/infrastructure/TypeOrm/TypeOrmSessionMediaEntity';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
+
+const dbConfig = {
+  host: process.env.DATABASE_HOST || 'localhost',
+  port: parseInt(process.env.DATABASE_PORT || '5432'),
+  username: process.env.DATABASE_USER || 'postgres',
+  password: process.env.DATABASE_PASSWORD || '',
+  database: process.env.DATABASE_NAME || 'baileys',
+};
+
+// Validate only critical variables
+if (!dbConfig.host || !dbConfig.username || !dbConfig.database) {
+  throw new Error('Missing critical database configuration');
+}
 
 export const DatabaseProvider = TypeOrmModule.forRoot({
   type: 'postgres',
-  host: process.env.DATABASE_HOST,
-  port: parseInt(process.env.DATABASE_PORT || '5432'),
-  username: process.env.DATABASE_USER,
-  password: process.env.DATABASE_PASSWORD,
-  database: process.env.DATABASE_NAME,
+  ...dbConfig,
   entities: [
     TypeOrmSessionsEntity,
     TypeOrmEventLogsEntity,

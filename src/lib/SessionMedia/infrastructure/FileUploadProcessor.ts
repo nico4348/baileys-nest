@@ -1,39 +1,42 @@
-import { Process, Processor, OnQueueActive, OnQueueCompleted, OnQueueFailed } from '@nestjs/bull';
+import { Processor, WorkerHost, OnWorkerEvent } from '@nestjs/bullmq';
 import { Injectable, Inject, Logger } from '@nestjs/common';
-import { Job } from 'bull';
+import { Job } from 'bullmq';
 import { FileUploadJob } from './FileUploadQueue';
 import { S3UploadService } from './S3UploadService';
 import { SessionMediaRepository } from '../domain/SessionMediaRepository';
 import { SessionMediaId } from '../domain/SessionMediaId';
+import { FileStorage } from './FileStorage';
 
-@Injectable()
 @Processor('file-upload')
-export class FileUploadProcessor {
+export class FileUploadProcessor extends WorkerHost {
   private readonly logger = new Logger(FileUploadProcessor.name);
 
   constructor(
     private readonly s3UploadService: S3UploadService,
     @Inject('SessionMediaRepository') 
     private readonly sessionMediaRepository: SessionMediaRepository,
-  ) {}
+    private readonly fileStorage: FileStorage,
+  ) {
+    super();
+  }
 
-  @OnQueueActive()
+  @OnWorkerEvent('active')
   onActive(job: Job) {
     this.logger.log(`Processing job ${job.id} of type ${job.name}`);
   }
 
-  @OnQueueCompleted()
+  @OnWorkerEvent('completed')
   onComplete(job: Job) {
     this.logger.log(`Completed job ${job.id} of type ${job.name}`);
   }
 
-  @OnQueueFailed()
+  @OnWorkerEvent('failed')
   onError(job: Job, error: any) {
     this.logger.error(`Failed job ${job.id} of type ${job.name}: ${error.message}`);
   }
 
-  @Process('upload-to-s3')
-  async handleFileUpload(job: Job<FileUploadJob>): Promise<void> {
+  async process(job: Job<FileUploadJob>): Promise<void> {
+    if (job.name !== 'upload-to-s3') return;
     const { sessionMediaId, fileBuffer, fileName, mediaType, sessionId } = job.data;
     
     try {
@@ -54,11 +57,17 @@ export class FileUploadProcessor {
           .markAsUploaded();
 
         await this.sessionMediaRepository.update(updatedSessionMedia);
+        
+        // Clean up temporary file after successful upload
+        await this.fileStorage.deleteTemporaryFile(sessionMediaId);
+        this.logger.log(`Temporary file cleaned up for ${sessionMediaId}`);
       } else {
         throw new Error(`SessionMedia with ID ${sessionMediaId} not found`);
       }
     } catch (error) {
       this.logger.error(`Failed to upload file ${fileName}: ${error.message}`);
+      // Clean up temporary file even on failure to prevent disk space issues
+      await this.fileStorage.deleteTemporaryFile(sessionMediaId);
       throw error;
     }
   }
