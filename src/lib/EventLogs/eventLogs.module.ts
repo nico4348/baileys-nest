@@ -1,5 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { BullModule } from '@nestjs/bullmq';
+import { BullBoardModule } from '@bull-board/nestjs';
+import { BullMQAdapter } from '@bull-board/api/bullMQAdapter';
 import { EventLogsController } from './eventLogs.controller';
 import { TypeOrmEventLogsEntity } from './infrastructure/TypeOrm/TypeOrmEventLogsEntity';
 import { TypeOrmEventLogsRepository } from './infrastructure/TypeOrm/TypeOrmEventLogsRepository';
@@ -10,9 +13,20 @@ import { EventLogsGetBySessionId } from './application/EventLogsGetBySessionId';
 import { EventLogsGetByEventId } from './application/EventLogsGetByEventId';
 import { EventLogsUpdate } from './application/EventLogsUpdate';
 import { EventLogsDelete } from './application/EventLogsDelete';
+import { EventLoggingQueue } from './infrastructure/EventLoggingQueue';
+import { EventLoggingProcessor } from './infrastructure/EventLoggingProcessor';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([TypeOrmEventLogsEntity])],
+  imports: [
+    TypeOrmModule.forFeature([TypeOrmEventLogsEntity]),
+    BullModule.registerQueue({
+      name: 'event-logging',
+    }),
+    BullBoardModule.forFeature({
+      name: 'event-logging',
+      adapter: BullMQAdapter,
+    }),
+  ],
   controllers: [EventLogsController],
   providers: [
     {
@@ -61,7 +75,9 @@ import { EventLogsDelete } from './application/EventLogsDelete';
         new EventLogsDelete(repository),
       inject: ['EventLogRepository'],
     },
+    EventLoggingQueue,
+    EventLoggingProcessor,
   ],
-  exports: ['EventLogRepository', 'EventLogsCreate'],
+  exports: ['EventLogRepository', 'EventLogsCreate', EventLoggingQueue],
 })
 export class EventLogsModule {}

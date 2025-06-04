@@ -1,5 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { BullModule } from '@nestjs/bullmq';
+import { BullBoardModule } from '@bull-board/nestjs';
+import { BullMQAdapter } from '@bull-board/api/bullMQAdapter';
 import { TypeOrmMessageStatusEntity } from './infrastructure/TypeOrm/TypeOrmMessageStatusEntity';
 import { TypeOrmMessageStatusRepository } from './infrastructure/TypeOrm/TypeOrmMessageStatusRepository';
 import { MessageStatusCreate } from './application/MessageStatusCreate';
@@ -18,6 +21,8 @@ import { StatusModule } from '../Status/status.module';
 import { MessagesGetByBaileysId } from '../Messages/application/MessagesGetByBaileysId';
 import { TypeOrmMessagesEntity } from '../Messages/infrastructure/TypeOrm/TypeOrmMessagesEntity';
 import { TypeOrmMessagesRepository } from '../Messages/infrastructure/TypeOrm/TypeOrmMessagesRepository';
+import { MessageStatusQueue } from './infrastructure/MessageStatusQueue';
+import { MessageStatusProcessor } from './infrastructure/MessageStatusProcessor';
 
 @Module({
   imports: [
@@ -25,6 +30,13 @@ import { TypeOrmMessagesRepository } from '../Messages/infrastructure/TypeOrm/Ty
       TypeOrmMessageStatusEntity,
       TypeOrmMessagesEntity,
     ]),
+    BullModule.registerQueue({
+      name: 'message-status-updates',
+    }),
+    BullBoardModule.forFeature({
+      name: 'message-status-updates',
+      adapter: BullMQAdapter,
+    }),
     StatusModule,
   ],
   controllers: [MessageStatusController],
@@ -54,6 +66,8 @@ import { TypeOrmMessagesRepository } from '../Messages/infrastructure/TypeOrm/Ty
       inject: ['MessageRepository'],
     },
     MessageStatusTracker,
+    MessageStatusQueue,
+    MessageStatusProcessor,
   ],
   exports: [
     'MessageStatusRepository',
@@ -68,6 +82,7 @@ import { TypeOrmMessagesRepository } from '../Messages/infrastructure/TypeOrm/Ty
     MessageStatusDelete,
     BaileysStatusMapper,
     MessageStatusTracker,
+    MessageStatusQueue,
   ],
 })
 export class MessageStatusModule {}

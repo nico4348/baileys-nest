@@ -41,25 +41,20 @@ export class MessagesHandleIncoming {
   ) {}
 
   async handleIncomingMessages(sessionId: string, messages: any[], socket?: any): Promise<void> {
-    console.log(`🔄 [MessagesHandleIncoming] Processing ${messages.length} messages for session: ${sessionId}`);
+    console.log(`📩 [${sessionId}] Processing ${messages.length} messages`);
     
     for (const message of messages) {
       try {
-        console.log(`📩 [MessagesHandleIncoming] Processing message ID: ${message.key?.id} from: ${message.key?.remoteJid}`);
         await this.processIncomingMessage(sessionId, message, socket);
       } catch (error) {
-        console.error(`❌ [MessagesHandleIncoming] Error processing incoming message: ${error.message}`, error);
+        console.error(`❌ [${sessionId}] Error processing message ${message.key?.id}: ${error.message}`);
       }
     }
   }
 
   private async processIncomingMessage(sessionId: string, baileysMessage: any, socket?: any): Promise<void> {
-    console.log(`🔍 [MessagesHandleIncoming] Processing message from session: ${sessionId}`);
-    console.log(`🔍 [MessagesHandleIncoming] Message data:`, JSON.stringify(baileysMessage, null, 2));
-    
     // Skip if message is from me (outgoing messages are handled elsewhere)
     if (baileysMessage.key?.fromMe) {
-      console.log(`⏭️ [MessagesHandleIncoming] Skipping outgoing message: ${baileysMessage.key?.id}`);
       return;
     }
 
@@ -67,8 +62,6 @@ export class MessagesHandleIncoming {
     const messageType = this.determineMessageType(baileysMessage);
     const to = this.extractTo(baileysMessage);
     const quotedMessageId = await this.extractQuotedMessageId(baileysMessage);
-
-    console.log(`📝 [MessagesHandleIncoming] Message details - UUID: ${uuid}, Type: ${messageType}, To: ${to}`);
 
     // Create main message record with fromMe = false
     await this.messagesCreate.run(
@@ -82,22 +75,16 @@ export class MessagesHandleIncoming {
       new Date(),
     );
 
-    console.log(`✅ [MessagesHandleIncoming] Main message record created with UUID: ${uuid}`);
-
     // Create specific message type record
     await this.createSpecificMessageType(uuid, messageType, baileysMessage, sessionId, socket);
   }
 
   private determineMessageType(message: any): 'txt' | 'media' | 'react' {
-    console.log(`🔍 [MessagesHandleIncoming] Determining message type for message:`, message.message);
-    
     if (message.message?.reactionMessage) {
-      console.log(`💕 [MessagesHandleIncoming] Detected REACTION message`);
       return 'react';
     }
     
     if (message.message?.conversation || message.message?.extendedTextMessage) {
-      console.log(`💬 [MessagesHandleIncoming] Detected TEXT message`);
       return 'txt';
     }
     
@@ -109,18 +96,9 @@ export class MessagesHandleIncoming {
       message.message?.documentMessage ||
       message.message?.stickerMessage
     ) {
-      console.log(`📷 [MessagesHandleIncoming] Detected MEDIA message`);
-      console.log(`📷 [MessagesHandleIncoming] Media types present:`, {
-        image: !!message.message?.imageMessage,
-        video: !!message.message?.videoMessage,
-        audio: !!message.message?.audioMessage,
-        document: !!message.message?.documentMessage,
-        sticker: !!message.message?.stickerMessage
-      });
       return 'media';
     }
 
-    console.log(`❓ [MessagesHandleIncoming] Unknown message type, defaulting to TEXT`);
     // Default to text if unable to determine
     return 'txt';
   }

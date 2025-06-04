@@ -252,6 +252,7 @@ import { EventSeeder } from '../Events/infrastructure/EventSeeder';
         eventLogger: BaileysEventLogger,
         messageStatusTracker: MessageStatusTracker,
         messagesHandleIncoming: any,
+        incomingMessageQueue: any,
       ) =>
         new WhatsAppSessionManager(
           authStateFactory,
@@ -267,6 +268,7 @@ import { EventSeeder } from '../Events/infrastructure/EventSeeder';
           eventLogger,
           messageStatusTracker,
           messagesHandleIncoming,
+          incomingMessageQueue,
         ),
       inject: [
         'AuthStateFactory',
@@ -282,6 +284,7 @@ import { EventSeeder } from '../Events/infrastructure/EventSeeder';
         BaileysEventLogger,
         MessageStatusTracker,
         'MessagesHandleIncoming',
+        'IncomingMessageQueue',
       ],
     },
     // Baileys Event Logger

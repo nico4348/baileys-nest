@@ -1,5 +1,8 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { BullModule } from '@nestjs/bullmq';
+import { BullBoardModule } from '@bull-board/nestjs';
+import { BullMQAdapter } from '@bull-board/api/bullMQAdapter';
 import { MessagesController } from './messages.controller';
 import { TypeOrmMessagesEntity } from './infrastructure/TypeOrm/TypeOrmMessagesEntity';
 import { TypeOrmMessagesRepository } from './infrastructure/TypeOrm/TypeOrmMessagesRepository';
@@ -22,18 +25,36 @@ import { TextMessagesModule } from '../TextMessages/textMessages.module';
 import { MediaMessagesModule } from '../MediaMessages/mediaMessages.module';
 import { ReactionMessagesModule } from '../ReactionMessages/reactionMessages.module';
 import { MessageStatusModule } from '../MessageStatus/messageStatus.module';
+import { EventLogsModule } from '../EventLogs/eventLogs.module';
 import { MessageStatusTrackSentMessage } from '../MessageStatus/application/MessageStatusTrackSentMessage';
 import { MessageStatusCreateMessageReceipt } from '../MessageStatus/application/MessageStatusCreateMessageReceipt';
 import { MessageStatusCreateValidated } from '../MessageStatus/application/MessageStatusCreateValidated';
+import { OutgoingMessageQueue } from './infrastructure/OutgoingMessageQueue';
+import { OutgoingMessageProcessor } from './infrastructure/OutgoingMessageProcessor';
+import { IncomingMessageQueue } from './infrastructure/IncomingMessageQueue';
+import { IncomingMessageProcessor } from './infrastructure/IncomingMessageProcessor';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([TypeOrmMessagesEntity]),
+    BullModule.registerQueue(
+      { name: 'outgoing-messages' },
+      { name: 'incoming-messages' },
+    ),
+    BullBoardModule.forFeature({
+      name: 'outgoing-messages',
+      adapter: BullMQAdapter,
+    }),
+    BullBoardModule.forFeature({
+      name: 'incoming-messages',
+      adapter: BullMQAdapter,
+    }),
     forwardRef(() => SessionsModule),
     TextMessagesModule,
     MediaMessagesModule,
     ReactionMessagesModule,
     MessageStatusModule,
+    EventLogsModule,
   ],
   controllers: [MessagesController],
   providers: [
@@ -183,6 +204,14 @@ import { MessageStatusCreateValidated } from '../MessageStatus/application/Messa
         'ReactionMessageHandler',
       ],
     },
+    OutgoingMessageQueue,
+    OutgoingMessageProcessor,
+    IncomingMessageQueue,
+    IncomingMessageProcessor,
+    {
+      provide: 'IncomingMessageQueue',
+      useExisting: IncomingMessageQueue,
+    },
   ],
   exports: [
     'MessageRepository',
@@ -192,6 +221,9 @@ import { MessageStatusCreateValidated } from '../MessageStatus/application/Messa
     'MessagesOrchestrator',
     'MessagesHandleIncoming',
     'SendMessage',
+    OutgoingMessageQueue,
+    IncomingMessageQueue,
+    'IncomingMessageQueue',
   ],
 })
 export class MessagesModule {}

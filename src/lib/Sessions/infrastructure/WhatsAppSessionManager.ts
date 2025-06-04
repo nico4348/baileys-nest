@@ -15,6 +15,7 @@ import { ISessionLogger } from './interfaces/ISessionLogger';
 import { BaileysEventLogger } from '../../EventLogs/infrastructure/BaileysEventLogger';
 import { MessageStatusTracker } from '../../MessageStatus/infrastructure/MessageStatusTracker';
 import { MessagesHandleIncoming } from '../../Messages/application/MessagesHandleIncoming';
+import { IncomingMessageQueue } from '../../Messages/infrastructure/IncomingMessageQueue';
 
 @Injectable()
 export class WhatsAppSessionManager
@@ -39,6 +40,7 @@ export class WhatsAppSessionManager
     private readonly messageStatusTracker: MessageStatusTracker,
     @Inject('MessagesHandleIncoming')
     private readonly messagesHandleIncoming: MessagesHandleIncoming,
+    private readonly incomingMessageQueue: IncomingMessageQueue,
   ) {}
   onModuleInit(): void {
     // No longer needed - circular dependency resolved through orchestration service
@@ -58,6 +60,7 @@ export class WhatsAppSessionManager
       this.eventLogger,
       this.messageStatusTracker,
       this.messagesHandleIncoming,
+      this.incomingMessageQueue,
     );
 
     this.sessionQrService.setSocketFactory(sessionId, socketFactory);
@@ -82,6 +85,7 @@ export class WhatsAppSessionManager
         this.eventLogger,
         this.messageStatusTracker,
         this.messagesHandleIncoming,
+        this.incomingMessageQueue,
       );
 
       this.sessionQrService.setSocketFactory(sessionId, socketFactory);

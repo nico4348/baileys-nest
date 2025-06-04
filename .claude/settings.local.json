@@ -18,7 +18,8 @@
       "Bash(redis-cli:*)",
       "Bash(rg:*)",
       "Bash(ls:*)",
-      "Bash(npm uninstall:*)"
+      "Bash(npm uninstall:*)",
+      "Bash(npm run start:*)"
     ],
     "deny": []
   }

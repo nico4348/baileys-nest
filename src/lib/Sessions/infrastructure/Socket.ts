@@ -13,6 +13,7 @@ import { ISessionStateManager } from './interfaces/ISessionStateManager';
 import { IBaileysEventLogger } from '../../EventLogs/infrastructure/BaileysEventLogger';
 import { MessageStatusTracker } from '../../MessageStatus/infrastructure/MessageStatusTracker';
 import { MessagesHandleIncoming } from '../../Messages/application/MessagesHandleIncoming';
+import { IncomingMessageQueue } from '../../Messages/infrastructure/IncomingMessageQueue';
 
 export class WhatsAppSocketFactory implements ISocketFactory {
   constructor(
@@ -23,6 +24,7 @@ export class WhatsAppSocketFactory implements ISocketFactory {
     private readonly eventLogger: IBaileysEventLogger,
     private readonly messageStatusTracker?: MessageStatusTracker,
     private readonly messagesHandleIncoming?: MessagesHandleIncoming,
+    private readonly incomingMessageQueue?: IncomingMessageQueue,
     private readonly logger: any = pino({ level: 'silent' }),
     private readonly retryCache: any = undefined,
   ) {}
@@ -58,9 +60,7 @@ export class WhatsAppSocketFactory implements ISocketFactory {
     });
 
     socket.ev.process(async (events) => {
-      console.log(`🚀 [Socket] Processing events for session ${sessionId}:`, Object.keys(events));
-      
-      // Log all events to EventLogs
+      // Log all events to EventLogs (silent)
       for (const eventName of Object.keys(events)) {
         await this.eventLogger.logEvent(sessionId, eventName);
       }
@@ -92,27 +92,72 @@ export class WhatsAppSocketFactory implements ISocketFactory {
 
       // Handle other Baileys events
       if (events['messages.upsert']) {
-        console.log(`📨 [Socket] messages.upsert event received for session ${sessionId}`);
-        console.log(`📨 [Socket] Messages count: ${events['messages.upsert'].messages?.length || 0}`);
-        console.log(`📨 [Socket] Messages data:`, JSON.stringify(events['messages.upsert'].messages, null, 2));
-        
-        // Handle incoming messages
-        if (this.messagesHandleIncoming && events['messages.upsert'].messages) {
-          console.log(`📨 [Socket] Calling messagesHandleIncoming.handleIncomingMessages`);
+        // Queue incoming messages for async processing
+        if (this.incomingMessageQueue && events['messages.upsert'].messages) {
+          const incomingMessages = events['messages.upsert'].messages.filter(
+            (msg) => !msg.key?.fromMe,
+          );
+
+          if (incomingMessages.length > 0) {
+            console.log(
+              `📨 [${sessionId}] Queueing ${incomingMessages.length} incoming messages`,
+            );
+          }
+
+          for (const message of incomingMessages) {
+            const messageType = this.determineMessageType(message);
+            const processingFlags = this.getProcessingFlags(
+              message,
+              messageType,
+            );
+
+            await this.incomingMessageQueue.addIncomingMessage({
+              sessionId,
+              messageData: {
+                baileysId: message.key?.id || `msg_${Date.now()}`,
+                from:
+                  message.key?.remoteJid?.replace('@s.whatsapp.net', '') ||
+                  'unknown',
+                to: sessionId,
+                messageType,
+                baileysJson: message,
+                quotedMessageId:
+                  this.extractQuotedMessageId(message) || undefined,
+                timestamp: new Date(
+                  (Number(message.messageTimestamp) ||
+                    Math.floor(Date.now() / 1000)) * 1000,
+                ),
+              },
+              messageContent: this.extractMessageContent(message, messageType),
+              priority: processingFlags.requiresNotification
+                ? 'high'
+                : 'normal',
+              processingFlags,
+            });
+          }
+        } else if (
+          this.messagesHandleIncoming &&
+          events['messages.upsert'].messages
+        ) {
+          // Fallback to direct processing if queue is not available
+          console.log(
+            `⚠️ [${sessionId}] Queue unavailable, using direct processing`,
+          );
           await this.messagesHandleIncoming.handleIncomingMessages(
             sessionId,
             events['messages.upsert'].messages,
-            socket // Pass the socket for media download
+            socket,
           );
-        } else {
-          console.log(`⚠️ [Socket] messagesHandleIncoming not available or no messages to process`);
         }
       }
 
       if (events['messages.update']) {
         // Track message status updates
         if (this.messageStatusTracker) {
-          await this.messageStatusTracker.handleMessagesUpdate(sessionId, events['messages.update']);
+          await this.messageStatusTracker.handleMessagesUpdate(
+            sessionId,
+            events['messages.update'],
+          );
         }
       }
 
@@ -134,6 +179,100 @@ export class WhatsAppSocketFactory implements ISocketFactory {
     });
 
     return socket;
+  }
+
+  private determineMessageType(message: any): string {
+    if (message.message?.reactionMessage) {
+      return 'react';
+    }
+
+    if (message.message?.conversation || message.message?.extendedTextMessage) {
+      return 'txt';
+    }
+
+    if (
+      message.message?.imageMessage ||
+      message.message?.videoMessage ||
+      message.message?.audioMessage ||
+      message.message?.documentMessage ||
+      message.message?.stickerMessage
+    ) {
+      return 'media';
+    }
+
+    return 'txt'; // Default to text
+  }
+
+  private getProcessingFlags(message: any, messageType: string) {
+    const isGroupMessage = message.key?.remoteJid?.endsWith('@g.us') || false;
+    const needsMediaDownload = messageType === 'media';
+
+    return {
+      needsMediaDownload,
+      needsS3Upload: needsMediaDownload,
+      isGroupMessage,
+      requiresNotification: !isGroupMessage, // Only notify for direct messages
+    };
+  }
+
+  private extractQuotedMessageId(message: any): string | null {
+    // For text messages with quotes
+    if (message.message?.extendedTextMessage?.contextInfo?.quotedMessage) {
+      return message.message.extendedTextMessage.contextInfo.stanzaId || null;
+    }
+
+    // For other message types with quotes
+    if (message.message?.contextInfo?.quotedMessage) {
+      return message.message.contextInfo.stanzaId || null;
+    }
+
+    return null;
+  }
+
+  private extractMessageContent(message: any, messageType: string) {
+    switch (messageType) {
+      case 'txt':
+        return {
+          text:
+            message.message?.conversation ||
+            message.message?.extendedTextMessage?.text ||
+            '',
+        };
+
+      case 'media':
+        const mediaMsg =
+          message.message?.imageMessage ||
+          message.message?.videoMessage ||
+          message.message?.audioMessage ||
+          message.message?.documentMessage ||
+          message.message?.stickerMessage;
+
+        return {
+          mediaType: this.getMediaType(message.message),
+          caption: mediaMsg?.caption || null,
+          fileName: mediaMsg?.fileName || `media_${Date.now()}`,
+          mimeType: mediaMsg?.mimetype || 'application/octet-stream',
+        };
+
+      case 'react':
+        const reactionMsg = message.message?.reactionMessage;
+        return {
+          emoji: reactionMsg?.text || '',
+          targetMessageId: reactionMsg?.key?.id || '',
+        };
+
+      default:
+        return {};
+    }
+  }
+
+  private getMediaType(messageContent: any): string {
+    if (messageContent.imageMessage) return 'image';
+    if (messageContent.videoMessage) return 'video';
+    if (messageContent.audioMessage) return 'audio';
+    if (messageContent.documentMessage) return 'document';
+    if (messageContent.stickerMessage) return 'sticker';
+    return 'unknown';
   }
 }
 

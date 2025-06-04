@@ -28,6 +28,14 @@ import { SessionMediaModule } from './lib/SessionMedia/sessionMedia.module';
         password: process.env.REDIS_PASSWORD,
       },
     }),
+    // Register all queues for the application
+    BullModule.registerQueue(
+      { name: 'message-status-updates' },
+      { name: 'outgoing-messages' },
+      { name: 'incoming-messages' },
+      { name: 'event-logging' },
+      { name: 'file-upload' }, // Existing queue
+    ),
     BullBoardModule.forRoot({
       route: '/admin/queues',
       adapter: ExpressAdapter,
