@@ -355,13 +355,20 @@ export class OutgoingMessageProcessor extends WorkerHost {
       targetMessageId,
     });
 
-    // For reactions, we need the target message key - this should be improved
+    // Get the Baileys key for the target message using UUID lookup
+    let targetMessageKey: any;
+    try {
+      const targetMessageData = await this.messagesOrchestrator.getMessageBaileysObject(targetMessageId);
+      targetMessageKey = targetMessageData.key;
+      console.log(`📝 [OutgoingProcessor] Found Baileys key for target message UUID: ${targetMessageId}`);
+    } catch (lookupError) {
+      console.error(`📝 [OutgoingProcessor] Could not find target message with UUID: ${targetMessageId}`, lookupError.message);
+      throw new Error(`Target message with UUID ${targetMessageId} not found`);
+    }
+
     const payload = {
-      key: {
-        id: targetMessageId, // This should be the actual message key from the target message
-        remoteJid: to,
-      },
-      text: content, // emoji
+      key: targetMessageKey,
+      emoji: content,
     };
 
     // Send reaction through Baileys

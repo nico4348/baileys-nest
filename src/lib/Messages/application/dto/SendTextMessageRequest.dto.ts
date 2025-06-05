@@ -25,6 +25,7 @@ export class SendTextMessageRequest {
 
   @IsOptional()
   @IsString()
+  @IsUUID()
   quotedMessageId?: string;
 
   @ValidateNested()

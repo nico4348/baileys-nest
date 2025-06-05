@@ -15,7 +15,6 @@ import { MessagesUpdate } from './application/MessagesUpdate';
 import { MessagesDelete } from './application/MessagesDelete';
 import { MessagesOrchestrator } from './application/MessagesOrchestrator';
 import { MessagesHandleIncoming } from './application/MessagesHandleIncoming';
-import { SendMessage } from './application/SendMessage';
 import { BaileysMessageSender } from './infrastructure/BaileysMessageSender';
 import { MessageHandlerFactory } from './infrastructure/MessageHandlerFactory';
 import { NodeFileService } from './infrastructure/NodeFileService';
@@ -33,9 +32,6 @@ import { OutgoingMessageQueue } from './infrastructure/OutgoingMessageQueue';
 import { OutgoingMessageProcessor } from './infrastructure/OutgoingMessageProcessor';
 import { IncomingMessageQueue } from './infrastructure/IncomingMessageQueue';
 import { IncomingMessageProcessor } from './infrastructure/IncomingMessageProcessor';
-import { MessagesSendText } from './application/MessagesSendText';
-import { MessagesSendMedia } from './application/MessagesSendMedia';
-import { MessagesSendReaction } from './application/MessagesSendReaction';
 import { MessageKeyBufferService } from './infrastructure/MessageKeyBufferService';
 
 @Module({
@@ -163,12 +159,6 @@ import { MessageKeyBufferService } from './infrastructure/MessageKeyBufferServic
       ],
     },
     {
-      provide: 'SendMessage',
-      useFactory: (messagesOrchestrator, cryptoService) =>
-        new SendMessage(messagesOrchestrator, cryptoService),
-      inject: ['MessagesOrchestrator', 'CryptoService'],
-    },
-    {
       provide: 'MessagesHandleIncoming',
       useFactory: (
         messagesCreate,
@@ -216,24 +206,6 @@ import { MessageKeyBufferService } from './infrastructure/MessageKeyBufferServic
       provide: 'IncomingMessageQueue',
       useExisting: IncomingMessageQueue,
     },
-    {
-      provide: 'MessagesSendText',
-      useFactory: (messagesCreate, messageSender) =>
-        new MessagesSendText(messagesCreate, messageSender),
-      inject: ['MessagesCreate', 'MessageSender'],
-    },
-    {
-      provide: 'MessagesSendMedia',
-      useFactory: (messagesCreate, messageSender) =>
-        new MessagesSendMedia(messagesCreate, messageSender),
-      inject: ['MessagesCreate', 'MessageSender'],
-    },
-    {
-      provide: 'MessagesSendReaction',
-      useFactory: (messagesCreate, messageSender) =>
-        new MessagesSendReaction(messagesCreate, messageSender),
-      inject: ['MessagesCreate', 'MessageSender'],
-    },
     MessageKeyBufferService,
   ],
   exports: [
@@ -243,10 +215,6 @@ import { MessageKeyBufferService } from './infrastructure/MessageKeyBufferServic
     'MessageSender',
     'MessagesOrchestrator',
     'MessagesHandleIncoming',
-    'SendMessage',
-    'MessagesSendText',
-    'MessagesSendMedia',
-    'MessagesSendReaction',
     OutgoingMessageQueue,
     IncomingMessageQueue,
     'IncomingMessageQueue',

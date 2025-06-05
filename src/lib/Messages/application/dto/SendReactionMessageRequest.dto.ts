@@ -14,6 +14,7 @@ export class ReactionData {
 
   @IsString()
   @IsNotEmpty()
+  @IsUUID()
   targetMessageId: string;
 
   @IsOptional()

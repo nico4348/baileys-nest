@@ -50,6 +50,7 @@ export class SendMediaMessageRequest {
 
   @IsOptional()
   @IsString()
+  @IsUUID()
   quotedMessageId?: string;
 
   @ValidateNested()
