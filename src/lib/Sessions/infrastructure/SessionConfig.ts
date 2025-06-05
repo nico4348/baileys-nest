@@ -12,9 +12,15 @@ export class SessionConfig implements ISessionConfig {
   readonly logLevel: 'debug' | 'info' | 'warn' | 'error' | 'silent';
 
   constructor() {
-    this.reconnectionTimeout = parseInt(process.env.SESSION_RECONNECTION_TIMEOUT || '30000');
-    this.deleteTimeout = parseInt(process.env.SESSION_DELETE_TIMEOUT || '10000');
-    this.restartTimeout = parseInt(process.env.SESSION_RESTART_TIMEOUT || '5000');
+    this.reconnectionTimeout = parseInt(
+      process.env.SESSION_RECONNECTION_TIMEOUT || '30000',
+    );
+    this.deleteTimeout = parseInt(
+      process.env.SESSION_DELETE_TIMEOUT || '10000',
+    );
+    this.restartTimeout = parseInt(
+      process.env.SESSION_RESTART_TIMEOUT || '5000',
+    );
     this.qrTimeout = parseInt(process.env.SESSION_QR_TIMEOUT || '120000');
     this.maxRetries = parseInt(process.env.SESSION_MAX_RETRIES || '3');
     this.retryDelay = parseInt(process.env.SESSION_RETRY_DELAY || '1000');

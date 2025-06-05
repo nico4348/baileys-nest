@@ -43,15 +43,6 @@ export class BaileysMessageSender implements MessageSender {
         throw new Error('Text message cannot be empty');
       }
 
-      // Set online presence first
-      await this.setOnlinePresence(sessionId, jid);
-      await delay(500);
-
-      await sock.sendPresenceUpdate('composing', jid);
-      await delay(2000);
-
-      await sock.sendPresenceUpdate('paused', jid);
-
       const msg = await sock.sendMessage(jid, { text }, opts);
 
       return msg || null;
@@ -125,10 +116,6 @@ export class BaileysMessageSender implements MessageSender {
         default:
           throw new Error(`Unsupported media type '${mediaType}'`);
       }
-
-      // Track message status if tracker is available and message was sent
-      // Note: Status tracking happens after message is stored in DB via MessageStatusTracker
-
       return msg;
     } catch (error) {
       console.error(`Error sending ${mediaType} to ${jid}:`, error);
@@ -156,67 +143,9 @@ export class BaileysMessageSender implements MessageSender {
         react: { key: key, text: emoji },
       });
 
-      // Track message status if tracker is available and message was sent
-      // Note: Status tracking happens after message is stored in DB via MessageStatusTracker
-
       return msg || null;
     } catch (error) {
       console.error(`Error sending reaction to ${jid}:`, error);
-      throw error;
-    }
-  }
-
-  async setOnlinePresence(sessionId: string, jid?: string): Promise<void> {
-    try {
-      const sock = this.getSocket(sessionId);
-      if (!sock) {
-        throw new Error(`Session ${sessionId} not found or not connected`);
-      }
-
-      // Set general online presence
-      await sock.sendPresenceUpdate('available');
-
-      // If specific chat is provided, subscribe and set presence for that chat
-      if (jid) {
-        await sock.presenceSubscribe(jid);
-        await sock.sendPresenceUpdate('available', jid);
-      }
-
-      console.log(
-        `✅ [${sessionId}] Set online presence${jid ? ` for ${jid}` : ' globally'}`,
-      );
-    } catch (error) {
-      console.error(
-        `Error setting online presence for session ${sessionId}:`,
-        error,
-      );
-      throw error;
-    }
-  }
-
-  async setOfflinePresence(sessionId: string, jid?: string): Promise<void> {
-    try {
-      const sock = this.getSocket(sessionId);
-      if (!sock) {
-        throw new Error(`Session ${sessionId} not found or not connected`);
-      }
-
-      // Set general offline presence
-      await sock.sendPresenceUpdate('unavailable');
-
-      // If specific chat is provided, set presence for that chat
-      if (jid) {
-        await sock.sendPresenceUpdate('unavailable', jid);
-      }
-
-      console.log(
-        `🔴 [${sessionId}] Set offline presence${jid ? ` for ${jid}` : ' globally'}`,
-      );
-    } catch (error) {
-      console.error(
-        `Error setting offline presence for session ${sessionId}:`,
-        error,
-      );
       throw error;
     }
   }

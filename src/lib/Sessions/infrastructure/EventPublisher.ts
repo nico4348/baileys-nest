@@ -5,7 +5,8 @@ import { ISessionLogger } from './interfaces/ISessionLogger';
 
 @Injectable()
 export class EventPublisher implements IEventPublisher {
-  private handlers: Map<string, ((event: SessionEvent) => Promise<void>)[]> = new Map();
+  private handlers: Map<string, ((event: SessionEvent) => Promise<void>)[]> =
+    new Map();
 
   constructor(private readonly logger: ISessionLogger) {}
 
@@ -19,7 +20,11 @@ export class EventPublisher implements IEventPublisher {
       try {
         await handler(event);
       } catch (error) {
-        this.logger.error(`Error handling event ${eventName}`, error, event.sessionId);
+        this.logger.error(
+          `Error handling event ${eventName}`,
+          error,
+          event.sessionId,
+        );
       }
     });
 
@@ -27,11 +32,14 @@ export class EventPublisher implements IEventPublisher {
   }
 
   async publishMany(events: SessionEvent[]): Promise<void> {
-    const promises = events.map(event => this.publish(event));
+    const promises = events.map((event) => this.publish(event));
     await Promise.allSettled(promises);
   }
 
-  subscribe(eventName: string, handler: (event: SessionEvent) => Promise<void>): void {
+  subscribe(
+    eventName: string,
+    handler: (event: SessionEvent) => Promise<void>,
+  ): void {
     if (!this.handlers.has(eventName)) {
       this.handlers.set(eventName, []);
     }
@@ -40,7 +48,10 @@ export class EventPublisher implements IEventPublisher {
     this.logger.info(`Subscribed to event: ${eventName}`);
   }
 
-  unsubscribe(eventName: string, handler: (event: SessionEvent) => Promise<void>): void {
+  unsubscribe(
+    eventName: string,
+    handler: (event: SessionEvent) => Promise<void>,
+  ): void {
     const handlers = this.handlers.get(eventName);
     if (handlers) {
       const index = handlers.indexOf(handler);
