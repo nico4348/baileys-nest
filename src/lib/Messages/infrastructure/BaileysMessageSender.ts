@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { proto, type WASocket } from 'baileys';
+import { proto, type WASocket, delay } from 'baileys';
 import { WhatsAppSessionManager } from '../../Sessions/infrastructure/WhatsAppSessionManager';
 import { MessageStatusTrackSentMessage } from '../../MessageStatus/application/MessageStatusTrackSentMessage';
 import {
@@ -28,7 +28,6 @@ export class BaileysMessageSender implements MessageSender {
   ): Promise<proto.WebMessageInfo | null> {
     let opts = {};
     if (quoted) {
-      // Si el objeto ya tiene key, úsalo directamente, si no, crea el formato esperado
       opts = {
         quoted: quoted.key ? quoted : { key: quoted },
       };
@@ -40,17 +39,20 @@ export class BaileysMessageSender implements MessageSender {
       }
 
       const { text } = payload;
-
       if (!text || text.trim().length === 0) {
         throw new Error('Text message cannot be empty');
       }
 
+      // Set online presence first
+      await this.setOnlinePresence(sessionId, jid);
+      await delay(500);
+
+      await sock.sendPresenceUpdate('composing', jid);
+      await delay(2000);
+
+      await sock.sendPresenceUpdate('paused', jid);
+
       const msg = await sock.sendMessage(jid, { text }, opts);
-      // Track message status if tracker is available and message was sent
-      // Note: Status creation is now handled by SendMessage/MessagesOrchestrator flow
-      // starting with 'message_receipt' and 'validated' before reaching 'sent'
-      // The MessageStatusTracker will handle status updates from Baileys events
-      // We don't need to track here since the message isn't stored in DB yet
 
       return msg || null;
     } catch (error) {
@@ -133,7 +135,6 @@ export class BaileysMessageSender implements MessageSender {
       throw error;
     }
   }
-
   async sendReactMessage(
     sessionId: string,
     jid: string,
@@ -161,6 +162,61 @@ export class BaileysMessageSender implements MessageSender {
       return msg || null;
     } catch (error) {
       console.error(`Error sending reaction to ${jid}:`, error);
+      throw error;
+    }
+  }
+
+  async setOnlinePresence(sessionId: string, jid?: string): Promise<void> {
+    try {
+      const sock = this.getSocket(sessionId);
+      if (!sock) {
+        throw new Error(`Session ${sessionId} not found or not connected`);
+      }
+
+      // Set general online presence
+      await sock.sendPresenceUpdate('available');
+
+      // If specific chat is provided, subscribe and set presence for that chat
+      if (jid) {
+        await sock.presenceSubscribe(jid);
+        await sock.sendPresenceUpdate('available', jid);
+      }
+
+      console.log(
+        `✅ [${sessionId}] Set online presence${jid ? ` for ${jid}` : ' globally'}`,
+      );
+    } catch (error) {
+      console.error(
+        `Error setting online presence for session ${sessionId}:`,
+        error,
+      );
+      throw error;
+    }
+  }
+
+  async setOfflinePresence(sessionId: string, jid?: string): Promise<void> {
+    try {
+      const sock = this.getSocket(sessionId);
+      if (!sock) {
+        throw new Error(`Session ${sessionId} not found or not connected`);
+      }
+
+      // Set general offline presence
+      await sock.sendPresenceUpdate('unavailable');
+
+      // If specific chat is provided, set presence for that chat
+      if (jid) {
+        await sock.sendPresenceUpdate('unavailable', jid);
+      }
+
+      console.log(
+        `🔴 [${sessionId}] Set offline presence${jid ? ` for ${jid}` : ' globally'}`,
+      );
+    } catch (error) {
+      console.error(
+        `Error setting offline presence for session ${sessionId}:`,
+        error,
+      );
       throw error;
     }
   }

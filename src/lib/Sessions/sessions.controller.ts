@@ -51,6 +51,115 @@ export class SessionsController {
     private readonly sessionsHardDelete: SessionsHardDelete,
     private readonly sessionOrchestrator: SessionOrchestrationService,
   ) {}
+
+  @Post(':sessionId/presence/typing')
+  async simulateTypingPresence(
+    @Param('sessionId') sessionId: string,
+    @Body() body: { numero: string; tiempo_ms: number },
+  ) {
+    try {
+      if (!body.numero || !body.tiempo_ms) {
+        throw new BadRequestException(
+          'Los campos numero y tiempo_ms son requeridos',
+        );
+      }
+
+      if (body.tiempo_ms <= 0) {
+        throw new BadRequestException(
+          'El tiempo debe ser mayor a 0 milisegundos',
+        );
+      }
+
+      const session = await this.sessionsGetOneById.run(sessionId);
+      if (!session) {
+        throw new NotFoundException('Sesión no encontrada');
+      }
+
+      const jid = body.numero.includes('@') 
+        ? body.numero 
+        : `${body.numero}@s.whatsapp.net`;
+
+      await this.sessionOrchestrator.simulateTypingPresence(
+        sessionId,
+        jid,
+        body.tiempo_ms,
+      );
+
+      return {
+        success: true,
+        message: `Presencia de escritura simulada por ${body.tiempo_ms}ms para ${body.numero}`,
+        data: {
+          sessionId,
+          numero: body.numero,
+          jid,
+          tiempo_ms: body.tiempo_ms,
+          tipo: 'typing',
+        },
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        'Error al simular presencia de escritura: ' + error.message,
+      );
+    }
+  }
+
+  @Post(':sessionId/presence/recording')
+  async simulateRecordingPresence(
+    @Param('sessionId') sessionId: string,
+    @Body() body: { numero: string; tiempo_ms: number },
+  ) {
+    try {
+      if (!body.numero || !body.tiempo_ms) {
+        throw new BadRequestException(
+          'Los campos numero y tiempo_ms son requeridos',
+        );
+      }
+
+      if (body.tiempo_ms <= 0) {
+        throw new BadRequestException(
+          'El tiempo debe ser mayor a 0 milisegundos',
+        );
+      }
+
+      const session = await this.sessionsGetOneById.run(sessionId);
+      if (!session) {
+        throw new NotFoundException('Sesión no encontrada');
+      }
+
+      const jid = body.numero.includes('@') 
+        ? body.numero 
+        : `${body.numero}@s.whatsapp.net`;
+
+      await this.sessionOrchestrator.simulateRecordingPresence(
+        sessionId,
+        jid,
+        body.tiempo_ms,
+      );
+
+      return {
+        success: true,
+        message: `Presencia de grabación de audio simulada por ${body.tiempo_ms}ms para ${body.numero}`,
+        data: {
+          sessionId,
+          numero: body.numero,
+          jid,
+          tiempo_ms: body.tiempo_ms,
+          tipo: 'recording',
+        },
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        'Error al simular presencia de grabación: ' + error.message,
+      );
+    }
+  }
+
   @Get()
   async getAllSessions() {
     try {

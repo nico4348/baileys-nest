@@ -38,4 +38,8 @@ export interface MessageSender {
     jid: string,
     payload: ReactPayload,
   ): Promise<any>;
+
+  setOnlinePresence(sessionId: string, jid?: string): Promise<void>;
+
+  setOfflinePresence(sessionId: string, jid?: string): Promise<void>;
 }

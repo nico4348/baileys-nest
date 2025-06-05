@@ -1,6 +1,7 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { SessionStatePort } from '../domain/ports/SessionStatePort';
 import { ConnectionPort } from '../domain/ports/ConnectionPort';
+import { delay } from 'baileys';
 
 @Injectable()
 export class SessionOrchestrationService {
@@ -67,5 +68,49 @@ export class SessionOrchestrationService {
 
   async handleCredentialsUpdate(sessionId: string): Promise<void> {
     return await this.connection.handleCredentialsUpdate(sessionId);
+  }
+
+  async simulateTypingPresence(sessionId: string, jid: string, tiempo_ms: number): Promise<void> {
+    const socket = this.getSocket(sessionId);
+    if (!socket) {
+      throw new Error(`Session ${sessionId} not found or not connected`);
+    }
+
+    try {
+      await socket.sendPresenceUpdate('available');
+      await socket.presenceSubscribe(jid);
+      await socket.sendPresenceUpdate('available', jid);
+      await delay(500);
+
+      await socket.sendPresenceUpdate('composing', jid);
+      await delay(tiempo_ms);
+
+      await socket.sendPresenceUpdate('paused', jid);
+    } catch (error) {
+      console.error(`Error simulating typing presence for ${jid}:`, error);
+      throw error;
+    }
+  }
+
+  async simulateRecordingPresence(sessionId: string, jid: string, tiempo_ms: number): Promise<void> {
+    const socket = this.getSocket(sessionId);
+    if (!socket) {
+      throw new Error(`Session ${sessionId} not found or not connected`);
+    }
+
+    try {
+      await socket.sendPresenceUpdate('available');
+      await socket.presenceSubscribe(jid);
+      await socket.sendPresenceUpdate('available', jid);
+      await delay(500);
+
+      await socket.sendPresenceUpdate('recording', jid);
+      await delay(tiempo_ms);
+
+      await socket.sendPresenceUpdate('paused', jid);
+    } catch (error) {
+      console.error(`Error simulating recording presence for ${jid}:`, error);
+      throw error;
+    }
   }
 }
