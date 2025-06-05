@@ -19,7 +19,6 @@ export class BaileysMessageSender implements MessageSender {
   private getSocket(sessionId: string): WASocket | null {
     return this.sessionManager.getSocket(sessionId);
   }
-
   async sendTextMessage(
     sessionId: string,
     jid: string,
@@ -29,7 +28,7 @@ export class BaileysMessageSender implements MessageSender {
     let opts = {};
     if (quoted) {
       opts = {
-        quoted: quoted.key ? quoted : { key: quoted },
+        quoted: quoted,
       };
     }
     try {
@@ -51,7 +50,6 @@ export class BaileysMessageSender implements MessageSender {
       throw error;
     }
   }
-
   async sendMediaMessage(
     sessionId: string,
     jid: string,
@@ -62,7 +60,7 @@ export class BaileysMessageSender implements MessageSender {
     let opts = {};
     if (quoted) {
       opts = {
-        quoted: quoted.key ? quoted : { key: quoted },
+        quoted: quoted,
       };
     }
     try {

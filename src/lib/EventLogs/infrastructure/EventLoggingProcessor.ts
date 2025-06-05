@@ -4,6 +4,7 @@ import { Job } from 'bullmq';
 import { EventLogJob, BatchEventLogJob } from './EventLoggingQueue';
 import { EventLogsCreate } from '../application/EventLogsCreate';
 import { EventLogRepository } from '../domain/EventLogRepository';
+import { randomUUID } from 'node:crypto';
 
 @Processor('event-logging')
 export class EventLoggingProcessor extends WorkerHost {
@@ -49,27 +50,25 @@ export class EventLoggingProcessor extends WorkerHost {
 
   private async processSingleEvent(job: Job<EventLogJob>): Promise<void> {
     const { sessionId, eventId, eventData, timestamp, category } = job.data;
-
     try {
-      const uuid = require('crypto').randomUUID();
-      await this.eventLogsCreate.run(
-        uuid,
-        sessionId,
-        eventId,
-        timestamp,
-      );
+      const uuid = randomUUID();
+      await this.eventLogsCreate.run(uuid, sessionId, eventId, timestamp);
 
       // Event logged successfully (silent)
     } catch (error) {
-      this.logger.error(`Failed to log event ${eventId} for session ${sessionId}: ${error.message}`);
+      this.logger.error(
+        `Failed to log event ${eventId} for session ${sessionId}: ${error.message}`,
+      );
       // Don't re-throw to avoid queue failures for logging issues
     }
   }
 
   private async processBatchEvents(job: Job<BatchEventLogJob>): Promise<void> {
     const { events, batchId, maxBatchSize } = job.data;
-    
-    this.logger.log(`Processing event batch ${batchId} with ${events.length} events`);
+
+    this.logger.log(
+      `Processing event batch ${batchId} with ${events.length} events`,
+    );
 
     // Process events in smaller chunks to avoid database timeouts
     const chunkSize = Math.min(50, maxBatchSize);
@@ -83,38 +82,46 @@ export class EventLoggingProcessor extends WorkerHost {
         await this.processBatchChunk(chunk, batchId);
         totalProcessed += chunk.length;
       } catch (error) {
-        this.logger.error(`Failed to process chunk in batch ${batchId}: ${error.message}`);
+        this.logger.error(
+          `Failed to process chunk in batch ${batchId}: ${error.message}`,
+        );
         totalErrors += chunk.length;
       }
     }
 
     this.logger.log(
-      `Batch ${batchId} completed: ${totalProcessed} processed, ${totalErrors} errors`
+      `Batch ${batchId} completed: ${totalProcessed} processed, ${totalErrors} errors`,
     );
 
     // For now, skip system event logging to avoid foreign key issues
     // TODO: Implement proper event lookup by name like BaileysEventLogger
-    this.logger.debug(`Batch processing statistics logged for batch ${batchId}`);
+    this.logger.debug(
+      `Batch processing statistics logged for batch ${batchId}`,
+    );
   }
-
-  private async processBatchChunk(events: EventLogJob[], batchId: string): Promise<void> {
+  private async processBatchChunk(
+    events: EventLogJob[],
+    batchId: string,
+  ): Promise<void> {
     // Process events in parallel within the chunk
     const results = await Promise.allSettled(
       events.map(async (event) => {
-        const uuid = require('crypto').randomUUID();
+        const uuid = randomUUID();
         return this.eventLogsCreate.run(
           uuid,
           event.sessionId,
           event.eventId,
           event.timestamp,
         );
-      })
+      }),
     );
 
-    const failures = results.filter(result => result.status === 'rejected');
-    
+    const failures = results.filter((result) => result.status === 'rejected');
+
     if (failures.length > 0) {
-      this.logger.warn(`Chunk in batch ${batchId} had ${failures.length} failures out of ${events.length} events`);
+      this.logger.warn(
+        `Chunk in batch ${batchId} had ${failures.length} failures out of ${events.length} events`,
+      );
     }
   }
 

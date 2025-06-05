@@ -286,7 +286,6 @@ export class MessagesOrchestrator {
       throw error;
     }
   }
-
   // Nuevo método: obtener messageKey de Baileys usando UUID de mensaje
   async getMessageBaileysKey(messageUuid: string): Promise<any> {
     const message = await this.messagesGetOneById.run(messageUuid);
@@ -296,5 +295,16 @@ export class MessagesOrchestrator {
       );
     }
     return message.baileys_json.value.key;
+  }
+
+  // Nuevo método: obtener el objeto completo de Baileys usando UUID de mensaje (para quoted messages)
+  async getMessageBaileysObject(messageUuid: string): Promise<any> {
+    const message = await this.messagesGetOneById.run(messageUuid);
+    if (!message || !message.baileys_json) {
+      throw new Error(
+        `Original message with id ${messageUuid} not found or missing baileys_json`,
+      );
+    }
+    return message.baileys_json.value;
   }
 }

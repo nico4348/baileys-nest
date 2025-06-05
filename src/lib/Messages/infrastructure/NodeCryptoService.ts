@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import * as crypto from 'crypto';
+import { randomUUID } from 'node:crypto';
 import { CryptoService } from '../domain/ports/CryptoService';
 
 @Injectable()
 export class NodeCryptoService implements CryptoService {
   generateUUID(): string {
-    return crypto.randomUUID();
+    return randomUUID();
   }
 }

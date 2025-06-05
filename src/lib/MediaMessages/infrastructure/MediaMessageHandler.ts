@@ -13,7 +13,7 @@ export class MediaMessageHandler implements IMessageHandler {
 
     await this.mediaMessagesCreate.run(
       messageId,
-      caption || '',
+      caption || null,
       mediaType,
       mimeType,
       fileName,

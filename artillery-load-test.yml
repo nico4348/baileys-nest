@@ -1,0 +1,73 @@
+config:
+  target: 'http://localhost:3000'
+  phases:
+    - duration: 60
+      arrivalRate: 5
+      name: 'Warm up'
+    - duration: 120
+      arrivalRate: 20
+      name: 'Load test'
+    - duration: 60
+      arrivalRate: 50
+      name: 'Stress test'
+  processor: './artillery-processor.js'
+
+scenarios:
+  - name: 'Send Text Messages'
+    weight: 50
+    flow:
+      - post:
+          url: '/messages/send-text'
+          headers:
+            Content-Type: 'application/json'
+          json:
+            sessionId: 'artillery-test'
+            to: '573000000000'
+            textData:
+              text: '{{ $randomString() }} - Artillery load test'
+          expect:
+            - statusCode: 200
+            - hasProperty: 'success'
+
+  - name: 'Send Media Messages'
+    weight: 30
+    flow:
+      - post:
+          url: '/messages/send-media'
+          headers:
+            Content-Type: 'application/json'
+          json:
+            sessionId: 'artillery-test'
+            to: '573000000000'
+            mediaData:
+              url: 'https://via.placeholder.com/150'
+              mediaType: 'image'
+              fileName: 'test.jpg'
+              caption: 'Artillery test media'
+          expect:
+            - statusCode: 200
+
+  - name: 'Send Reactions'
+    weight: 15
+    flow:
+      - post:
+          url: '/messages/send-reaction'
+          headers:
+            Content-Type: 'application/json'
+          json:
+            sessionId: 'artillery-test'
+            to: '573000000000'
+            reactionData:
+              emoji: '👍'
+              targetMessageId: 'test-message-id'
+          expect:
+            - statusCode: 200
+
+  - name: 'Get Messages'
+    weight: 5
+    flow:
+      - get:
+          url: '/messages?session_id=artillery-test'
+          expect:
+            - statusCode: 200
+            - hasProperty: 'success'

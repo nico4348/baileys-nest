@@ -27,7 +27,7 @@ import { SessionsHardDelete } from './application/SessionsHardDelete';
 import { WhatsAppSessionManager } from './infrastructure/WhatsAppSessionManager';
 import { SessionOrchestrationService } from './application/SessionOrchestrationService';
 import { MessageKeyBufferService } from '../Messages/infrastructure/MessageKeyBufferService';
-import { randomUUID } from 'crypto';
+import { randomUUID } from 'node:crypto';
 
 @Controller('sessions')
 export class SessionsController {

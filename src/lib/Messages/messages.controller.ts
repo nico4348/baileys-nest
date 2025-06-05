@@ -22,6 +22,9 @@ import { MessagesDelete } from './application/MessagesDelete';
 import { SendMessage } from './application/SendMessage';
 import { SendMessageRequest } from './application/dto/SendMessageRequest.dto';
 import { SendMessageResponse } from './application/dto/SendMessageResponse.dto';
+import { SendTextMessageRequest } from './application/dto/SendTextMessageRequest.dto';
+import { SendMediaMessageRequest } from './application/dto/SendMediaMessageRequest.dto';
+import { SendReactionMessageRequest } from './application/dto/SendReactionMessageRequest.dto';
 import { OutgoingMessageQueue } from './infrastructure/OutgoingMessageQueue';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -220,11 +223,10 @@ export class MessagesController {
   }
 
   // --- Separated WhatsApp Message Sending Endpoints ---
-
   @Post('send-text')
   @UsePipes(new ValidationPipe({ transform: true }))
   async sendTextMessage(
-    @Body() request: SendMessageRequest,
+    @Body() request: SendTextMessageRequest,
   ): Promise<SendMessageResponse> {
     try {
       const messageId = uuidv4();
@@ -267,11 +269,10 @@ export class MessagesController {
       );
     }
   }
-
   @Post('send-media')
   @UsePipes(new ValidationPipe({ transform: true }))
   async sendMediaMessage(
-    @Body() request: SendMessageRequest,
+    @Body() request: SendMediaMessageRequest,
   ): Promise<SendMessageResponse> {
     try {
       const messageId = uuidv4();
@@ -317,11 +318,10 @@ export class MessagesController {
       );
     }
   }
-
   @Post('send-reaction')
   @UsePipes(new ValidationPipe({ transform: true }))
   async sendReactionMessage(
-    @Body() request: SendMessageRequest,
+    @Body() request: SendReactionMessageRequest,
   ): Promise<SendMessageResponse> {
     try {
       const messageId = uuidv4();
