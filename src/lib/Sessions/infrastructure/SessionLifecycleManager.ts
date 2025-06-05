@@ -16,20 +16,14 @@ export class SessionLifecycleManager implements OnModuleInit {
   ) {}
 
   async onModuleInit(): Promise<void> {
-    this.logger.info('Initializing session lifecycle manager');
-
     try {
       const allSessions: Session[] = await this.sessionsRepository.getAll();
       const activeSessions = allSessions.filter(
         (s) => s.status.value && !s.isDeleted.value,
       );
 
-      this.logger.info(
-        `Found ${activeSessions.length} active sessions to restore`,
-      );
-
       for (const session of activeSessions) {
-        this.logger.info('Restoring session', session.id.value);
+        // this.logger.info('Restoring session', session.id.value);
       }
     } catch (error) {
       this.logger.error('Failed to initialize sessions', error);
@@ -38,7 +32,6 @@ export class SessionLifecycleManager implements OnModuleInit {
 
   storeSession(sessionId: string, socket: any): void {
     this.sessions.set(sessionId, socket);
-    this.logger.info('Session stored in memory', sessionId);
   }
 
   getSession(sessionId: string): any {
@@ -48,7 +41,7 @@ export class SessionLifecycleManager implements OnModuleInit {
   removeSession(sessionId: string): void {
     const removed = this.sessions.delete(sessionId);
     if (removed) {
-      this.logger.info('Session removed from memory', sessionId);
+      // this.logger.info('Session removed from memory', sessionId);
     }
   }
 
@@ -59,11 +52,11 @@ export class SessionLifecycleManager implements OnModuleInit {
 
   setRestarting(sessionId: string): void {
     this.restarting.add(sessionId);
-    this.logger.info('Session marked as restarting', sessionId);
+    // this.logger.info('Session marked as restarting', sessionId);
 
     setTimeout(() => {
       this.restarting.delete(sessionId);
-      this.logger.info('Session restart flag removed', sessionId);
+      // this.logger.info('Session restart flag removed', sessionId);
     }, 5000);
   }
 
@@ -73,13 +66,13 @@ export class SessionLifecycleManager implements OnModuleInit {
 
   setPaused(sessionId: string): void {
     this.paused.add(sessionId);
-    this.logger.info('Session marked as paused', sessionId);
+    // this.logger.info('Session marked as paused', sessionId);
   }
 
   removePaused(sessionId: string): void {
     const removed = this.paused.delete(sessionId);
     if (removed) {
-      this.logger.info('Session paused flag removed', sessionId);
+      // this.logger.info('Session paused flag removed', sessionId);
     }
   }
 
@@ -89,11 +82,11 @@ export class SessionLifecycleManager implements OnModuleInit {
 
   setDeleting(sessionId: string): void {
     this.deleting.add(sessionId);
-    this.logger.info('Session marked as deleting', sessionId);
+    // this.logger.info('Session marked as deleting', sessionId);
 
     setTimeout(() => {
       this.deleting.delete(sessionId);
-      this.logger.info('Session delete flag removed', sessionId);
+      // this.logger.info('Session delete flag removed', sessionId);
     }, 10000);
   }
 
@@ -108,10 +101,10 @@ export class SessionLifecycleManager implements OnModuleInit {
       // Solo cerrar la conexión sin hacer logout para preservar credenciales
       if (socket.end && typeof socket.end === 'function') {
         await socket.end();
-        this.logger.info(
-          'Session connection paused (ended without logout)',
-          sessionId,
-        );
+        // this.logger.info(
+        //   'Session connection paused (ended without logout)',
+        //   sessionId,
+        // );
       }
     } catch (error) {
       this.logger.warn('Error pausing session connection', sessionId);
@@ -128,14 +121,13 @@ export class SessionLifecycleManager implements OnModuleInit {
     }
 
     try {
-      this.logger.info('Resuming paused session', sessionId);
-
       // Create new socket with existing credentials
       const socket = await socketFactory.createSocket(sessionId);
       this.storeSession(sessionId, socket);
       this.removePaused(sessionId);
 
-      this.logger.info('Session resumed successfully', sessionId);
+      // this.logger.info('Resuming paused session', sessionId);
+
       return socket;
     } catch (error) {
       this.logger.error('Error resuming session', error, sessionId);
@@ -150,7 +142,7 @@ export class SessionLifecycleManager implements OnModuleInit {
     try {
       if (socket.logout && typeof socket.logout === 'function') {
         await socket.logout();
-        this.logger.info('Session logout completed', sessionId);
+        // this.logger.info('Session logout completed', sessionId);
       }
     } catch (error) {
       this.logger.warn('Error during session logout', sessionId);
@@ -159,7 +151,7 @@ export class SessionLifecycleManager implements OnModuleInit {
     try {
       if (socket.end && typeof socket.end === 'function') {
         await socket.end();
-        this.logger.info('Session connection ended', sessionId);
+        // this.logger.info('Session connection ended', sessionId);
       }
     } catch (error) {
       this.logger.warn('Error ending session connection', sessionId);

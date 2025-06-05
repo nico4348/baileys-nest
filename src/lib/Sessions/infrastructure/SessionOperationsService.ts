@@ -23,11 +23,14 @@ export class SessionOperationsService {
   async startSession(sessionId: string): Promise<void> {
     try {
       await this.sessionsStart.run(sessionId);
-      this.logger.info('Session started', sessionId);
       await this.sessionLogLogger.logSessionStart(sessionId);
     } catch (error) {
       this.logger.error('Failed to start session', error, sessionId);
-      await this.sessionLogLogger.logError(sessionId, error, 'Session start failed');
+      await this.sessionLogLogger.logError(
+        sessionId,
+        error,
+        'Session start failed',
+      );
       throw error;
     }
   }
@@ -35,11 +38,14 @@ export class SessionOperationsService {
   async resumeSession(sessionId: string): Promise<void> {
     try {
       await this.sessionsResume.run(sessionId);
-      this.logger.info('Session resumed', sessionId);
       await this.sessionLogLogger.logSessionResume(sessionId);
     } catch (error) {
       this.logger.error('Failed to resume session', error, sessionId);
-      await this.sessionLogLogger.logError(sessionId, error, 'Session resume failed');
+      await this.sessionLogLogger.logError(
+        sessionId,
+        error,
+        'Session resume failed',
+      );
       throw error;
     }
   }
@@ -47,11 +53,14 @@ export class SessionOperationsService {
   async restartSession(sessionId: string): Promise<void> {
     try {
       await this.sessionsRestart.run(sessionId);
-      this.logger.info('Session restarted', sessionId);
       await this.sessionLogLogger.logReconnection(sessionId, 'Manual restart');
     } catch (error) {
       this.logger.error('Failed to restart session', error, sessionId);
-      await this.sessionLogLogger.logError(sessionId, error, 'Session restart failed');
+      await this.sessionLogLogger.logError(
+        sessionId,
+        error,
+        'Session restart failed',
+      );
       throw error;
     }
   }
@@ -60,11 +69,14 @@ export class SessionOperationsService {
     try {
       // Para pause, solo cambiar el estado en la BD sin hacer logout completo
       await this.sessionsStop.run(sessionId);
-      this.logger.info('Session paused', sessionId);
       await this.sessionLogLogger.logSessionPause(sessionId);
     } catch (error) {
       this.logger.error('Failed to pause session', error, sessionId);
-      await this.sessionLogLogger.logError(sessionId, error, 'Session pause failed');
+      await this.sessionLogLogger.logError(
+        sessionId,
+        error,
+        'Session pause failed',
+      );
       throw error;
     }
   }
@@ -72,11 +84,17 @@ export class SessionOperationsService {
   async deleteSession(sessionId: string): Promise<void> {
     try {
       await this.sessionsDelete.run(sessionId);
-      this.logger.info('Session deleted', sessionId);
-      await this.sessionLogLogger.logInfo(sessionId, 'Session deleted permanently');
+      await this.sessionLogLogger.logInfo(
+        sessionId,
+        'Session deleted permanently',
+      );
     } catch (error) {
       this.logger.error('Failed to delete session', error, sessionId);
-      await this.sessionLogLogger.logError(sessionId, error, 'Session deletion failed');
+      await this.sessionLogLogger.logError(
+        sessionId,
+        error,
+        'Session deletion failed',
+      );
       throw error;
     }
   }

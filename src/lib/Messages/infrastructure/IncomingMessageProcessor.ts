@@ -1,9 +1,13 @@
 import { Processor, WorkerHost, OnWorkerEvent } from '@nestjs/bullmq';
 import { Inject, Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
-import { IncomingMessageJob, BulkIncomingMessageJob } from './IncomingMessageQueue';
+import {
+  IncomingMessageJob,
+  BulkIncomingMessageJob,
+} from './IncomingMessageQueue';
 import { MessagesHandleIncoming } from '../application/MessagesHandleIncoming';
 import { EventLogsCreate } from '../../EventLogs/application/EventLogsCreate';
+import { MessageKeyBufferService } from './MessageKeyBufferService';
 
 @Processor('incoming-messages')
 export class IncomingMessageProcessor extends WorkerHost {
@@ -14,18 +18,21 @@ export class IncomingMessageProcessor extends WorkerHost {
     private readonly messagesHandleIncoming: MessagesHandleIncoming,
     @Inject('EventLogsCreate')
     private readonly eventLogsCreate: EventLogsCreate,
+    private readonly msgKeyBuffer: MessageKeyBufferService,
   ) {
     super();
   }
 
   @OnWorkerEvent('active')
   onActive(job: Job) {
-    this.logger.debug(`Processing incoming message for session ${job.data.sessionId}`);
+    // this.logger.debug(
+    //   `Processing incoming message for session ${job.data.sessionId}`,
+    // );
   }
 
   @OnWorkerEvent('completed')
   onComplete(job: Job) {
-    this.logger.debug(`Completed incoming message processing`);
+    // this.logger.debug(`Completed incoming message processing`);
   }
 
   @OnWorkerEvent('failed')
@@ -33,12 +40,16 @@ export class IncomingMessageProcessor extends WorkerHost {
     this.logger.error(`Failed incoming message processing: ${error.message}`);
   }
 
-  async process(job: Job<IncomingMessageJob | BulkIncomingMessageJob>): Promise<void> {
+  async process(
+    job: Job<IncomingMessageJob | BulkIncomingMessageJob>,
+  ): Promise<void> {
     try {
       if (job.name === 'process-incoming') {
         await this.processSingleIncomingMessage(job as Job<IncomingMessageJob>);
       } else if (job.name === 'process-bulk-incoming') {
-        await this.processBulkIncomingMessages(job as Job<BulkIncomingMessageJob>);
+        await this.processBulkIncomingMessages(
+          job as Job<BulkIncomingMessageJob>,
+        );
       } else if (job.name === 'process-media-incoming') {
         await this.processMediaIncomingMessage(job as Job<IncomingMessageJob>);
       }
@@ -48,37 +59,67 @@ export class IncomingMessageProcessor extends WorkerHost {
     }
   }
 
-  private async processSingleIncomingMessage(job: Job<IncomingMessageJob>): Promise<void> {
-    const { sessionId, messageData, messageContent, processingFlags } = job.data;
-
+  private async processSingleIncomingMessage(
+    job: Job<IncomingMessageJob>,
+  ): Promise<void> {
+    const { sessionId, messageData, messageContent, processingFlags } =
+      job.data;
     try {
+      // Buffer msgKey por chat (jid)
+      const jid = `${messageData.from}@s.whatsapp.net`;
+      this.msgKeyBuffer.add(jid, {
+        id: messageData.baileysId,
+        remoteJid: jid,
+        fromMe: false,
+      });
+
       // Step 1: Create base message record
       // Use the existing method from MessagesHandleIncoming
       const mockSocket = {}; // We might need to pass the actual socket later
-      const mockMessages = [{
-        key: {
-          id: messageData.baileysId,
-          remoteJid: `${messageData.from}@s.whatsapp.net`,
-          fromMe: false
+      const mockMessages = [
+        {
+          key: {
+            id: messageData.baileysId,
+            remoteJid: `${messageData.from}@s.whatsapp.net`,
+            fromMe: false,
+          },
+          message: messageData.baileysJson,
         },
-        message: messageData.baileysJson
-      }];
-      
-      await this.messagesHandleIncoming.handleIncomingMessages(sessionId, mockMessages, mockSocket);
-      
+      ];
+
+      await this.messagesHandleIncoming.handleIncomingMessages(
+        sessionId,
+        mockMessages,
+        mockSocket,
+      );
+
       // For now, we'll create a mock result
       const messageResult = { id: messageData.baileysId };
 
-      // Step 2: Log status update (will implement queue later)  
-      this.logger.debug(`Message ${messageData.baileysId} processed for ${sessionId}`);
+      // Step 2: Log status update (will implement queue later)
+      // this.logger.debug(
+      //   `Message ${messageData.baileysId} processed for ${sessionId}`,
+      // );
 
       // Step 3: Process content based on message type
       if (processingFlags.needsMediaDownload && messageContent?.mediaUrl) {
-        await this.processMediaContent(messageResult.id, sessionId, messageContent);
+        await this.processMediaContent(
+          messageResult.id,
+          sessionId,
+          messageContent,
+        );
       } else if (messageContent?.text) {
-        await this.processTextContent(messageResult.id, sessionId, messageContent);
+        await this.processTextContent(
+          messageResult.id,
+          sessionId,
+          messageContent,
+        );
       } else if (messageContent?.emoji) {
-        await this.processReactionContent(messageResult.id, sessionId, messageContent);
+        await this.processReactionContent(
+          messageResult.id,
+          sessionId,
+          messageContent,
+        );
       }
 
       // Step 4: Log event for traceability
@@ -88,18 +129,26 @@ export class IncomingMessageProcessor extends WorkerHost {
       if (processingFlags.requiresNotification) {
         await this.handleNotifications(sessionId, messageData, messageContent);
       }
-
     } catch (error) {
-      this.logger.error(`Failed to process incoming message ${messageData.baileysId}: ${error.message}`);
-      
+      this.logger.error(
+        `Failed to process incoming message ${messageData.baileysId}: ${error.message}`,
+      );
+
       // Log failure event
-      await this.logIncomingMessageEvent(sessionId, messageData, 'failed', error.message);
-      
+      await this.logIncomingMessageEvent(
+        sessionId,
+        messageData,
+        'failed',
+        error.message,
+      );
+
       throw error;
     }
   }
 
-  private async processMediaIncomingMessage(job: Job<IncomingMessageJob>): Promise<void> {
+  private async processMediaIncomingMessage(
+    job: Job<IncomingMessageJob>,
+  ): Promise<void> {
     const { sessionId, messageData, messageContent } = job.data;
 
     try {
@@ -109,18 +158,25 @@ export class IncomingMessageProcessor extends WorkerHost {
       }
 
       // For now, just log media processing - will implement download/upload later
-      this.logger.debug(`Media processing for ${messageData.baileysId}: ${messageContent?.mediaType}`);
-
+      // this.logger.debug(
+      //   `Media processing for ${messageData.baileysId}: ${messageContent?.mediaType}`,
+      // );
     } catch (error) {
-      this.logger.error(`Failed to process media message ${messageData.baileysId}: ${error.message}`);
+      this.logger.error(
+        `Failed to process media message ${messageData.baileysId}: ${error.message}`,
+      );
       throw error;
     }
   }
 
-  private async processBulkIncomingMessages(job: Job<BulkIncomingMessageJob>): Promise<void> {
+  private async processBulkIncomingMessages(
+    job: Job<BulkIncomingMessageJob>,
+  ): Promise<void> {
     const { sessionId, messages, batchId, receivedAt } = job.data;
-    
-    this.logger.log(`Processing bulk incoming messages batch ${batchId} with ${messages.length} messages`);
+
+    this.logger.log(
+      `Processing bulk incoming messages batch ${batchId} with ${messages.length} messages`,
+    );
 
     const results = await Promise.allSettled(
       messages.map(async (messageJob, index) => {
@@ -128,16 +184,16 @@ export class IncomingMessageProcessor extends WorkerHost {
           data: {
             sessionId,
             ...messageJob,
-          }
+          },
         } as Job<IncomingMessageJob>);
-      })
+      }),
     );
 
-    const failures = results.filter(result => result.status === 'rejected');
-    const successes = results.filter(result => result.status === 'fulfilled');
+    const failures = results.filter((result) => result.status === 'rejected');
+    const successes = results.filter((result) => result.status === 'fulfilled');
 
     this.logger.log(
-      `Bulk incoming batch ${batchId} completed: ${successes.length} successes, ${failures.length} failures`
+      `Bulk incoming batch ${batchId} completed: ${successes.length} successes, ${failures.length} failures`,
     );
 
     if (failures.length > 0) {
@@ -151,41 +207,63 @@ export class IncomingMessageProcessor extends WorkerHost {
 
     // For now, skip bulk event logging to avoid foreign key issues
     // TODO: Implement proper event lookup by name like BaileysEventLogger
-    this.logger.debug(`Bulk processing completed for batch ${batchId}`);
+    // this.logger.debug(`Bulk processing completed for batch ${batchId}`);
   }
 
-  private async processTextContent(messageId: string, sessionId: string, content: any): Promise<void> {
+  private async processTextContent(
+    messageId: string,
+    sessionId: string,
+    content: any,
+  ): Promise<void> {
     // This would integrate with TextMessages module
-    this.logger.debug(`Processing text content for message ${messageId}`);
+    // this.logger.debug(`Processing text content for message ${messageId}`);
   }
 
-  private async processReactionContent(messageId: string, sessionId: string, content: any): Promise<void> {
+  private async processReactionContent(
+    messageId: string,
+    sessionId: string,
+    content: any,
+  ): Promise<void> {
     // This would integrate with ReactionMessages module
-    this.logger.debug(`Processing reaction content for message ${messageId}`);
+    // this.logger.debug(`Processing reaction content for message ${messageId}`);
   }
 
-  private async processMediaContent(messageId: string, sessionId: string, content: any): Promise<void> {
+  private async processMediaContent(
+    messageId: string,
+    sessionId: string,
+    content: any,
+  ): Promise<void> {
     // This would integrate with MediaMessages module
-    this.logger.debug(`Processing media content for message ${messageId}`);
+    // this.logger.debug(`Processing media content for message ${messageId}`);
   }
 
   private async logIncomingMessageEvent(
-    sessionId: string, 
-    messageData: any, 
-    status: string, 
-    error?: string
+    sessionId: string,
+    messageData: any,
+    status: string,
+    error?: string,
   ): Promise<void> {
     try {
       // For now, skip event logging to avoid foreign key issues
       // TODO: Implement proper event lookup by name like BaileysEventLogger
-      this.logger.debug(`Incoming message ${status} for ${messageData.baileysId}`);
+      // this.logger.debug(
+      //   `Incoming message ${status} for ${messageData.baileysId}`,
+      // );
     } catch (logError) {
-      this.logger.warn(`Failed to log incoming message event: ${logError.message}`);
+      this.logger.warn(
+        `Failed to log incoming message event: ${logError.message}`,
+      );
     }
   }
 
-  private async handleNotifications(sessionId: string, messageData: any, content: any): Promise<void> {
+  private async handleNotifications(
+    sessionId: string,
+    messageData: any,
+    content: any,
+  ): Promise<void> {
     // Placeholder for notification handling
-    this.logger.debug(`Handling notifications for message ${messageData.baileysId}`);
+    // this.logger.debug(
+    //   `Handling notifications for message ${messageData.baileysId}`,
+    // );
   }
 }

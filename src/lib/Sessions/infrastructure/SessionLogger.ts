@@ -5,11 +5,6 @@ import { ISessionLogger } from './interfaces/ISessionLogger';
 export class SessionLogger implements ISessionLogger {
   constructor() {}
 
-  info(message: string, sessionId?: string): void {
-    const prefix = sessionId ? `[${sessionId}]` : '';
-    console.log(`ℹ️ ${prefix} ${message}`);
-  }
-
   warn(message: string, sessionId?: string): void {
     const prefix = sessionId ? `[${sessionId}]` : '';
     console.warn(`⚠️ ${prefix} ${message}`);

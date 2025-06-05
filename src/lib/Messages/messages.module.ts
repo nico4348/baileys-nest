@@ -36,6 +36,7 @@ import { IncomingMessageProcessor } from './infrastructure/IncomingMessageProces
 import { MessagesSendText } from './application/MessagesSendText';
 import { MessagesSendMedia } from './application/MessagesSendMedia';
 import { MessagesSendReaction } from './application/MessagesSendReaction';
+import { MessageKeyBufferService } from './infrastructure/MessageKeyBufferService';
 
 @Module({
   imports: [
@@ -233,6 +234,7 @@ import { MessagesSendReaction } from './application/MessagesSendReaction';
         new MessagesSendReaction(messagesCreate, messageSender),
       inject: ['MessagesCreate', 'MessageSender'],
     },
+    MessageKeyBufferService,
   ],
   exports: [
     'MessageRepository',
@@ -248,6 +250,7 @@ import { MessagesSendReaction } from './application/MessagesSendReaction';
     OutgoingMessageQueue,
     IncomingMessageQueue,
     'IncomingMessageQueue',
+    MessageKeyBufferService, // Exportar el servicio para otros módulos
   ],
 })
 export class MessagesModule {}

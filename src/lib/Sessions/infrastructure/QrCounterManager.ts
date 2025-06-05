@@ -8,11 +8,11 @@ export class QrCounterManager implements QrCounterPort {
   private readonly MAX_QR_LIMIT = 2;
 
   constructor(private readonly logger: ISessionLogger) {}
+
   incrementCounter(sessionId: string): number {
     const currentCount = this.qrCounters.get(sessionId) || 0;
     const newCount = currentCount + 1;
     this.qrCounters.set(sessionId, newCount);
-    // Simplified logging - removed redundant log
     return newCount;
   }
 
@@ -24,6 +24,7 @@ export class QrCounterManager implements QrCounterPort {
   canGenerateQr(sessionId: string): boolean {
     return !this.hasExceededLimit(sessionId);
   }
+
   getCurrentCount(sessionId: string): number {
     return this.qrCounters.get(sessionId) || 0;
   }
@@ -31,9 +32,9 @@ export class QrCounterManager implements QrCounterPort {
   getMaxLimit(): number {
     return this.MAX_QR_LIMIT;
   }
+
   resetCounter(sessionId: string): void {
     this.qrCounters.delete(sessionId);
-    this.logger.info('QR counter reset - successful connection', sessionId);
   }
 
   getRemainingAttempts(sessionId: string): number {
@@ -43,6 +44,5 @@ export class QrCounterManager implements QrCounterPort {
 
   removeSession(sessionId: string): void {
     this.qrCounters.delete(sessionId);
-    // Removed redundant log - already logged in ConnectionManager
   }
 }

@@ -8,6 +8,7 @@ export class QrManager implements IQrManager {
   private qrCodes: Map<string, string> = new Map();
 
   constructor(private readonly logger: ISessionLogger) {}
+
   storeQr(sessionId: string, qr: string): void {
     this.qrCodes.set(sessionId, qr);
   }
@@ -22,7 +23,6 @@ export class QrManager implements IQrManager {
 
   removeQr(sessionId: string): void {
     this.qrCodes.delete(sessionId);
-    this.logger.info('QR code removed', sessionId);
   }
 
   async getQrAsBase64(sessionId: string): Promise<string | null> {

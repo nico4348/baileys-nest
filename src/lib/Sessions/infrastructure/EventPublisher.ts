@@ -14,8 +14,6 @@ export class EventPublisher implements IEventPublisher {
     const eventName = event.eventName();
     const handlers = this.handlers.get(eventName) || [];
 
-    this.logger.info(`Publishing event: ${eventName}`, event.sessionId);
-
     const promises = handlers.map(async (handler) => {
       try {
         await handler(event);
@@ -45,7 +43,6 @@ export class EventPublisher implements IEventPublisher {
     }
 
     this.handlers.get(eventName)!.push(handler);
-    this.logger.info(`Subscribed to event: ${eventName}`);
   }
 
   unsubscribe(
@@ -57,7 +54,6 @@ export class EventPublisher implements IEventPublisher {
       const index = handlers.indexOf(handler);
       if (index > -1) {
         handlers.splice(index, 1);
-        this.logger.info(`Unsubscribed from event: ${eventName}`);
       }
     }
   }

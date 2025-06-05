@@ -10,19 +10,19 @@ export class SessionQrService {
 
   setSocketFactory(sessionId: string, factory: ISocketFactory): void {
     if (!factory) {
-      this.logger.error('Cannot set null or undefined socket factory', null, sessionId);
+      this.logger.error(
+        'Cannot set null or undefined socket factory',
+        null,
+        sessionId,
+      );
       throw new Error('Socket factory cannot be null or undefined');
     }
-    
+
     this.socketFactories.set(sessionId, factory);
-    this.logger.info('Socket factory registered', sessionId);
   }
 
   removeSocketFactory(sessionId: string): void {
-    const removed = this.socketFactories.delete(sessionId);
-    if (removed) {
-      this.logger.info('Socket factory removed', sessionId);
-    }
+    this.socketFactories.delete(sessionId);
   }
 
   getQr(sessionId: string): string | null {
@@ -35,7 +35,11 @@ export class SessionQrService {
     try {
       return socketFactory.getQR(sessionId);
     } catch (error) {
-      this.logger.error('Error getting QR from socket factory', error, sessionId);
+      this.logger.error(
+        'Error getting QR from socket factory',
+        error,
+        sessionId,
+      );
       return null;
     }
   }

@@ -1,7 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { MediaMessagesGetOneById } from './MediaMessagesGetOneById';
 import { MediaMessagesUpdate } from './MediaMessagesUpdate';
-import { S3MediaUploader, S3UploadResult } from '../infrastructure/S3MediaUploader';
+import {
+  S3MediaUploader,
+  S3UploadResult,
+} from '../infrastructure/S3MediaUploader';
 
 export interface UploadToS3Result {
   success: boolean;
@@ -18,15 +21,18 @@ export class UploadMediaToS3 {
     private readonly s3MediaUploader: S3MediaUploader,
   ) {}
 
-  async run(mediaMessageId: string, sessionId: string): Promise<UploadToS3Result> {
-    console.log(`☁️ [UploadMediaToS3] Starting S3 upload for mediaMessageId: ${mediaMessageId}, sessionId: ${sessionId}`);
-    
+  async run(
+    mediaMessageId: string,
+    sessionId: string,
+  ): Promise<UploadToS3Result> {
     try {
-      console.log(`☁️ [UploadMediaToS3] Getting media message from database...`);
-      const mediaMessage = await this.mediaMessagesGetOneById.run(mediaMessageId);
-      
+      const mediaMessage =
+        await this.mediaMessagesGetOneById.run(mediaMessageId);
+
       if (!mediaMessage) {
-        console.error(`❌ [UploadMediaToS3] Media message not found for ID: ${mediaMessageId}`);
+        console.error(
+          `❌ [UploadMediaToS3] Media message not found for ID: ${mediaMessageId}`,
+        );
         throw new Error('Media message not found');
       }
 
@@ -34,46 +40,36 @@ export class UploadMediaToS3 {
       const messageId = mediaMessage.message_id.value;
       const mimeType = mediaMessage.mime_type?.value;
 
-      console.log(`☁️ [UploadMediaToS3] Media message details:`, {
-        localFilePath,
-        messageId,
-        mimeType,
-        mediaType: mediaMessage.media_type.value,
-        fileName: mediaMessage.file_name.value
-      });
-
-      console.log(`☁️ [UploadMediaToS3] Calling S3MediaUploader.uploadFileToS3...`);
-      const uploadResult: S3UploadResult = await this.s3MediaUploader.uploadFileToS3(
-        localFilePath,
-        sessionId,
-        messageId,
-        mimeType
-      );
-
-      console.log(`☁️ [UploadMediaToS3] S3 upload result:`, uploadResult);
+      const uploadResult: S3UploadResult =
+        await this.s3MediaUploader.uploadFileToS3(
+          localFilePath,
+          sessionId,
+          messageId,
+          mimeType,
+        );
 
       if (uploadResult.success && uploadResult.s3Url) {
-        console.log(`☁️ [UploadMediaToS3] Updating database with S3 URL: ${uploadResult.s3Url}`);
         await this.mediaMessagesUpdate.run(
           mediaMessage.message_id.value,
           mediaMessage.caption?.value || null,
           mediaMessage.media_type.value,
           mediaMessage.mime_type?.value || '',
           mediaMessage.file_name.value,
-          uploadResult.s3Url
+          uploadResult.s3Url,
         );
 
-        console.log(`☁️ [UploadMediaToS3] Deleting temporary file: ${localFilePath}`);
         await this.s3MediaUploader.deleteTemporaryFile(localFilePath);
 
-        console.log(`✅ [UploadMediaToS3] S3 upload completed successfully`);
         return {
           success: true,
           s3Url: uploadResult.s3Url,
           s3Key: uploadResult.key,
         };
       } else {
-        console.error(`❌ [UploadMediaToS3] S3 upload failed:`, uploadResult.error);
+        console.error(
+          `❌ [UploadMediaToS3] S3 upload failed:`,
+          uploadResult.error,
+        );
         return {
           success: false,
           error: uploadResult.error || 'Upload failed',

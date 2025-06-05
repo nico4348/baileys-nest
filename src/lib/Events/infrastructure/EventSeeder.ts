@@ -12,19 +12,11 @@ export class EventSeeder implements OnApplicationBootstrap {
   ) {}
 
   async onApplicationBootstrap(): Promise<void> {
-    console.log('🌱 Checking if events table needs seeding...');
-
     try {
       const existingEvents = await this.eventsGetAll.run();
 
       if (existingEvents.length === 0) {
-        console.log('📋 Events table is empty. Starting seed process...');
         await this.seedBaileysEvents();
-        console.log('✅ Events seeding completed successfully');
-      } else {
-        console.log(
-          `📋 Events table already contains ${existingEvents.length} events. Skipping seed.`,
-        );
       }
     } catch (error) {
       console.error('❌ Error during events seeding:', error.message);
@@ -122,12 +114,8 @@ export class EventSeeder implements OnApplicationBootstrap {
           event.description,
           createdAt,
         );
-        console.log(`Event '${event.name}' seeded successfully`);
       } catch (error) {
-        console.log(
-          `Event '${event.name}' already exists or error occurred:`,
-          error.message,
-        );
+        console.error(`Error seeding event '${event.name}':`, error.message);
       }
     }
   }

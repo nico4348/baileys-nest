@@ -27,9 +27,6 @@ export class MessageStatusCreateValidated {
       if (
         !this.statusMapper.shouldCreateValidatedStatus(latestStatus?.statusName)
       ) {
-        console.log(
-          `⏭️ Skipping validated status for message ${messageUuid}: current status is ${latestStatus?.statusName}`,
-        );
         return;
       }
 
@@ -47,14 +44,6 @@ export class MessageStatusCreateValidated {
         messageUuid,
         validatedStatus.id.value,
         new Date(),
-      );
-
-      const progressText = latestStatus
-        ? `${latestStatus.statusName} → validated`
-        : `initial → validated`;
-
-      console.log(
-        `✅ Created MessageStatus for message ${messageUuid}: ${progressText}`,
       );
     } catch (error) {
       console.error(

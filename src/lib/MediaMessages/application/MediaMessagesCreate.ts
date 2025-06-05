@@ -43,18 +43,10 @@ export class MediaMessagesCreate {
       try {
         let uploadResult: MediaUploadResult | null = null;
 
-        console.log(`🔍 Processing media filePath: ${filePath}`);
-        console.log(
-          `📁 Media type: ${mediaType}, MIME: ${mimeType}, FileName: ${fileName}`,
-        );
-
         const isUrl =
           filePath.startsWith('http://') || filePath.startsWith('https://');
-        console.log(`🌐 Is URL: ${isUrl}`);
 
         if (isUrl) {
-          console.log(`⬇️ Downloading media from URL: ${filePath}`);
-
           try {
             const response = await axios.get(filePath, {
               responseType: 'arraybuffer',
@@ -65,11 +57,7 @@ export class MediaMessagesCreate {
               },
             });
 
-            console.log(
-              `✅ Media downloaded successfully, size: ${response.data.byteLength} bytes`,
-            );
             const buffer = Buffer.from(response.data);
-            console.log(`📦 Buffer created, size: ${buffer.length} bytes`);
 
             uploadResult = await this.storageService.uploadBuffer(
               buffer,
@@ -86,16 +74,12 @@ export class MediaMessagesCreate {
             );
           }
         } else if (fs.existsSync(filePath)) {
-          console.log(`📁 Uploading local media to storage: ${filePath}`);
-
           uploadResult = await this.storageService.uploadFromPath(
             filePath,
             sessionId,
             messageId,
             mediaType as 'image' | 'video' | 'audio' | 'document' | 'sticker',
           );
-        } else {
-          console.warn(`Local file not found for upload: ${filePath}`);
         }
 
         if (uploadResult?.success) {
@@ -108,9 +92,6 @@ export class MediaMessagesCreate {
             new MediaMessageFilePath(uploadResult.url),
           );
           await this.repository.update(updatedMediaMessage);
-          console.log(
-            `FilePath updated in database with storage URL: ${uploadResult.url}`,
-          );
         } else if (uploadResult?.error) {
           console.error(`❌ Storage upload failed: ${uploadResult.error}`);
         }

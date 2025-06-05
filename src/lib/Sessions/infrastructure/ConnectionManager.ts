@@ -40,7 +40,7 @@ export class ConnectionManager implements IConnectionManager, ConnectionPort {
   }
 
   async handleCredentialsUpdate(sessionId: string): Promise<void> {
-    this.logger.info('Credentials updated', sessionId);
+    // this.logger.info('Credentials updated', sessionId);
   }
   private async pauseSessionOnQrLimit(sessionId: string): Promise<void> {
     try {
@@ -91,10 +91,10 @@ export class ConnectionManager implements IConnectionManager, ConnectionPort {
     this.qrManager.storeQr(sessionId, qr);
 
     // Simple QR generation log
-    this.logger.info(
-      `QR generated (${newCount}/${this.qrCounterManager.getMaxLimit()})`,
-      sessionId,
-    );
+    // this.logger.info(
+    //   `QR generated (${newCount}/${this.qrCounterManager.getMaxLimit()})`,
+    //   sessionId,
+    // );
 
     // Log QR generation event
     await this.sessionLogLogger.logQrEvent(sessionId);
@@ -126,14 +126,14 @@ export class ConnectionManager implements IConnectionManager, ConnectionPort {
             await this.sessionStateManager.isSessionPaused(sessionId);
 
           if (!isPaused) {
-            this.logger.info('Auto-reconnecting session', sessionId);
+            // this.logger.info('Auto-reconnecting session', sessionId);
             await this.sessionLogLogger.logReconnection(sessionId, reason);
             await this.sessionStateManager.recreateSession(sessionId);
           } else {
-            this.logger.info(
-              'Session is paused, not auto-reconnecting',
-              sessionId,
-            );
+            // this.logger.info(
+            //   'Session is paused, not auto-reconnecting',
+            //   sessionId,
+            // );
           }
         } else {
           this.logger.warn(
@@ -150,7 +150,7 @@ export class ConnectionManager implements IConnectionManager, ConnectionPort {
         );
       }
     } else {
-      this.logger.info('Session closed by logout', sessionId);
+      // this.logger.info('Session closed by logout', sessionId);
       // Reset QR counter on logout since session will need to reauth
       this.qrCounterManager.resetCounter(sessionId);
     }
@@ -168,7 +168,7 @@ export class ConnectionManager implements IConnectionManager, ConnectionPort {
     // Reset QR counter on successful connection
     this.qrCounterManager.resetCounter(sessionId);
 
-    this.logger.info('Session connected successfully', sessionId);
+    // this.logger.info('Session connected successfully', sessionId);
 
     // Log connection event
     await this.sessionLogLogger.logConnectionEvent(sessionId, true);

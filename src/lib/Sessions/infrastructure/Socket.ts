@@ -99,9 +99,6 @@ export class WhatsAppSocketFactory implements ISocketFactory {
           );
 
           if (incomingMessages.length > 0) {
-            console.log(
-              `📨 [${sessionId}] Queueing ${incomingMessages.length} incoming messages`,
-            );
           }
 
           for (const message of incomingMessages) {

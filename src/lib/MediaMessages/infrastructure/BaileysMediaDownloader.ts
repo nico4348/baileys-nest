@@ -57,7 +57,6 @@ export class BaileysMediaDownloader {
   ): Promise<string> {
     const filePath = path.join(MEDIA_DIR, filename);
     await fs.writeFile(filePath, buffer);
-    console.log('✅ Guardado:', filePath);
     return filePath;
   }
 
@@ -95,7 +94,6 @@ export class BaileysMediaDownloader {
         );
 
         if (uploadResult.success) {
-          console.log(`✅ Media uploaded to storage: ${uploadResult.url}`);
           return uploadResult.url;
         } else {
           console.error(`❌ Storage upload failed: ${uploadResult.error}`);

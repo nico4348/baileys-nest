@@ -26,6 +26,7 @@ import { SessionsDelete } from './application/SessionsDelete';
 import { SessionsHardDelete } from './application/SessionsHardDelete';
 import { WhatsAppSessionManager } from './infrastructure/WhatsAppSessionManager';
 import { SessionOrchestrationService } from './application/SessionOrchestrationService';
+import { MessageKeyBufferService } from '../Messages/infrastructure/MessageKeyBufferService';
 import { randomUUID } from 'crypto';
 
 @Controller('sessions')
@@ -50,6 +51,8 @@ export class SessionsController {
     @Inject('SessionsHardDelete')
     private readonly sessionsHardDelete: SessionsHardDelete,
     private readonly sessionOrchestrator: SessionOrchestrationService,
+    @Inject(MessageKeyBufferService)
+    private readonly msgKeyBuffer: MessageKeyBufferService,
   ) {}
 
   @Post(':sessionId/presence/typing')
@@ -75,10 +78,11 @@ export class SessionsController {
         throw new NotFoundException('Sesión no encontrada');
       }
 
-      const jid = body.numero.includes('@') 
-        ? body.numero 
+      const jid = body.numero.includes('@')
+        ? body.numero
         : `${body.numero}@s.whatsapp.net`;
 
+      // Solo simular presencia, sin marcar como leído
       await this.sessionOrchestrator.simulateTypingPresence(
         sessionId,
         jid,
@@ -97,7 +101,10 @@ export class SessionsController {
         },
       };
     } catch (error) {
-      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      ) {
         throw error;
       }
       throw new InternalServerErrorException(
@@ -129,10 +136,11 @@ export class SessionsController {
         throw new NotFoundException('Sesión no encontrada');
       }
 
-      const jid = body.numero.includes('@') 
-        ? body.numero 
+      const jid = body.numero.includes('@')
+        ? body.numero
         : `${body.numero}@s.whatsapp.net`;
 
+      // Solo simular presencia, sin marcar como leído
       await this.sessionOrchestrator.simulateRecordingPresence(
         sessionId,
         jid,
@@ -151,11 +159,62 @@ export class SessionsController {
         },
       };
     } catch (error) {
-      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      ) {
         throw error;
       }
       throw new InternalServerErrorException(
         'Error al simular presencia de grabación: ' + error.message,
+      );
+    }
+  }
+
+  // Nuevo endpoint para marcar mensajes como leídos
+  @Post(':sessionId/read-messages')
+  async readMessages(
+    @Param('sessionId') sessionId: string,
+    @Body() body: { numero: string },
+  ) {
+    try {
+      if (!body.numero) {
+        throw new BadRequestException('El campo numero es requerido');
+      }
+
+      const session = await this.sessionsGetOneById.run(sessionId);
+      if (!session) {
+        throw new NotFoundException('Sesión no encontrada');
+      }
+
+      const jid = body.numero.includes('@')
+        ? body.numero
+        : `${body.numero}@s.whatsapp.net`;
+      const socket = this.sessionOrchestrator.getSocket(sessionId);
+      const msgKeys = this.msgKeyBuffer.getAndClear(jid);
+      if (socket && msgKeys.length > 0 && socket.readMessages) {
+        await socket.readMessages(msgKeys);
+      }
+
+      return {
+        success: true,
+        message: `Mensajes marcados como leídos para ${body.numero}`,
+        data: {
+          sessionId,
+          numero: body.numero,
+          jid,
+          cantidad: msgKeys.length,
+        },
+      };
+    } catch (error) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      ) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        'Error al marcar mensajes como leídos: ' + error.message,
       );
     }
   }

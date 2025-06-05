@@ -49,7 +49,7 @@ import { EventLoggingQueue } from '../EventLogs/infrastructure/EventLoggingQueue
     EventsModule,
     EventLogsModule,
     MessageStatusModule,
-    forwardRef(() => MessagesModule),
+    forwardRef(() => MessagesModule), // Importar MessagesModule para acceso a MessageKeyBufferService
   ],
   controllers: [SessionsController],
   providers: [
@@ -291,8 +291,16 @@ import { EventLoggingQueue } from '../EventLogs/infrastructure/EventLoggingQueue
     // Baileys Event Logger
     {
       provide: BaileysEventLogger,
-      useFactory: (eventLogsCreate: any, eventsGetOneByName: any, eventLoggingQueue: any) =>
-        new BaileysEventLogger(eventLogsCreate, eventsGetOneByName, eventLoggingQueue),
+      useFactory: (
+        eventLogsCreate: any,
+        eventsGetOneByName: any,
+        eventLoggingQueue: any,
+      ) =>
+        new BaileysEventLogger(
+          eventLogsCreate,
+          eventsGetOneByName,
+          eventLoggingQueue,
+        ),
       inject: ['EventLogsCreate', 'EventsGetOneByName', 'EventLoggingQueue'],
     },
     // Auto-initializer for starting sessions on bootstrap
