@@ -219,79 +219,40 @@ export class MessagesController {
     }
   }
 
-  // Unified WhatsApp Message Sending Endpoint
+  // --- Separated WhatsApp Message Sending Endpoints ---
 
-  @Post('send')
+  @Post('send-text')
   @UsePipes(new ValidationPipe({ transform: true }))
-  async send(
+  async sendTextMessage(
     @Body() request: SendMessageRequest,
   ): Promise<SendMessageResponse> {
     try {
-      // Queue the message instead of sending immediately
       const messageId = uuidv4();
-      
-      let content: string | Buffer;
-      let messageData: any = {
-        to: `${request.to}@s.whatsapp.net`,
-      };
-
-      // Prepare content based on message type
-      switch (request.messageType) {
-        case 'text':
-          if (!request.textData?.text) {
-            throw new Error('Text data is required for text messages');
-          }
-          content = request.textData.text;
-          messageData.content = content;
-          if (request.quotedMessageId) {
-            messageData.quotedMessageId = request.quotedMessageId;
-          }
-          break;
-          
-        case 'media':
-          if (!request.mediaData?.url) {
-            throw new Error('Media data is required for media messages');
-          }
-          content = request.mediaData.url;
-          messageData.content = content;
-          messageData.mediaType = request.mediaData.mediaType;
-          messageData.fileName = request.mediaData.fileName;
-          messageData.caption = request.mediaData.caption;
-          if (request.quotedMessageId) {
-            messageData.quotedMessageId = request.quotedMessageId;
-          }
-          break;
-          
-        case 'reaction':
-          if (!request.reactionData?.emoji) {
-            throw new Error('Reaction data is required for reaction messages');
-          }
-          content = request.reactionData.emoji;
-          messageData.content = content;
-          messageData.emoji = request.reactionData.emoji;
-          messageData.targetMessageId = request.reactionData.targetMessageId;
-          break;
-          
-        default:
-          throw new Error(`Unsupported message type: ${request.messageType}`);
+      if (!request.textData?.text) {
+        throw new Error('Text data is required for text messages');
       }
-
-      // Add to outgoing message queue
+      const messageData: any = {
+        to: `${request.to}@s.whatsapp.net`,
+        content: request.textData.text,
+      };
+      if (request.quotedMessageId) {
+        messageData.quotedMessageId = request.quotedMessageId;
+      }
       await this.outgoingMessageQueue.addMessage({
         sessionId: request.sessionId,
-        messageType: request.messageType as 'text' | 'media' | 'reaction',
+        messageType: 'text',
         messageData,
-        priority: request.messageType === 'reaction' ? 'high' : 'normal',
+        priority: 'normal',
         retryCount: 3,
       });
-
-      console.log(`📤 [${request.sessionId}] ${request.messageType} message queued for ${request.to}`);
-
+      console.log(
+        `📤 [${request.sessionId}] text message queued for ${request.to}`,
+      );
       return {
         success: true,
         messageId,
-        message: `${request.messageType} message queued successfully`,
-        messageType: request.messageType,
+        message: 'text message queued successfully',
+        messageType: 'text',
         queued: true,
         timestamp: new Date(),
       };
@@ -300,7 +261,103 @@ export class MessagesController {
         {
           success: false,
           message: error.message,
-          messageType: request?.messageType || 'unknown',
+          messageType: 'text',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  @Post('send-media')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async sendMediaMessage(
+    @Body() request: SendMessageRequest,
+  ): Promise<SendMessageResponse> {
+    try {
+      const messageId = uuidv4();
+      if (!request.mediaData?.url) {
+        throw new Error('Media data is required for media messages');
+      }
+      const messageData: any = {
+        to: `${request.to}@s.whatsapp.net`,
+        content: request.mediaData.url,
+        mediaType: request.mediaData.mediaType,
+        fileName: request.mediaData.fileName,
+        caption: request.mediaData.caption,
+      };
+      if (request.quotedMessageId) {
+        messageData.quotedMessageId = request.quotedMessageId;
+      }
+      await this.outgoingMessageQueue.addMessage({
+        sessionId: request.sessionId,
+        messageType: 'media',
+        messageData,
+        priority: 'normal',
+        retryCount: 3,
+      });
+      console.log(
+        `📤 [${request.sessionId}] media message queued for ${request.to}`,
+      );
+      return {
+        success: true,
+        messageId,
+        message: 'media message queued successfully',
+        messageType: 'media',
+        queued: true,
+        timestamp: new Date(),
+      };
+    } catch (error) {
+      throw new HttpException(
+        {
+          success: false,
+          message: error.message,
+          messageType: 'media',
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  @Post('send-reaction')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  async sendReactionMessage(
+    @Body() request: SendMessageRequest,
+  ): Promise<SendMessageResponse> {
+    try {
+      const messageId = uuidv4();
+      if (!request.reactionData?.emoji) {
+        throw new Error('Reaction data is required for reaction messages');
+      }
+      const messageData: any = {
+        to: `${request.to}@s.whatsapp.net`,
+        content: request.reactionData.emoji,
+        emoji: request.reactionData.emoji,
+        targetMessageId: request.reactionData.targetMessageId,
+      };
+      await this.outgoingMessageQueue.addMessage({
+        sessionId: request.sessionId,
+        messageType: 'reaction',
+        messageData,
+        priority: 'high',
+        retryCount: 3,
+      });
+      console.log(
+        `📤 [${request.sessionId}] reaction message queued for ${request.to}`,
+      );
+      return {
+        success: true,
+        messageId,
+        message: 'reaction message queued successfully',
+        messageType: 'reaction',
+        queued: true,
+        timestamp: new Date(),
+      };
+    } catch (error) {
+      throw new HttpException(
+        {
+          success: false,
+          message: error.message,
+          messageType: 'reaction',
         },
         HttpStatus.BAD_REQUEST,
       );
