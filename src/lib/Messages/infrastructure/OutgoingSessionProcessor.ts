@@ -3,6 +3,7 @@ import { Worker, Job } from 'bullmq';
 import { OutgoingMessageJob, BulkOutgoingMessageJob } from './OutgoingMessageQueue';
 import { SessionRateLimiter } from './SessionRateLimiter';
 import { OutgoingQueueManager } from './OutgoingQueueManager';
+import { SessionsGetOneById } from '../../Sessions/application/SessionsGetOneById';
 import Redis from 'ioredis';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -30,6 +31,8 @@ export class OutgoingSessionProcessor implements OnModuleDestroy {
     private readonly sessionRateLimiter: SessionRateLimiter,
     @Inject(forwardRef(() => OutgoingQueueManager))
     private readonly queueManager: OutgoingQueueManager,
+    @Inject('SessionsGetOneById')
+    private readonly sessionsGetOneById: SessionsGetOneById,
   ) {
     this.redis = new Redis({
       host: process.env.REDIS_HOST || 'localhost',
@@ -229,6 +232,9 @@ export class OutgoingSessionProcessor implements OnModuleDestroy {
     job: Job<OutgoingMessageJob | BulkOutgoingMessageJob>
   ): Promise<any> {
     try {
+      // Validate session is active before processing any job
+      await this.validateSessionIsActive(sessionId);
+
       if (job.name === 'send-message' || job.name === 'outgoing-message') {
         return await this.processSingleMessage(sessionId, job as Job<OutgoingMessageJob>);
       } else if (job.name === 'send-bulk-messages') {
@@ -531,6 +537,25 @@ export class OutgoingSessionProcessor implements OnModuleDestroy {
 
   private delay(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  private async validateSessionIsActive(sessionId: string): Promise<void> {
+    try {
+      const session = await this.sessionsGetOneById.run(sessionId);
+      
+      if (!session) {
+        throw new Error(`Session ${sessionId} not found`);
+      }
+
+      if (!session.status || session.status.value === false) {
+        throw new Error(`Session ${sessionId} is not online - cannot process messages`);
+      }
+
+      this.logger.debug(`Session ${sessionId} validation passed during processing - status: ${session.status.value}`);
+    } catch (error) {
+      this.logger.warn(`Session validation failed during processing for ${sessionId}: ${error.message}`);
+      throw error;
+    }
   }
 
   private setupWorkerEventHandlers(worker: Worker, sessionId: string): void {

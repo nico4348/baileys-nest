@@ -263,6 +263,19 @@ export class MessagesController {
         timestamp: new Date(),
       };
     } catch (error) {
+      // Check if it's a session validation error
+      if (error.message.includes('not online') || error.message.includes('not found')) {
+        throw new HttpException(
+          {
+            success: false,
+            message: error.message,
+            messageType: 'text',
+            error: 'SESSION_OFFLINE',
+          },
+          HttpStatus.PRECONDITION_FAILED,
+        );
+      }
+
       throw new HttpException(
         {
           success: false,
@@ -312,6 +325,19 @@ export class MessagesController {
         timestamp: new Date(),
       };
     } catch (error) {
+      // Check if it's a session validation error
+      if (error.message.includes('not online') || error.message.includes('not found')) {
+        throw new HttpException(
+          {
+            success: false,
+            message: error.message,
+            messageType: 'media',
+            error: 'SESSION_OFFLINE',
+          },
+          HttpStatus.PRECONDITION_FAILED,
+        );
+      }
+
       throw new HttpException(
         {
           success: false,
@@ -357,6 +383,19 @@ export class MessagesController {
         timestamp: new Date(),
       };
     } catch (error) {
+      // Check if it's a session validation error
+      if (error.message.includes('not online') || error.message.includes('not found')) {
+        throw new HttpException(
+          {
+            success: false,
+            message: error.message,
+            messageType: 'reaction',
+            error: 'SESSION_OFFLINE',
+          },
+          HttpStatus.PRECONDITION_FAILED,
+        );
+      }
+
       throw new HttpException(
         {
           success: false,

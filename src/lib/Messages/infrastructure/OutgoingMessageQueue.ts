@@ -1,8 +1,9 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Inject } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { OutgoingQueueManager } from './OutgoingQueueManager';
 import { OutgoingSessionProcessor } from './OutgoingSessionProcessor';
+import { SessionsGetOneById } from '../../Sessions/application/SessionsGetOneById';
 
 export interface OutgoingMessageJob {
   sessionId: string;
@@ -38,9 +39,14 @@ export class OutgoingMessageQueue {
     private readonly outgoingQueue: Queue,
     private readonly queueManager: OutgoingQueueManager,
     private readonly sessionProcessor: OutgoingSessionProcessor,
+    @Inject('SessionsGetOneById')
+    private readonly sessionsGetOneById: SessionsGetOneById,
   ) {}
 
   async addMessage(job: OutgoingMessageJob): Promise<void> {
+    // Validate session is active
+    await this.validateSessionIsActive(job.sessionId);
+    
     // Ensure session worker exists
     await this.ensureSessionWorker(job.sessionId);
     
@@ -49,6 +55,9 @@ export class OutgoingMessageQueue {
   }
 
   async addBulkMessages(job: BulkOutgoingMessageJob): Promise<void> {
+    // Validate session is active
+    await this.validateSessionIsActive(job.sessionId);
+    
     // Ensure session worker exists
     await this.ensureSessionWorker(job.sessionId);
     
@@ -57,6 +66,9 @@ export class OutgoingMessageQueue {
   }
 
   async addHighPriorityMessage(job: OutgoingMessageJob): Promise<void> {
+    // Validate session is active
+    await this.validateSessionIsActive(job.sessionId);
+    
     // Ensure session worker exists
     await this.ensureSessionWorker(job.sessionId);
     
@@ -105,6 +117,25 @@ export class OutgoingMessageQueue {
         this.logger.error(`Failed to create worker for session ${sessionId}: ${error.message}`);
         throw error;
       }
+    }
+  }
+
+  private async validateSessionIsActive(sessionId: string): Promise<void> {
+    try {
+      const session = await this.sessionsGetOneById.run(sessionId);
+      
+      if (!session) {
+        throw new Error(`Session ${sessionId} not found`);
+      }
+
+      if (!session.status || session.status.value === false) {
+        throw new Error(`Session ${sessionId} is not online - cannot send messages`);
+      }
+
+      this.logger.debug(`Session ${sessionId} validation passed - status: ${session.status.value}`);
+    } catch (error) {
+      this.logger.warn(`Session validation failed for ${sessionId}: ${error.message}`);
+      throw error;
     }
   }
 
