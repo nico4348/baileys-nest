@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { OutgoingQueueManager } from './OutgoingQueueManager';
@@ -31,6 +31,8 @@ export interface BulkOutgoingMessageJob {
 
 @Injectable()
 export class OutgoingMessageQueue {
+  private readonly logger = new Logger(OutgoingMessageQueue.name);
+
   constructor(
     @InjectQueue('outgoing-messages') 
     private readonly outgoingQueue: Queue,
@@ -94,8 +96,15 @@ export class OutgoingMessageQueue {
 
   async ensureSessionWorker(sessionId: string): Promise<void> {
     const activeWorkers = this.sessionProcessor.getActiveSessionWorkers();
+    
     if (!activeWorkers.includes(sessionId)) {
-      await this.sessionProcessor.createSessionWorker(sessionId);
+      this.logger.debug(`Creating worker for session ${sessionId}`);
+      try {
+        await this.sessionProcessor.createSessionWorker(sessionId);
+      } catch (error) {
+        this.logger.error(`Failed to create worker for session ${sessionId}: ${error.message}`);
+        throw error;
+      }
     }
   }
 

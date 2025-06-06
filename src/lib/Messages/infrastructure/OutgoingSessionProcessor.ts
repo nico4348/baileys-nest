@@ -46,31 +46,47 @@ export class OutgoingSessionProcessor implements OnModuleDestroy {
       return;
     }
 
-    const queueName = `outgoing-messages-${sessionId}`;
-    const workerConfig: SessionWorkerConfig = {
-      sessionId,
-      concurrency: config?.concurrency || 1,
-      enabled: config?.enabled !== false,
-    };
+    try {
+      const queueName = `outgoing-messages-${sessionId}`;
+      const workerConfig: SessionWorkerConfig = {
+        sessionId,
+        concurrency: config?.concurrency || 1,
+        enabled: config?.enabled !== false,
+      };
 
-    const worker = new Worker(
-      queueName,
-      async (job: Job<OutgoingMessageJob | BulkOutgoingMessageJob>) => {
-        return await this.processJob(sessionId, job);
-      },
-      {
-        connection: this.redis,
-        concurrency: workerConfig.concurrency,
+      this.logger.log(`Creating worker for session ${sessionId} with queue: ${queueName}`);
+      
+      const worker = new Worker(
+        queueName,
+        async (job: Job<OutgoingMessageJob | BulkOutgoingMessageJob>) => {
+          this.logger.debug(`🎯 Processing job ${job.id} for session ${sessionId}`);
+          return await this.processJob(sessionId, job);
+        },
+        {
+          connection: this.redis,
+          concurrency: workerConfig.concurrency,
+        }
+      );
+
+      // Setup worker event handlers
+      this.setupWorkerEventHandlers(worker, sessionId);
+
+      this.workers.set(sessionId, worker);
+      this.workerConfig.set(sessionId, workerConfig);
+
+      this.logger.log(`✅ Worker created for session ${sessionId} with concurrency ${workerConfig.concurrency}`);
+      
+      // Ensure the queue is not paused when creating a new worker
+      try {
+        await this.queueManager.resumeSession(sessionId);
+        this.logger.debug(`▶️ Ensured queue is active for session ${sessionId}`);
+      } catch (resumeError) {
+        this.logger.error(`❌ Failed to ensure queue is active for session ${sessionId}: ${resumeError.message}`);
       }
-    );
-
-    // Setup worker event handlers
-    this.setupWorkerEventHandlers(worker, sessionId);
-
-    this.workers.set(sessionId, worker);
-    this.workerConfig.set(sessionId, workerConfig);
-
-    this.logger.log(`Created worker for session ${sessionId} with concurrency ${workerConfig.concurrency}`);
+    } catch (error) {
+      this.logger.error(`💥 Error creating worker for session ${sessionId}: ${error.message}`);
+      throw error;
+    }
   }
 
   async removeSessionWorker(sessionId: string): Promise<void> {
@@ -92,22 +108,6 @@ export class OutgoingSessionProcessor implements OnModuleDestroy {
     }
   }
 
-  async pauseSessionWorker(sessionId: string): Promise<void> {
-    const worker = this.workers.get(sessionId);
-    if (worker) {
-      this.logger.warn(`⏸️ Attempting to pause worker for session ${sessionId}. Current state: isPaused=${worker.isPaused()}`);
-      try {
-        await worker.pause();
-        this.logger.warn(`⏸️ Successfully paused worker for session ${sessionId}. New state: isPaused=${worker.isPaused()}`);
-      } catch (error) {
-        this.logger.error(`❌ Error pausing worker for session ${sessionId}: ${error.message}`);
-        throw error;
-      }
-    } else {
-      this.logger.error(`❌ No worker found for session ${sessionId} when trying to pause`);
-      throw new Error(`No worker found for session ${sessionId}`);
-    }
-  }
 
   async pauseSessionQueue(sessionId: string): Promise<void> {
     try {
@@ -129,105 +129,44 @@ export class OutgoingSessionProcessor implements OnModuleDestroy {
     }
   }
 
-  async resumeSessionWorker(sessionId: string): Promise<void> {
-    const worker = this.workers.get(sessionId);
-    if (worker) {
-      this.logger.warn(`▶️ Attempting to resume worker for session ${sessionId}. Current isPaused: ${worker.isPaused()}`);
-      
-      try {
-        // Force resume by calling resume multiple times if needed
-        await worker.resume();
-        
-        // Check if it's still paused and force resume again
-        if (worker.isPaused()) {
-          this.logger.warn(`⚠️ Worker still paused after first resume attempt, trying again...`);
-          await worker.resume();
-        }
-        
-        // If still paused, recreate the worker
-        if (worker.isPaused()) {
-          this.logger.warn(`⚠️ Worker still paused, recreating worker for session ${sessionId}`);
-          try {
-            await this.removeSessionWorker(sessionId);
-            this.logger.warn(`🗑️ Removed old worker for session ${sessionId}`);
-            
-            await this.createSessionWorker(sessionId);
-            this.logger.warn(`🔄 Recreated worker for session ${sessionId}`);
-            
-            // Verify the new worker is working
-            const newWorker = this.workers.get(sessionId);
-            if (newWorker) {
-              this.logger.warn(`✅ New worker created successfully. isPaused: ${newWorker.isPaused()}, isRunning: ${newWorker.isRunning()}`);
-            } else {
-              this.logger.error(`❌ Failed to create new worker for session ${sessionId}`);
-            }
-          } catch (recreateError) {
-            this.logger.error(`❌ Error recreating worker for session ${sessionId}: ${recreateError.message}`);
-          }
-        } else {
-          this.logger.warn(`▶️ Successfully resumed worker for session ${sessionId}. New isPaused: ${worker.isPaused()}`);
-        }
-      } catch (error) {
-        this.logger.error(`❌ Error resuming worker for session ${sessionId}: ${error.message}`);
-        // Try recreating the worker as fallback
-        this.logger.warn(`🔄 Fallback: Recreating worker for session ${sessionId}`);
-        try {
-          await this.removeSessionWorker(sessionId);
-          this.logger.warn(`🗑️ Fallback: Removed old worker for session ${sessionId}`);
-          
-          await this.createSessionWorker(sessionId);
-          this.logger.warn(`🔄 Fallback: Recreated worker for session ${sessionId}`);
-          
-          const newWorker = this.workers.get(sessionId);
-          if (newWorker) {
-            this.logger.warn(`✅ Fallback: New worker created successfully. isPaused: ${newWorker.isPaused()}, isRunning: ${newWorker.isRunning()}`);
-          }
-        } catch (fallbackError) {
-          this.logger.error(`❌ Fallback failed for session ${sessionId}: ${fallbackError.message}`);
-        }
-      }
-    } else {
-      this.logger.error(`❌ No worker found for session ${sessionId} when trying to resume`);
-    }
-  }
 
   private scheduleQueueResume(sessionId: string, delayMs: number): void {
     // Clear any existing timeout for this session
     const existingTimeout = this.resumeTimeouts.get(sessionId);
     if (existingTimeout) {
       clearTimeout(existingTimeout);
-      this.logger.warn(`🗑️ Cleared existing timeout for session ${sessionId}`);
+      this.logger.warn(`🗑️ Cleared existing resume timeout for session ${sessionId}`);
     }
     
-    this.logger.warn(`🔄 Scheduling QUEUE resume for session ${sessionId} in ${delayMs / 1000}s`);
+    this.logger.warn(`🔄 Scheduling automatic queue resume for session ${sessionId} in ${delayMs / 1000}s`);
     
     const timeoutId = setTimeout(() => {
-      this.logger.warn(`⏰ Timeout triggered, attempting to resume QUEUE for session ${sessionId}`);
+      this.logger.warn(`⏰ Auto-resume triggered for session ${sessionId}`);
       
       // Remove from timeout tracking
       this.resumeTimeouts.delete(sessionId);
       
-      // Reset the rate limit first
+      // Reset the rate limit first, then resume the queue
       this.sessionRateLimiter.reset(sessionId)
         .then(() => {
-          this.logger.warn(`🔄 Rate limit reset for session ${sessionId}`);
-          // Then resume the queue
+          this.logger.warn(`🔄 Rate limit counter reset for session ${sessionId}`);
+          // Then resume the queue processing
           return this.resumeSessionQueue(sessionId);
         })
         .then(() => {
-          this.logger.warn(`✅ Successfully resumed QUEUE for session ${sessionId} after rate limit cooldown`);
+          this.logger.warn(`✅ Queue automatically resumed for session ${sessionId} - messages will now process`);
         })
         .catch((error) => {
-          this.logger.error(`❌ Failed to resume queue for session ${sessionId}: ${error.message}`);
+          this.logger.error(`❌ Failed to auto-resume queue for session ${sessionId}: ${error.message}`);
           // Retry resume after 5 seconds if it fails
-          this.logger.warn(`🔄 Retrying queue resume for session ${sessionId} in 5s`);
+          this.logger.warn(`🔄 Retrying auto-resume for session ${sessionId} in 5s`);
           this.scheduleQueueResume(sessionId, 5000);
         });
     }, delayMs);
     
     // Track the timeout
     this.resumeTimeouts.set(sessionId, timeoutId);
-    this.logger.warn(`⏱️ Queue resume timeout set for session ${sessionId}. Active timeouts: ${this.resumeTimeouts.size}`);
+    this.logger.warn(`⏱️ Auto-resume scheduled for session ${sessionId}. Active schedules: ${this.resumeTimeouts.size}`);
   }
 
   async updateSessionWorkerConcurrency(sessionId: string, concurrency: number): Promise<void> {
@@ -314,10 +253,10 @@ export class OutgoingSessionProcessor implements OnModuleDestroy {
     if (!rateLimitResult.allowed) {
       const retryAfter = rateLimitResult.retryAfter || 60;
       this.logger.warn(
-        `Rate limit exceeded for session ${sessionId}. Pausing worker for ${retryAfter}s`
+        `Rate limit exceeded for session ${sessionId}. Pausing queue for ${retryAfter}s`
       );
       
-      // Pause the queue processing for this session (not the worker)
+      // Pause the queue processing for this session
       try {
         await this.pauseSessionQueue(sessionId);
         this.logger.warn(`⏸️ Queue paused successfully, scheduling resume in ${retryAfter}s`);
@@ -330,8 +269,8 @@ export class OutgoingSessionProcessor implements OnModuleDestroy {
         this.scheduleQueueResume(sessionId, retryAfter * 1000);
       }
       
-      // Throw error to fail this job, but worker will be paused so no more jobs will process
-      throw new Error(`Rate limit exceeded - worker paused for ${retryAfter}s`);
+      // Throw error to fail this job, queue is paused so no more jobs will process
+      throw new Error(`Rate limit exceeded - queue paused for ${retryAfter}s`);
     }
 
     try {

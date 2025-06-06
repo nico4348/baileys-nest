@@ -203,7 +203,14 @@ export class OutgoingQueueManager implements OnModuleDestroy {
       queue = new Queue(queueName, this.queueOptions);
       
       this.queues.set(sessionId, queue);
-      this.logger.debug(`Created new queue for session ${sessionId}`);
+      this.logger.debug(`Created new queue: ${queueName}`);
+      
+      // Ensure new queues start in resumed state
+      const isPaused = await queue.isPaused();
+      if (isPaused) {
+        await queue.resume();
+        this.logger.debug(`Auto-resumed queue ${queueName} after creation`);
+      }
       
       // Setup error handling for the queue
       queue.on('error', (error) => {
