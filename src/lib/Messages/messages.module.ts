@@ -40,6 +40,7 @@ import { IncomingMessageQueue } from './infrastructure/IncomingMessageQueue';
 import { IncomingMessageProcessor } from './infrastructure/IncomingMessageProcessor';
 import { MessageKeyBufferService } from './infrastructure/MessageKeyBufferService';
 import { SessionRateLimiter } from './infrastructure/SessionRateLimiter';
+import { QueueRecoveryService } from './infrastructure/QueueRecoveryService';
 
 @Module({
   imports: [
@@ -230,6 +231,7 @@ import { SessionRateLimiter } from './infrastructure/SessionRateLimiter';
       useExisting: IncomingMessageQueue,
     },
     MessageKeyBufferService,
+    QueueRecoveryService,
   ],
   exports: [
     'MessageRepository',
@@ -244,7 +246,8 @@ import { SessionRateLimiter } from './infrastructure/SessionRateLimiter';
     OutgoingMessageQueue,
     IncomingMessageQueue,
     'IncomingMessageQueue',
-    MessageKeyBufferService, // Exportar el servicio para otros módulos
+    MessageKeyBufferService,
+    QueueRecoveryService,
   ],
 })
 export class MessagesModule {}

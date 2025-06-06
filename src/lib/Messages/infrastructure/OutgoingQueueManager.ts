@@ -195,6 +195,14 @@ export class OutgoingQueueManager implements OnModuleDestroy {
     return this.queues.size;
   }
 
+  getQueue(sessionId: string): Queue | undefined {
+    return this.queues.get(sessionId);
+  }
+
+  hasQueue(sessionId: string): boolean {
+    return this.queues.has(sessionId);
+  }
+
   private async getOrCreateQueue(sessionId: string): Promise<Queue> {
     let queue = this.queues.get(sessionId);
     

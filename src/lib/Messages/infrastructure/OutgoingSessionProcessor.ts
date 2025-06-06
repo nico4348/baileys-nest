@@ -16,7 +16,7 @@ export interface SessionWorkerConfig {
 export class OutgoingSessionProcessor implements OnModuleDestroy {
   private readonly logger = new Logger(OutgoingSessionProcessor.name);
   private readonly redis: Redis;
-  private readonly workers = new Map<string, Worker>();
+  private readonly sessionWorkers = new Map<string, Worker>();
   private readonly workerConfig = new Map<string, SessionWorkerConfig>();
   private readonly resumeTimeouts = new Map<string, NodeJS.Timeout>();
 
@@ -40,8 +40,17 @@ export class OutgoingSessionProcessor implements OnModuleDestroy {
     });
   }
 
+  async ensureSessionWorker(sessionId: string): Promise<void> {
+    if (this.sessionWorkers.has(sessionId)) {
+      this.logger.debug(`Worker for session ${sessionId} already exists`);
+      return;
+    }
+
+    await this.createSessionWorker(sessionId);
+  }
+
   async createSessionWorker(sessionId: string, config?: SessionWorkerConfig): Promise<void> {
-    if (this.workers.has(sessionId)) {
+    if (this.sessionWorkers.has(sessionId)) {
       this.logger.warn(`Worker for session ${sessionId} already exists`);
       return;
     }
@@ -71,7 +80,7 @@ export class OutgoingSessionProcessor implements OnModuleDestroy {
       // Setup worker event handlers
       this.setupWorkerEventHandlers(worker, sessionId);
 
-      this.workers.set(sessionId, worker);
+      this.sessionWorkers.set(sessionId, worker);
       this.workerConfig.set(sessionId, workerConfig);
 
       this.logger.log(`✅ Worker created for session ${sessionId} with concurrency ${workerConfig.concurrency}`);
@@ -90,10 +99,10 @@ export class OutgoingSessionProcessor implements OnModuleDestroy {
   }
 
   async removeSessionWorker(sessionId: string): Promise<void> {
-    const worker = this.workers.get(sessionId);
+    const worker = this.sessionWorkers.get(sessionId);
     if (worker) {
       await worker.close();
-      this.workers.delete(sessionId);
+      this.sessionWorkers.delete(sessionId);
       this.workerConfig.delete(sessionId);
       
       // Clear any pending resume timeout
@@ -181,15 +190,15 @@ export class OutgoingSessionProcessor implements OnModuleDestroy {
   }
 
   getActiveSessionWorkers(): string[] {
-    return Array.from(this.workers.keys());
+    return Array.from(this.sessionWorkers.keys());
   }
 
   getWorkerCount(): number {
-    return this.workers.size;
+    return this.sessionWorkers.size;
   }
 
   async getSessionWorkerStats(sessionId: string) {
-    const worker = this.workers.get(sessionId);
+    const worker = this.sessionWorkers.get(sessionId);
     const config = this.workerConfig.get(sessionId);
     
     if (!worker || !config) {
@@ -208,7 +217,7 @@ export class OutgoingSessionProcessor implements OnModuleDestroy {
   async getAllWorkerStats() {
     const stats = new Map<string, any>();
     
-    for (const sessionId of this.workers.keys()) {
+    for (const sessionId of this.sessionWorkers.keys()) {
       stats.set(sessionId, await this.getSessionWorkerStats(sessionId));
     }
     
@@ -560,10 +569,10 @@ export class OutgoingSessionProcessor implements OnModuleDestroy {
     }
     this.resumeTimeouts.clear();
     
-    const closePromises = Array.from(this.workers.values()).map(worker => worker.close());
+    const closePromises = Array.from(this.sessionWorkers.values()).map(worker => worker.close());
     await Promise.all(closePromises);
     
-    this.workers.clear();
+    this.sessionWorkers.clear();
     this.workerConfig.clear();
     await this.redis.disconnect();
     
