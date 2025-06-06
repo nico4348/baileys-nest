@@ -30,6 +30,8 @@ export class SessionsResume {
       new Date(),
       session.isDeleted.value,
       session.deletedAt.value || undefined,
+      session.rateLimit.getValue(),
+      session.rateLimitWindow.getValue(),
     );
 
     console.log(`Reanudando sesión ${sessionId}`);

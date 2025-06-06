@@ -15,6 +15,11 @@ export interface SessionLimitConfig {
   window: number;
 }
 
+export interface SessionWindowConfig {
+  sessionId: string;
+  window: number;
+}
+
 @Injectable()
 export class SessionRateLimiter {
   private readonly logger = new Logger(SessionRateLimiter.name);
@@ -22,6 +27,7 @@ export class SessionRateLimiter {
   private readonly defaultLimit: number;
   private readonly defaultWindow: number;
   private limitCache = new Map<string, { limit: number; expires: number }>();
+  private windowCache = new Map<string, { window: number; expires: number }>();
 
   constructor(
     @Inject('SessionsGetOneById')
@@ -36,12 +42,13 @@ export class SessionRateLimiter {
     });
 
     this.defaultLimit = parseInt(process.env.DEFAULT_RATE_LIMIT || '30');
-    this.defaultWindow = 60; // 60 seconds
+    this.defaultWindow = parseInt(process.env.DEFAULT_RATE_WINDOW || '60'); // 60 seconds
   }
 
   async canSend(sessionId: string): Promise<RateLimitResult> {
     const key = `rate_limit:${sessionId}`;
     const limit = await this.getSessionLimit(sessionId);
+    const window = await this.getSessionWindow(sessionId);
     
     try {
       const current = await this.redis.get(key);
@@ -49,7 +56,7 @@ export class SessionRateLimiter {
       
       if (currentCount >= limit) {
         const ttl = await this.redis.ttl(key);
-        const retryAfter = ttl > 0 ? ttl : this.defaultWindow;
+        const retryAfter = ttl > 0 ? ttl : window;
         
         this.logger.warn(
           `Rate limit exceeded for session ${sessionId}: ${currentCount}/${limit}. Retry in ${retryAfter}s`
@@ -68,7 +75,7 @@ export class SessionRateLimiter {
         allowed: true,
         current: currentCount,
         limit,
-        resetTime: Date.now() + (this.defaultWindow * 1000),
+        resetTime: Date.now() + (window * 1000),
       };
     } catch (error) {
       this.logger.error(`Error checking rate limit for session ${sessionId}:`, error);
@@ -76,7 +83,7 @@ export class SessionRateLimiter {
         allowed: true,
         current: 0,
         limit,
-        resetTime: Date.now() + (this.defaultWindow * 1000),
+        resetTime: Date.now() + (window * 1000),
       };
     }
   }
@@ -97,11 +104,12 @@ export class SessionRateLimiter {
 
   async increment(sessionId: string): Promise<number> {
     const key = `rate_limit:${sessionId}`;
+    const window = await this.getSessionWindow(sessionId);
     
     try {
       const pipeline = this.redis.pipeline();
       pipeline.incr(key);
-      pipeline.expire(key, this.defaultWindow);
+      pipeline.expire(key, window);
       const results = await pipeline.exec();
       
       if (!results || !results[0] || !results[0][1]) {
@@ -171,7 +179,7 @@ export class SessionRateLimiter {
       try {
         const session = await this.sessionsGetOneById.run(sessionId);
         if (session && session.rateLimit) {
-          const limit = session.rateLimit;
+          const limit = session.rateLimit.getValue();
           await this.setSessionLimit(sessionId, limit);
           return limit;
         }
@@ -179,7 +187,7 @@ export class SessionRateLimiter {
         this.logger.warn(`Could not get session from database: ${dbError.message}`);
       }
       
-      // Fall back to default
+      // Fall back to default only for new sessions
       const limit = this.defaultLimit;
       await this.setSessionLimit(sessionId, limit);
       return limit;
@@ -204,7 +212,8 @@ export class SessionRateLimiter {
       const currentCount = current ? parseInt(current) : 0;
       const remaining = Math.max(0, limit - currentCount);
       const ttl = await this.redis.ttl(key);
-      const resetTime = ttl > 0 ? Date.now() + (ttl * 1000) : Date.now() + (this.defaultWindow * 1000);
+      const window = await this.getSessionWindow(sessionId);
+      const resetTime = ttl > 0 ? Date.now() + (ttl * 1000) : Date.now() + (window * 1000);
       const percentage = limit > 0 ? (currentCount / limit) * 100 : 0;
       
       return {
@@ -216,11 +225,12 @@ export class SessionRateLimiter {
       };
     } catch (error) {
       this.logger.error(`Error getting rate limit stats for session ${sessionId}:`, error);
+      const window = await this.getSessionWindow(sessionId);
       return {
         current: 0,
         limit,
         remaining: limit,
-        resetTime: Date.now() + (this.defaultWindow * 1000),
+        resetTime: Date.now() + (window * 1000),
         percentage: 0,
       };
     }
@@ -233,11 +243,69 @@ export class SessionRateLimiter {
       return 0;
     }
     
-    return (result.retryAfter || 60) * 1000; // Return delay in milliseconds
+    const window = await this.getSessionWindow(sessionId);
+    return (result.retryAfter || window) * 1000; // Return delay in milliseconds
+  }
+
+  async setSessionWindow(sessionId: string, window: number): Promise<void> {
+    const cacheKey = `session_window:${sessionId}`;
+    const expires = Date.now() + (5 * 60 * 1000); // Cache for 5 minutes
+    
+    this.windowCache.set(sessionId, { window, expires });
+    
+    try {
+      await this.redis.setex(cacheKey, 300, window.toString()); // 5 minute TTL
+      this.logger.debug(`Set rate window for session ${sessionId}: ${window}`);
+    } catch (error) {
+      this.logger.error(`Error setting rate window for session ${sessionId}:`, error);
+      throw error;
+    }
+  }
+
+  async getSessionWindow(sessionId: string): Promise<number> {
+    const cached = this.windowCache.get(sessionId);
+    if (cached && cached.expires > Date.now()) {
+      return cached.window;
+    }
+
+    const cacheKey = `session_window:${sessionId}`;
+    
+    try {
+      // First check Redis cache
+      const storedWindow = await this.redis.get(cacheKey);
+      
+      if (storedWindow) {
+        const window = parseInt(storedWindow);
+        const expires = Date.now() + (5 * 60 * 1000);
+        this.windowCache.set(sessionId, { window, expires });
+        return window;
+      }
+      
+      // If not in cache, get from database
+      try {
+        const session = await this.sessionsGetOneById.run(sessionId);
+        if (session && session.rateLimitWindow) {
+          const window = session.rateLimitWindow.getValue();
+          await this.setSessionWindow(sessionId, window);
+          return window;
+        }
+      } catch (dbError) {
+        this.logger.warn(`Could not get session from database: ${dbError.message}`);
+      }
+      
+      // Fall back to default only for new sessions
+      const window = this.defaultWindow;
+      await this.setSessionWindow(sessionId, window);
+      return window;
+    } catch (error) {
+      this.logger.error(`Error getting rate window for session ${sessionId}:`, error);
+      return this.defaultWindow;
+    }
   }
 
   async cleanup(): Promise<void> {
     this.limitCache.clear();
+    this.windowCache.clear();
     await this.redis.disconnect();
   }
 }

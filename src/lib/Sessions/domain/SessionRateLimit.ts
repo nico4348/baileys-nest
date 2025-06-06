@@ -33,7 +33,8 @@ export class SessionRateLimit {
   }
 
   static default(): SessionRateLimit {
-    return new SessionRateLimit(30);
+    const defaultValue = parseInt(process.env.DEFAULT_RATE_LIMIT || '30');
+    return new SessionRateLimit(defaultValue);
   }
 
   isHighRateLimit(): boolean {

@@ -9,6 +9,7 @@ import { SessionStatus } from '../domain/SessionStatus';
 import { SessionUpdatedAt } from '../domain/SessionUpdatedAt';
 import { SessionDeletedAt } from '../domain/SessionDeletedAt';
 import { SessionRateLimit } from '../domain/SessionRateLimit';
+import { SessionRateLimitWindow } from '../domain/SessionRateLimitWindow';
 
 export class SessionsUpdate {
   constructor(private repository: SessionsRepository) {}
@@ -21,7 +22,8 @@ export class SessionsUpdate {
     updated_at: Date,
     is_deleted: boolean,
     deleted_at?: Date,
-    rate_limit: number = 30,
+    rate_limit: number = SessionRateLimit.default().getValue(),
+    rate_limit_window: number = SessionRateLimitWindow.default().getValue(),
   ): Promise<void> {
     const session = new Session(
       new SessionId(id),
@@ -33,6 +35,7 @@ export class SessionsUpdate {
       new SessionIsDeleted(is_deleted),
       new SessionDeletedAt(deleted_at || null),
       new SessionRateLimit(rate_limit),
+      new SessionRateLimitWindow(rate_limit_window),
     );
     await this.repository.update(session);
   }

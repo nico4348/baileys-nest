@@ -7,6 +7,7 @@ import { SessionStatus } from './SessionStatus';
 import { SessionUpdatedAt } from './SessionUpdatedAt';
 import { SessionDeletedAt } from './SessionDeletedAt';
 import { SessionRateLimit } from './SessionRateLimit';
+import { SessionRateLimitWindow } from './SessionRateLimitWindow';
 export class Session {
   id: SessionId;
   sessionName: SessionName;
@@ -17,6 +18,7 @@ export class Session {
   isDeleted: SessionIsDeleted;
   deletedAt: SessionDeletedAt;
   rateLimit: SessionRateLimit;
+  rateLimitWindow: SessionRateLimitWindow;
 
   constructor(
     id: SessionId,
@@ -28,6 +30,7 @@ export class Session {
     isDeleted: SessionIsDeleted,
     deletedAt: SessionDeletedAt,
     rateLimit: SessionRateLimit,
+    rateLimitWindow: SessionRateLimitWindow,
   ) {
     this.id = id;
     this.sessionName = sessionName;
@@ -38,6 +41,7 @@ export class Session {
     this.isDeleted = isDeleted;
     this.deletedAt = deletedAt;
     this.rateLimit = rateLimit;
+    this.rateLimitWindow = rateLimitWindow;
   }
   public toPlainObject() {
     return {
@@ -48,6 +52,7 @@ export class Session {
       createdAt: this.createdAt.value,
       updatedAt: this.updatedAt.value,
       rateLimit: this.rateLimit.getValue(),
+      rateLimitWindow: this.rateLimitWindow.getValue(),
     };
   }
 }

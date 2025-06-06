@@ -27,6 +27,8 @@ import { SessionsHardDelete } from './application/SessionsHardDelete';
 import { WhatsAppSessionManager } from './infrastructure/WhatsAppSessionManager';
 import { SessionOrchestrationService } from './application/SessionOrchestrationService';
 import { MessageKeyBufferService } from '../Messages/infrastructure/MessageKeyBufferService';
+import { SessionRateLimit } from './domain/SessionRateLimit';
+import { SessionRateLimitWindow } from './domain/SessionRateLimitWindow';
 import { randomUUID } from 'node:crypto';
 
 @Controller('sessions')
@@ -544,7 +546,7 @@ export class SessionsController {
   }
   @Post('create')
   async create(
-    @Body() body: { session_name: string; phone: string },
+    @Body() body: { session_name: string; phone: string; rate_limit?: number; rate_limit_window?: number },
   ): Promise<{ success: boolean; sessionId: string; message?: string }> {
     // Validar que los campos requeridos están presentes
     if (!body.session_name || !body.phone) {
@@ -564,6 +566,9 @@ export class SessionsController {
       new Date(),
       new Date(),
       false,
+      null,
+      body.rate_limit || SessionRateLimit.default().getValue(),
+      body.rate_limit_window || SessionRateLimitWindow.default().getValue(),
     ); // Iniciar la sesión de WhatsApp
     try {
       await this.sessionOrchestrator.startSession(generatedId);
@@ -663,6 +668,8 @@ export class SessionsController {
       session_name?: string;
       phone?: string;
       status?: boolean;
+      rate_limit?: number;
+      rate_limit_window?: number;
     },
   ) {
     try {
@@ -679,6 +686,8 @@ export class SessionsController {
         new Date(), // updatedAt
         existingSession.isDeleted.value,
         existingSession.deletedAt?.value || undefined,
+        body.rate_limit || existingSession.rateLimit.getValue(),
+        body.rate_limit_window || existingSession.rateLimitWindow.getValue(),
       ); // Obtener la sesión actualizada
       const updatedSession = await this.sessionsGetOneById.run(sessionId);
 

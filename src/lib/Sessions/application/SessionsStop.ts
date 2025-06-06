@@ -30,6 +30,8 @@ export class SessionsStop {
       new Date(),
       session.isDeleted.value,
       session.deletedAt.value || undefined,
+      session.rateLimit.getValue(),
+      session.rateLimitWindow.getValue(),
     );
 
     console.log(`Sesión ${sessionId} pausada`);

@@ -33,6 +33,9 @@ export class TypeOrmSessionsEntity {
   @Column({ type: 'integer', default: 30 })
   rate_limit: number;
 
+  @Column({ type: 'integer', default: 60 })
+  rate_limit_window: number;
+
   @OneToMany(() => TypeOrmSessionLogsEntity, (sessionLog) => sessionLog.session)
   sessionLogs: TypeOrmSessionLogsEntity[];
   

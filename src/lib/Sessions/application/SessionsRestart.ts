@@ -28,6 +28,8 @@ export class SessionsRestart {
       new Date(), // updatedAt actual
       session.isDeleted.value,
       session.deletedAt.value || undefined,
+      session.rateLimit.getValue(),
+      session.rateLimitWindow.getValue(),
     );
 
     console.log(`🔄 Reiniciando sesión ${sessionId}`);
