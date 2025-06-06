@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
+import { OutgoingQueueManager } from './OutgoingQueueManager';
+import { OutgoingSessionProcessor } from './OutgoingSessionProcessor';
 
 export interface OutgoingMessageJob {
   sessionId: string;
@@ -32,62 +34,69 @@ export class OutgoingMessageQueue {
   constructor(
     @InjectQueue('outgoing-messages') 
     private readonly outgoingQueue: Queue,
+    private readonly queueManager: OutgoingQueueManager,
+    private readonly sessionProcessor: OutgoingSessionProcessor,
   ) {}
 
   async addMessage(job: OutgoingMessageJob): Promise<void> {
-    const priority = this.getPriorityValue(job.priority);
-    const delay = job.scheduledAt ? 
-      Math.max(0, job.scheduledAt.getTime() - Date.now()) : 0;
-
-    await this.outgoingQueue.add('send-message', job, {
-      priority,
-      delay,
-      attempts: job.retryCount || 3,
-      backoff: {
-        type: 'exponential',
-        delay: 5000, // Start with 5 seconds
-      },
-      removeOnComplete: 200,
-      removeOnFail: 100,
-      // Rate limiting: max 1 message per session every 2 seconds
-      jobId: `session_${job.sessionId}_${Date.now()}`,
-    });
+    // Ensure session worker exists
+    await this.ensureSessionWorker(job.sessionId);
+    
+    // Use the new queue manager
+    await this.queueManager.enqueue(job.sessionId, job);
   }
 
   async addBulkMessages(job: BulkOutgoingMessageJob): Promise<void> {
-    await this.outgoingQueue.add('send-bulk-messages', job, {
-      priority: 5, // Medium priority for bulk operations
-      attempts: 2, // Less retries for bulk operations
-      backoff: {
-        type: 'fixed',
-        delay: 10000,
-      },
-      removeOnComplete: 50,
-      removeOnFail: 25,
-    });
+    // Ensure session worker exists
+    await this.ensureSessionWorker(job.sessionId);
+    
+    // Use the new queue manager
+    await this.queueManager.enqueueBulk(job.sessionId, job);
   }
 
   async addHighPriorityMessage(job: OutgoingMessageJob): Promise<void> {
-    await this.outgoingQueue.add('send-message', { ...job, priority: 'high' }, {
-      priority: 10, // Highest priority
-      attempts: 5, // More retries for high priority
-      backoff: {
-        type: 'exponential',
-        delay: 3000,
-      },
-      removeOnComplete: 500,
-      removeOnFail: 200,
-    });
+    // Ensure session worker exists
+    await this.ensureSessionWorker(job.sessionId);
+    
+    // Use the new queue manager for high priority
+    await this.queueManager.enqueueHighPriority(job.sessionId, job);
   }
 
   async getQueueStats() {
-    return {
-      waiting: await this.outgoingQueue.getWaiting(),
-      active: await this.outgoingQueue.getActive(),
-      completed: await this.outgoingQueue.getCompleted(),
-      failed: await this.outgoingQueue.getFailed(),
-      delayed: await this.outgoingQueue.getDelayed(),
-    };
+    // Return aggregated stats from all session queues
+    return await this.queueManager.getAllSessionsStats();
+  }
+
+  async getSessionStats(sessionId: string) {
+    return await this.queueManager.getSessionQueueStats(sessionId);
+  }
+
+  async pauseSession(sessionId: string): Promise<void> {
+    await this.queueManager.pauseSession(sessionId);
+  }
+
+  async resumeSession(sessionId: string): Promise<void> {
+    await this.queueManager.resumeSession(sessionId);
+  }
+
+  async removeSession(sessionId: string): Promise<void> {
+    await this.sessionProcessor.removeSessionWorker(sessionId);
+    await this.queueManager.removeSessionQueue(sessionId);
+  }
+
+  async cleanupInactiveSessions(inactiveThresholdHours: number = 24): Promise<void> {
+    await this.queueManager.cleanupInactiveSessions(inactiveThresholdHours);
+  }
+
+  getActiveSessions(): string[] {
+    return this.queueManager.getActiveSessionIds();
+  }
+
+  async ensureSessionWorker(sessionId: string): Promise<void> {
+    const activeWorkers = this.sessionProcessor.getActiveSessionWorkers();
+    if (!activeWorkers.includes(sessionId)) {
+      await this.sessionProcessor.createSessionWorker(sessionId);
+    }
   }
 
   private getPriorityValue(priority: string): number {

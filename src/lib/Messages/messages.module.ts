@@ -4,6 +4,7 @@ import { BullModule } from '@nestjs/bullmq';
 import { BullBoardModule } from '@bull-board/nestjs';
 import { BullMQAdapter } from '@bull-board/api/bullMQAdapter';
 import { MessagesController } from './messages.controller';
+import { RateLimitingController, GlobalRateLimitingController } from './controllers/rateLimiting.controller';
 import { TypeOrmMessagesEntity } from './infrastructure/TypeOrm/TypeOrmMessagesEntity';
 import { TypeOrmMessagesRepository } from './infrastructure/TypeOrm/TypeOrmMessagesRepository';
 import { MessagesCreate } from './application/MessagesCreate';
@@ -20,6 +21,9 @@ import { MessageHandlerFactory } from './infrastructure/MessageHandlerFactory';
 import { NodeFileService } from './infrastructure/NodeFileService';
 import { NodeCryptoService } from './infrastructure/NodeCryptoService';
 import { SessionsModule } from '../Sessions/sessions.module';
+import { SessionsGetOneById } from '../Sessions/application/SessionsGetOneById';
+import { TypeOrmSessionsEntity } from '../Sessions/infrastructure/TypeOrm/TypeOrmSessionsEntity';
+import { TypeOrmSessionsRepository } from '../Sessions/infrastructure/TypeOrm/TypeOrmSessionsRepository';
 import { TextMessagesModule } from '../TextMessages/textMessages.module';
 import { MediaMessagesModule } from '../MediaMessages/mediaMessages.module';
 import { ReactionMessagesModule } from '../ReactionMessages/reactionMessages.module';
@@ -30,13 +34,16 @@ import { MessageStatusCreateMessageReceipt } from '../MessageStatus/application/
 import { MessageStatusCreateValidated } from '../MessageStatus/application/MessageStatusCreateValidated';
 import { OutgoingMessageQueue } from './infrastructure/OutgoingMessageQueue';
 import { OutgoingMessageProcessor } from './infrastructure/OutgoingMessageProcessor';
+import { OutgoingQueueManager } from './infrastructure/OutgoingQueueManager';
+import { OutgoingSessionProcessor } from './infrastructure/OutgoingSessionProcessor';
 import { IncomingMessageQueue } from './infrastructure/IncomingMessageQueue';
 import { IncomingMessageProcessor } from './infrastructure/IncomingMessageProcessor';
 import { MessageKeyBufferService } from './infrastructure/MessageKeyBufferService';
+import { SessionRateLimiter } from './infrastructure/SessionRateLimiter';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([TypeOrmMessagesEntity]),
+    TypeOrmModule.forFeature([TypeOrmMessagesEntity, TypeOrmSessionsEntity]),
     BullModule.registerQueue(
       { name: 'outgoing-messages' },
       { name: 'incoming-messages' },
@@ -56,7 +63,7 @@ import { MessageKeyBufferService } from './infrastructure/MessageKeyBufferServic
     MessageStatusModule,
     EventLogsModule,
   ],
-  controllers: [MessagesController],
+  controllers: [MessagesController, RateLimitingController, GlobalRateLimitingController],
   providers: [
     {
       provide: 'MessageRepository',
@@ -198,6 +205,22 @@ import { MessageKeyBufferService } from './infrastructure/MessageKeyBufferServic
         'ReactionMessageHandler',
       ],
     },
+    {
+      provide: 'SessionRepository',
+      useClass: TypeOrmSessionsRepository,
+    },
+    {
+      provide: 'SessionsGetOneById',
+      useFactory: (repository) => new SessionsGetOneById(repository),
+      inject: ['SessionRepository'],
+    },
+    {
+      provide: SessionRateLimiter,
+      useFactory: (sessionsGetOneById) => new SessionRateLimiter(sessionsGetOneById),
+      inject: ['SessionsGetOneById'],
+    },
+    OutgoingQueueManager,
+    OutgoingSessionProcessor,
     OutgoingMessageQueue,
     OutgoingMessageProcessor,
     IncomingMessageQueue,
@@ -215,6 +238,9 @@ import { MessageKeyBufferService } from './infrastructure/MessageKeyBufferServic
     'MessageSender',
     'MessagesOrchestrator',
     'MessagesHandleIncoming',
+    SessionRateLimiter,
+    OutgoingQueueManager,
+    OutgoingSessionProcessor,
     OutgoingMessageQueue,
     IncomingMessageQueue,
     'IncomingMessageQueue',

@@ -12,6 +12,7 @@ import { SessionCreatedAt } from '../../domain/SessionCreatedAt';
 import { SessionUpdatedAt } from '../../domain/SessionUpdatedAt';
 import { SessionIsDeleted } from '../../domain/SessionIsDeleted';
 import { SessionDeletedAt } from '../../domain/SessionDeletedAt';
+import { SessionRateLimit } from '../../domain/SessionRateLimit';
 
 @Injectable()
 export class TypeOrmSessionsRepository implements SessionsRepository {
@@ -31,6 +32,7 @@ export class TypeOrmSessionsRepository implements SessionsRepository {
         new SessionUpdatedAt(entity.updated_at),
         new SessionIsDeleted(entity.is_deleted),
         new SessionDeletedAt(entity.deleted_at),
+        new SessionRateLimit(entity.rate_limit || 30),
       );
     } catch (error) {
       throw new Error(
@@ -49,6 +51,7 @@ export class TypeOrmSessionsRepository implements SessionsRepository {
       updated_at: session.updatedAt.value,
       is_deleted: session.isDeleted.value,
       deleted_at: session.deletedAt.value,
+      rate_limit: session.rateLimit.getValue(),
     };
   }
   async create(session: Session): Promise<void> {

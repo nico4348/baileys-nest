@@ -29,6 +29,10 @@ export class TypeOrmSessionsEntity {
 
   @Column({ type: 'timestamp', nullable: true })
   deleted_at: Date | null;
+
+  @Column({ type: 'integer', default: 30 })
+  rate_limit: number;
+
   @OneToMany(() => TypeOrmSessionLogsEntity, (sessionLog) => sessionLog.session)
   sessionLogs: TypeOrmSessionLogsEntity[];
   

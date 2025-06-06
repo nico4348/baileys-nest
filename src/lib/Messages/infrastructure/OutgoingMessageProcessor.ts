@@ -5,6 +5,7 @@ import {
   OutgoingMessageJob,
   BulkOutgoingMessageJob,
 } from './OutgoingMessageQueue';
+import { SessionRateLimiter } from './SessionRateLimiter';
 import Redis from 'ioredis';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -12,6 +13,7 @@ import { v4 as uuidv4 } from 'uuid';
 export class OutgoingMessageProcessor extends WorkerHost {
   private readonly logger = new Logger(OutgoingMessageProcessor.name);
   private readonly redis: Redis;
+  
   constructor(
     @Inject('MessagesCreate')
     private readonly messagesCreate: any,
@@ -19,6 +21,7 @@ export class OutgoingMessageProcessor extends WorkerHost {
     private readonly messageSender: any,
     @Inject('MessagesOrchestrator')
     private readonly messagesOrchestrator: any,
+    private readonly sessionRateLimiter: SessionRateLimiter,
   ) {
     super();
     this.redis = new Redis({
@@ -26,6 +29,7 @@ export class OutgoingMessageProcessor extends WorkerHost {
       port: parseInt(process.env.REDIS_PORT || '6379'),
       username: process.env.REDIS_USERNAME || 'default',
       password: process.env.REDIS_PASSWORD,
+      maxRetriesPerRequest: null,
     });
   }
 
@@ -66,8 +70,19 @@ export class OutgoingMessageProcessor extends WorkerHost {
   ): Promise<void> {
     const { sessionId, messageType, messageData } = job.data;
 
-    // Rate limiting check
-    await this.checkRateLimit(sessionId);
+    // Check rate limit before sending
+    const rateLimitResult = await this.sessionRateLimiter.canSend(sessionId);
+    
+    if (!rateLimitResult.allowed) {
+      const retryAfter = rateLimitResult.retryAfter || 60;
+      this.logger.warn(
+        `Rate limit exceeded for session ${sessionId}. Processing will pause for ${retryAfter}s`
+      );
+      
+      // For the legacy processor, we'll just throw an error
+      // The new session-based processor handles pausing properly
+      throw new Error(`Rate limit exceeded - wait ${retryAfter}s before retry`);
+    }
 
     try {
       let result;
@@ -91,8 +106,8 @@ export class OutgoingMessageProcessor extends WorkerHost {
         `Sent ${messageType} message for ${sessionId}: ${result.messageId}`,
       );
 
-      // Update rate limiting counter
-      await this.updateRateLimit(sessionId);
+      // Increment rate limiting counter after successful send
+      await this.sessionRateLimiter.increment(sessionId);
 
       return result;
     } catch (error) {
@@ -128,8 +143,18 @@ export class OutgoingMessageProcessor extends WorkerHost {
       const messageJob = messages[i];
 
       try {
-        // Rate limiting check before each message
-        await this.checkRateLimit(sessionId);
+        // Check rate limit before each message
+        const rateLimitResult = await this.sessionRateLimiter.canSend(sessionId);
+        
+        if (!rateLimitResult.allowed) {
+          const retryAfter = rateLimitResult.retryAfter || 60;
+          this.logger.warn(
+            `Rate limit exceeded for session ${sessionId} during bulk send. Waiting ${retryAfter}s`
+          );
+          await this.delay(retryAfter * 1000);
+          i--; // Retry the current message
+          continue;
+        }
 
         const result = await this.processSingleMessage({
           data: {
@@ -140,8 +165,7 @@ export class OutgoingMessageProcessor extends WorkerHost {
 
         results.push({ index: i, status: 'success', result });
 
-        // Update rate limit
-        await this.updateRateLimit(sessionId);
+        // Rate limit increment is handled in processSingleMessage
 
         // Delay between messages (except for the last one)
         if (i < messages.length - 1) {
@@ -172,28 +196,12 @@ export class OutgoingMessageProcessor extends WorkerHost {
     }
   }
 
-  private async checkRateLimit(sessionId: string): Promise<void> {
-    const key = `rate_limit:outgoing:${sessionId}`;
-    const current = await this.redis.get(key);
-    const limit = 30; // 30 messages per minute
-    const window = 60; // 60 seconds
-
-    if (current && parseInt(current) >= limit) {
-      const ttl = await this.redis.ttl(key);
-      throw new Error(
-        `Rate limit exceeded for session ${sessionId}. Try again in ${ttl} seconds.`,
-      );
-    }
+  async getRateLimitStats(sessionId: string) {
+    return await this.sessionRateLimiter.getRateLimitStats(sessionId);
   }
 
-  private async updateRateLimit(sessionId: string): Promise<void> {
-    const key = `rate_limit:outgoing:${sessionId}`;
-    const window = 60; // 60 seconds
-
-    const pipeline = this.redis.pipeline();
-    pipeline.incr(key);
-    pipeline.expire(key, window);
-    await pipeline.exec();
+  async setSessionRateLimit(sessionId: string, limit: number) {
+    return await this.sessionRateLimiter.setSessionLimit(sessionId, limit);
   }
 
   private delay(ms: number): Promise<void> {

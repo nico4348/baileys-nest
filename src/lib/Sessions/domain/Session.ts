@@ -6,6 +6,7 @@ import { SessionPhone } from './SessionPhone';
 import { SessionStatus } from './SessionStatus';
 import { SessionUpdatedAt } from './SessionUpdatedAt';
 import { SessionDeletedAt } from './SessionDeletedAt';
+import { SessionRateLimit } from './SessionRateLimit';
 export class Session {
   id: SessionId;
   sessionName: SessionName;
@@ -15,6 +16,7 @@ export class Session {
   updatedAt: SessionUpdatedAt;
   isDeleted: SessionIsDeleted;
   deletedAt: SessionDeletedAt;
+  rateLimit: SessionRateLimit;
 
   constructor(
     id: SessionId,
@@ -25,6 +27,7 @@ export class Session {
     updatedAt: SessionUpdatedAt,
     isDeleted: SessionIsDeleted,
     deletedAt: SessionDeletedAt,
+    rateLimit: SessionRateLimit,
   ) {
     this.id = id;
     this.sessionName = sessionName;
@@ -34,6 +37,7 @@ export class Session {
     this.updatedAt = updatedAt;
     this.isDeleted = isDeleted;
     this.deletedAt = deletedAt;
+    this.rateLimit = rateLimit;
   }
   public toPlainObject() {
     return {
@@ -43,6 +47,7 @@ export class Session {
       status: this.status.value,
       createdAt: this.createdAt.value,
       updatedAt: this.updatedAt.value,
+      rateLimit: this.rateLimit.getValue(),
     };
   }
 }

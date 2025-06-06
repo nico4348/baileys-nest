@@ -8,6 +8,7 @@ import { SessionsRepository } from '../domain/SessionsRepository';
 import { SessionStatus } from '../domain/SessionStatus';
 import { SessionUpdatedAt } from '../domain/SessionUpdatedAt';
 import { SessionDeletedAt } from '../domain/SessionDeletedAt';
+import { SessionRateLimit } from '../domain/SessionRateLimit';
 
 export class SessionsUpdate {
   constructor(private repository: SessionsRepository) {}
@@ -20,6 +21,7 @@ export class SessionsUpdate {
     updated_at: Date,
     is_deleted: boolean,
     deleted_at?: Date,
+    rate_limit: number = 30,
   ): Promise<void> {
     const session = new Session(
       new SessionId(id),
@@ -30,6 +32,7 @@ export class SessionsUpdate {
       new SessionUpdatedAt(updated_at),
       new SessionIsDeleted(is_deleted),
       new SessionDeletedAt(deleted_at || null),
+      new SessionRateLimit(rate_limit),
     );
     await this.repository.update(session);
   }
